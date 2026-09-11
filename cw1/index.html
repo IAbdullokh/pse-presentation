@@ -336,9 +336,9 @@ const VisRuntime = (function () {
   const NS = "http://www.w3.org/2000/svg";
   const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function makeApi(rec) {
+  function makeApi(rec, forceStatic) {
     const api = {
-      T, reduced: reduced(),
+      T, reduced: forceStatic || reduced(),
       /* managed rAF loop — stops automatically on unmount */
       raf(fn) {
         let id, t0 = null, stopped = false;
@@ -397,15 +397,20 @@ const VisRuntime = (function () {
     return api;
   }
 
-  /* Mount every [data-vis] inside a frame. Idempotent. */
-  function mount(frameEl) {
+  /* Mount every [data-vis] inside a frame. Idempotent.
+     `opts.static` renders the finished state with no loops — used by the
+     overview, where nine frames are on screen at once at ~16% scale and
+     animation would be both invisible and wasteful. Without it the overview
+     showed an empty hole wherever a visual belongs. */
+  function mount(frameEl, opts) {
+    const isStatic = !!(opts && opts.static);
     frameEl.querySelectorAll("[data-vis]").forEach(el => {
       if (live.has(el)) return;
       const id = el.getAttribute("data-vis"), def = VIS[id];
       if (!def) return;
       const rec = { id, teardown: [] };
       live.set(el, rec);
-      try { def.mount(el, makeApi(rec)); }
+      try { def.mount(el, makeApi(rec, isStatic)); }
       catch (e) { el.setAttribute("data-vis-error", String(e && e.message || e)); }
     });
   }
@@ -921,7 +926,7 @@ VIS.promptlab = { mount(host, api) {
       show: 5 }
   ];
 
-  let scene = 0, stop = false;
+  let scene = api.reduced ? 1 : 0, stop = false;   /* static: show the engineered ask */
   api.onTeardown(() => { stop = true; });
 
   /* one tracked handle rather than a new teardown entry per wait — this loop
@@ -946,7 +951,7 @@ VIS.promptlab = { mount(host, api) {
   }
 
   async function run() {
-    while (!stop) {
+    do {
       const s = SCENES[scene];
       title.textContent = s.title;
       title.className = "mono " + s.cls;
@@ -971,9 +976,12 @@ VIS.promptlab = { mount(host, api) {
       verd.textContent = s.verdict;
       verd.className = "pl-verdict show " + s.cls;
 
-      await wait(api.reduced ? 4000 : 3400); if (stop) return;
+      /* Reduced motion (and the overview's static mount) get ONE finished
+         scene and stop — looping here would spin with every wait at 0ms. */
+      if (api.reduced) return;
+      await wait(3400); if (stop) return;
       scene = (scene + 1) % SCENES.length;
-    }
+    } while (!stop);
   }
   run();
 }};
@@ -2036,7 +2044,14 @@ const DECK = {
     overview = true; stage.classList.add("ov");
     const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / W, vh / H) * 0.93;
     cam = { s, tx: vw / 2 - W / 2 * s, ty: vh / 2 - H / 2 * s }; apply(true);
-    document.querySelectorAll(".frame").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".frame").forEach(el => {
+      el.classList.remove("active");
+      if (window.VisRuntime) { VisRuntime.unmount(el); VisRuntime.mount(el, { static: true }); }
+      /* counters and typewriters are driven by arrival, which never happens in
+         overview — settle them on their final values so no figure reads 0 */
+      el.querySelectorAll(".num").forEach(n => { n.textContent = fmt(n, +n.getAttribute("data-to")); });
+      el.querySelectorAll(".type").forEach(t => { t.textContent = t.getAttribute("data-text"); });
+    });
     $("#rlabel").textContent = "Overview — click a frame";
   }
 
@@ -2055,7 +2070,7 @@ const DECK = {
     revealT.push(setTimeout(() => {
       el.querySelectorAll(".num").forEach(n => count(n));
       el.querySelectorAll(".type").forEach(t => typewrite(t));
-      if (window.VisRuntime) VisRuntime.mount(el);         /* graphics start as the camera lands */
+      if (window.VisRuntime) { VisRuntime.unmount(el); VisRuntime.mount(el); }  /* live, animated */
     }, delay));
     spk.textContent = TEAM[F[i].speaker] ? TEAM[F[i].speaker].name : "";
     notes.textContent = F[i].notes || "";
