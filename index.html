@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abdulloh — PSE Coursework</title>
+<meta name="description" content="Professional Skills and Employability coursework: a CW1 group presentation on the prompt engineer career, a career-development platform, and an economics dashboard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg:#0B0E17; --surface:#131829; --surface2:#182036; --line:#232B46; --line2:#2E3859;
+    --ink:#F3EFE6; --ink2:#B8BED2; --ink3:#7C86A6; --acc:#F2A93B; --acc2:#FFD08A; --blue:#8AA4FF;
+    --serif:"Literata",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:
+      radial-gradient(1100px 700px at 12% 0%, #141a33 0%, transparent 62%),
+      radial-gradient(900px 650px at 88% 100%, #1a1730 0%, transparent 62%), var(--bg);
+    color:var(--ink); font-family:var(--serif); min-height:100vh; -webkit-font-smoothing:antialiased}
+  .mono{font-family:var(--mono); letter-spacing:.02em}
+  .wrap{max-width:1080px; margin:0 auto; padding:clamp(48px,8vw,110px) clamp(22px,5vw,40px) 80px}
+  .kicker{font-size:12.5px; letter-spacing:.16em; color:var(--acc); text-transform:uppercase}
+  h1{font-size:clamp(38px,6vw,70px); font-weight:500; letter-spacing:-.035em; line-height:1.02; margin:18px 0 0}
+  h1 em{font-style:italic; color:var(--acc2)}
+  .lede{font-size:clamp(17px,2vw,21px); color:var(--ink2); max-width:56ch; margin:20px 0 0; line-height:1.5}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; margin-top:52px}
+  a.card{display:flex; flex-direction:column; gap:11px; padding:26px 26px 24px; text-decoration:none;
+    background:var(--surface); border:1px solid var(--line); border-radius:18px; color:inherit;
+    transition:border-color .18s, transform .18s, background .18s}
+  a.card:hover{border-color:var(--acc); transform:translateY(-2px); background:var(--surface2)}
+  .tag{font-size:11.5px; letter-spacing:.14em; color:var(--acc); text-transform:uppercase}
+  .card h2{font-size:24px; font-weight:500; letter-spacing:-.02em; margin:0; line-height:1.2}
+  .card p{font-size:14.5px; color:var(--ink2); margin:0; line-height:1.5}
+  .meta{font-size:12.5px; color:var(--ink3); margin-top:auto; padding-top:10px; display:flex; gap:8px; flex-wrap:wrap}
+  .meta span{border:1px solid var(--line2); border-radius:999px; padding:3px 10px}
+  .go{font-size:13px; color:var(--acc); display:flex; align-items:center; gap:7px}
+  footer{margin-top:56px; padding-top:22px; border-top:1px solid var(--line); font-size:13px; color:var(--ink3); line-height:1.6}
+  footer b{color:var(--ink2); font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker mono">Westminster International University in Tashkent · 2026/27</p>
+  <h1>Professional Skills<br>&amp; <em>Employability</em></h1>
+  <p class="lede">Three pieces of coursework, each built as a working product rather than a document. Everything runs in the browser with no server and no external data.</p>
+
+  <div class="grid">
+    <a class="card" href="cw1/">
+      <span class="tag mono">CW1 · Group presentation</span>
+      <h2>Prompt Engineer<br>as a Career</h2>
+      <p>A zoom-canvas presentation on a career that appeared in 2022, peaked in 2023, and by 2026 had dissolved into almost every AI job. Ten frames, nine generated visuals, a live prompting demonstration.</p>
+      <div class="meta"><span>← → to move</span><span>O for overview</span><span>T for the 5–7 min timer</span></div>
+      <span class="go mono">Open the presentation →</span>
+    </a>
+
+    <a class="card" href="pse/">
+      <span class="tag mono">Module workspace</span>
+      <h2>PSE Career<br>Platform</h2>
+      <p>A career-development workspace: explore occupations, rate your skills against a target, build SMART goals, track CW1 research and references, and draft a LinkedIn profile with a live preview.</p>
+      <div class="meta"><span>Nine tabs</span><span>Saves in your browser</span><span>Works offline</span></div>
+      <span class="go mono">Open the platform →</span>
+    </a>
+
+    <a class="card" href="inflation/">
+      <span class="tag mono">Economics · Data science</span>
+      <h2>Uzbekistan<br>Inflation Dashboard</h2>
+      <p>Inflation and purchasing power in Uzbekistan, 2016–2025. An animated timeline, three live calculators, a forecast model backtested against its own past, and a regional comparison — every series traced to an official source.</p>
+      <div class="meta"><span>14 figures</span><span>3 calculators</span><span>Every number cited</span></div>
+      <span class="go mono">Open the dashboard →</span>
+    </a>
+  </div>
+
+  <footer>
+    <p>Built as static pages — no framework, no build step at runtime, no network requests for data. Charts are drawn in plain SVG and Canvas. <b>Figures should be re-verified against their primary sources before submission</b>; each project lists its sources and the date they were read.</p>
+  </footer>
+</div>
+</body>
+</html>

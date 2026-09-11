@@ -1,0 +1,2134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Engineer as a Career</title>
+<meta name="description" content="A CW1 group presentation for the Westminster PSE module: the career of a prompt engineer — overview, responsibilities, skills, education, job market, AI trends, development plan and references — as an animated zoom-canvas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Prompt Engineer as a Career — a conversation between a serif (the human) and a mono (the machine). */
+:root {
+  color-scheme: dark;
+  --bg: #0B0E17; --bg2: #0F1322; --surface: #131829; --surface2: #182036; --line: #232B46; --line2: #2E3859;
+  --ink: #F3EFE6; --ink2: #B8BED2; --ink3: #7C86A6;
+  --acc: #F2A93B; --acc2: #FFD08A; --blue: #8AA4FF; --ok: #5FD3A2; --bad: #FF7A6B;
+  --serif: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--serif); overflow: hidden; -webkit-font-smoothing: antialiased; }
+.mono { font-family: var(--mono); letter-spacing: .02em; }
+.dim { color: var(--ink3); } .acc { color: var(--acc); } .warn { color: var(--bad); }
+.tiny { font-size: 18px; }
+
+#stage { position: fixed; inset: 0; overflow: hidden; cursor: default; user-select: none;
+  background: radial-gradient(1200px 800px at 15% 10%, #141a33 0%, transparent 60%), radial-gradient(1000px 700px at 85% 90%, #1a1730 0%, transparent 60%), var(--bg); }
+#depth, #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+#depth { width: 9000px; height: 7000px; left: -1500px; top: -1200px; pointer-events: none;
+  background: radial-gradient(circle at 1px 1px, rgba(243,239,230,.06) 1px, transparent 1.6px) 0 0 / 34px 34px; }
+.moving { transition: transform 1.05s cubic-bezier(.22,.8,.2,1); }
+.tok { position: absolute; font-size: 22px; color: rgba(138,164,255,.28); border: 1px solid rgba(138,164,255,.16); padding: 6px 14px; border-radius: 999px; white-space: nowrap; animation: drift linear infinite; }
+@keyframes drift { from { transform: translate(0,0); } 50% { transform: translate(60px,-40px); } to { transform: translate(0,0); } }
+
+.path { position: absolute; left: 0; top: 0; overflow: visible; }
+.path path { fill: none; stroke: rgba(242,169,59,.25); stroke-width: 5; stroke-dasharray: 14 18; stroke-linecap: round; }
+
+/* ---------- frames ---------- */
+.frame { position: absolute; background: var(--surface); border: 1px solid var(--line); border-radius: 28px;
+  box-shadow: 0 30px 90px -30px rgba(0,0,0,.8); overflow: hidden; }
+.frame::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(242,169,59,.06), transparent 40%); pointer-events: none; }
+.fnum { position: absolute; right: 34px; top: 30px; font-size: 22px; color: var(--ink3); }
+.fin { position: absolute; inset: 0; padding: 74px 84px; display: flex; flex-direction: column; gap: 26px; }
+.ov .frame { cursor: pointer; }
+.ov .frame:hover { border-color: var(--acc); }
+
+.kicker { font-size: 18px; color: var(--acc); letter-spacing: .14em; }
+h1 { font-size: 168px; line-height: .95; margin: 0; font-weight: 500; letter-spacing: -.035em; }
+h1 em, h2 em { font-style: italic; color: var(--acc2); }
+h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spacing: -.025em; max-width: 26ch; }
+.lede { font-size: 34px; line-height: 1.35; color: var(--ink2); max-width: 30ch; margin: 0; }
+.body { font-size: 27px; line-height: 1.45; color: var(--ink2); max-width: 50ch; margin: 0; }
+.body b, .lede b { color: var(--ink); font-weight: 600; }
+
+.prompt { font-size: 30px; color: var(--blue); display: flex; align-items: center; gap: 14px; min-height: 44px; }
+.prompt .pfx { color: var(--acc); }
+.caret { width: 14px; height: 32px; background: var(--blue); animation: blink 1s steps(2) infinite; }
+@keyframes blink { to { opacity: 0; } }
+
+.team { display: flex; gap: 12px; flex-wrap: wrap; }
+.chip { font-size: 19px; padding: 9px 16px; border: 1px solid var(--line2); border-radius: 999px; color: var(--ink2); }
+.chip b { color: var(--acc); font-weight: 500; }
+
+.timeline { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
+.tl { border-top: 3px solid var(--line2); padding-top: 18px; display: grid; gap: 8px; font-size: 21px; color: var(--ink2); line-height: 1.35; }
+.tl .yr { font-size: 30px; color: var(--acc); } .tl b { color: var(--ink); font-size: 24px; } .tl span b { color: var(--acc2); }
+.callout { border-left: 5px solid var(--acc); background: rgba(242,169,59,.08); padding: 20px 26px; font-size: 27px; line-height: 1.4; border-radius: 0 16px 16px 0; }
+.callout .mono { display: block; font-size: 16px; letter-spacing: .14em; margin-bottom: 6px; }
+.callout.final { font-size: 30px; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
+.list { margin: 0; padding: 0; list-style: none; display: grid; gap: 15px; font-size: 24px; color: var(--ink2); line-height: 1.35; }
+.list li { padding-left: 26px; position: relative; } .list li::before { content: ""; position: absolute; left: 0; top: 14px; width: 10px; height: 10px; border-radius: 50%; background: var(--acc); }
+.list b { color: var(--ink); font-weight: 600; }
+.env { display: grid; gap: 16px; font-size: 21px; color: var(--ink2); line-height: 1.4; }
+.env > div { display: grid; gap: 4px; } .env .mono { font-size: 14px; letter-spacing: .14em; } .env b { color: var(--ink); font-size: 23px; }
+.flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 17px; margin-top: 10px; }
+.flow span { padding: 8px 14px; border: 1px solid var(--line2); border-radius: 10px; color: var(--ink2); background: var(--surface2); }
+.flow i { color: var(--acc); font-style: normal; }
+
+.colhead { font-size: 16px; letter-spacing: .16em; color: var(--acc); margin-bottom: 8px; }
+.colhead.alt { color: var(--blue); }
+.skill { display: grid; gap: 8px; font-size: 22px; color: var(--ink2); margin-bottom: 20px; }
+.bar { height: 10px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--acc); transition: width 1.1s cubic-bezier(.2,.8,.2,1); }
+.skill.alt .bar i { background: var(--blue); }
+.frame.active .bar i { width: var(--w); }
+.foot { font-size: 16px; color: var(--ink3); line-height: 1.45; margin-top: auto; }
+
+.cards3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.cards3 > div { background: var(--surface2); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; display: grid; gap: 8px; font-size: 19px; line-height: 1.4; color: var(--ink2); align-content: start; }
+.cards3 .mono { font-size: 14px; letter-spacing: .14em; } .cards3 b { color: var(--ink); font-size: 24px; } .cards3 i { color: var(--ink); }
+
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
+.stats > div { background: var(--surface2); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; gap: 8px; font-size: 18px; color: var(--ink2); }
+.stats .mono { font-size: 13px; letter-spacing: .14em; } .stats > div > b { font-family: var(--mono); font-size: 44px; color: var(--ink); letter-spacing: -.02em; font-weight: 500; } .stats span b { color: var(--acc2); }
+.strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; border-top: 1px solid var(--line); padding-top: 22px; }
+.strip > div { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; font-size: 20px; color: var(--ink2); line-height: 1.35; }
+.strip b { font-family: var(--mono); font-size: 46px; color: var(--acc); font-weight: 500; letter-spacing: -.02em; }
+
+.trio { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.trio > div { display: grid; gap: 8px; font-size: 20px; color: var(--ink2); line-height: 1.35; border-top: 3px solid var(--acc); padding-top: 16px; }
+.trio b { font-family: var(--mono); font-size: 72px; color: var(--ink); font-weight: 500; letter-spacing: -.03em; line-height: 1; }
+.shift { display: grid; gap: 10px; font-size: 20px; }
+.shift > div { display: grid; grid-template-columns: 1fr 40px 1.2fr; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.shift span { color: var(--ink3); } .shift i { color: var(--acc); font-style: normal; text-align: center; } .shift b { color: var(--ink); font-weight: 500; }
+
+.plan { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; }
+.plan > div { background: var(--surface2); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; display: grid; gap: 8px; font-size: 19px; line-height: 1.4; color: var(--ink2); align-content: start; }
+.plan .mono { font-size: 14px; letter-spacing: .14em; } .plan b { color: var(--ink); font-size: 25px; } .plan i { color: var(--acc2); }
+
+.takeaways { margin: 0; padding: 0 0 0 40px; display: grid; gap: 14px; font-size: 25px; line-height: 1.4; color: var(--ink2); }
+.takeaways li::marker { color: var(--acc); font-family: var(--mono); } .takeaways b { color: var(--ink); font-weight: 600; }
+
+.refs { margin: 0; padding: 0 0 0 34px; display: grid; gap: 8px; font-size: 17px; line-height: 1.4; color: var(--ink2); font-family: var(--sans); }
+.refs li::marker { color: var(--acc); font-family: var(--mono); } .refs i { color: var(--ink); }
+
+/* reveal on arrival */
+.r { opacity: 0; transform: translateY(18px); }
+.frame.active .r { animation: reveal .7s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(360ms + var(--i) * 140ms); }
+@keyframes reveal { to { opacity: 1; transform: none; } }
+.ov .r { opacity: 1; transform: none; animation: none; }
+@media (prefers-reduced-motion: reduce) { .r { opacity: 1; transform: none; } .frame.active .r { animation: none; } .moving { transition: none; } .caret { animation: none; } .tok { animation: none; } }
+
+/* ---------- on-screen UI ---------- */
+.ui { position: fixed; z-index: 10; font-family: var(--mono); }
+#top { top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: center; gap: 14px; pointer-events: none; }
+#top > * { pointer-events: auto; }
+#brand { font-size: 12px; letter-spacing: .14em; color: var(--ink3); }
+#speaker { font-size: 12px; color: var(--ink2); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
+#clock { font-size: 15px; color: var(--ink3); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(8px); font-variant-numeric: tabular-nums; }
+#clock.run { color: var(--ink); border-color: var(--line2); } #clock.in { color: var(--ok); } #clock.over { color: var(--bad); }
+#bottom { left: 22px; right: 22px; bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+#rail { display: flex; align-items: center; gap: 8px; background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
+.dot { width: 22px; height: 22px; border: 0; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
+.dot span { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); transition: all .25s; }
+.dot.done span { background: var(--ink3); } .dot.on span { background: var(--acc); width: 22px; border-radius: 999px; }
+.rlabel { font-size: 12px; color: var(--ink2); margin-left: 6px; white-space: nowrap; }
+#ctl { display: flex; gap: 8px; }
+#ctl button { font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--ink2); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(8px); }
+#ctl button:hover { color: var(--ink); border-color: var(--line2); }
+#hint { left: 50%; transform: translateX(-50%); bottom: 72px; font-size: 12px; color: var(--ink3); transition: opacity .8s; pointer-events: none; }
+#hint.fade { opacity: 0; }
+#notes { left: 22px; bottom: 76px; max-width: 520px; font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--ink2); background: rgba(19,24,41,.92); border: 1px solid var(--line2); border-left: 3px solid var(--acc); padding: 14px 18px; border-radius: 12px; display: none; backdrop-filter: blur(10px); }
+body.notes #notes { display: block; }
+@media (max-width: 700px) { .rlabel, #brand, #hint { display: none; } }
+
+/* ---------- visuals layer ---------- */
+.vis { position: relative; width: 100%; }
+.vis > svg, .vis > canvas { display: block; width: 100%; height: 100%; }
+.vis[data-vis-error]::after { content: "visual failed: " attr(data-vis-error); font-family: var(--mono); font-size: 13px; color: var(--bad); }
+.vis-divergence { height: 400px; }
+
+/* ---------- promptlab ---------- */
+.vis-promptlab { height: 470px; }
+.pl { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; height: 100%; }
+.pl-side, .pl-anat { background: #0A0E1A; border: 1px solid var(--line); border-radius: 16px;
+  display: flex; flex-direction: column; overflow: hidden; transition: border-color .4s; }
+.pl-side.bad  { border-color: rgba(255,122,107,.4); }
+.pl-side.good { border-color: rgba(95,211,162,.45); }
+.pl-head { font-size: 13px; letter-spacing: .16em; color: var(--ink3); padding: 12px 18px;
+  border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 9px; transition: color .4s; }
+.pl-head.bad  { color: var(--bad); } .pl-head.good { color: var(--ok); }
+.pl-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.pl-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+.pl-line { font-size: 16px; line-height: 1.5; color: var(--blue); display: flex; gap: 8px; align-items: flex-start; }
+.pl-pfx { color: var(--acc); flex: none; }
+.pl-car { width: 9px; height: 19px; background: var(--blue); flex: none; animation: blink 1s steps(2) infinite; }
+.pl-out { font-family: var(--serif); font-size: 17px; line-height: 1.5; color: var(--ink2); white-space: pre-wrap;
+  border-left: 3px solid var(--line2); padding-left: 14px; opacity: 0; transition: opacity .3s; }
+.pl-out.in { opacity: 1; }
+.pl-verdict { font-family: var(--mono); font-size: 14px; padding: 0 18px; max-height: 0; overflow: hidden;
+  transition: max-height .35s, padding .35s; color: var(--ink3); }
+.pl-verdict.show { max-height: 80px; padding: 12px 18px; border-top: 1px solid var(--line); }
+.pl-verdict.bad { color: var(--bad); } .pl-verdict.good { color: var(--ok); }
+.pl-parts { padding: 14px 16px; display: grid; gap: 9px; align-content: start; }
+.pl-part { display: grid; gap: 3px; padding: 9px 12px; border-radius: 10px; background: var(--surface2);
+  border: 1px solid var(--line); opacity: .18; transform: translateX(10px); transition: opacity .45s, transform .45s, border-color .45s; }
+.pl-part.on { opacity: 1; transform: none; border-color: rgba(95,211,162,.35); }
+.pl-k { font-size: 11px; letter-spacing: .14em; color: var(--ok); }
+.pl-v { font-size: 14px; line-height: 1.35; color: var(--ink2); }
+
+/* ---------- provenance ---------- */
+.vis-provenance { height: 340px; }
+.vis-provenance .pv-head, .vis-provenance .pv-row, .vis-provenance .pv-src { pointer-events: none; }
+.vis-provenance .pv-thread { fill: none; pointer-events: none; stroke-width: 1.5; stroke-opacity: .45;
+  stroke-linecap: round; transition: stroke-opacity .2s ease, stroke-width .2s ease; }
+.vis-provenance .pv-row, .vis-provenance .pv-src { transition: opacity .2s ease; }
+.vis-provenance .pv-hit { fill: transparent; pointer-events: all; cursor: help; }
+/* isolate one link: everything drops back, the answer to the question stays lit */
+.vis-provenance.pv-lit .pv-thread { stroke-opacity: .12; }
+.vis-provenance.pv-lit .pv-thread.on { stroke-opacity: 1; stroke-width: 2.5; }
+.vis-provenance.pv-lit .pv-row, .vis-provenance.pv-lit .pv-src { opacity: .3; }
+.vis-provenance.pv-lit .pv-row.on, .vis-provenance.pv-lit .pv-src.on { opacity: 1; }
+/* While the entrance is running the rAF loop owns opacity frame by frame; the
+   hover transition would only smear it. It comes back the moment we land. */
+.vis-provenance.pv-arrive .pv-row, .vis-provenance.pv-arrive .pv-src { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .vis-provenance .pv-thread, .vis-provenance .pv-row, .vis-provenance .pv-src { transition: none; }
+}
+
+/* ---------- tokenise (frame 1) ---------- */
+.vis-tokenise { height: 150px; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.vis-tokenise .tk-row { position: relative; display: flex; flex-wrap: wrap; gap: 10px; }
+.vis-tokenise .tk { font-family: var(--mono); font-size: 22px; line-height: 1.2; letter-spacing: .02em;
+  color: var(--ink2); padding: 8px 12px; border: 1px solid var(--line2); border-radius: 8px; white-space: pre;
+  /* the 6% tint rides on top of surface2 as a flat image layer, so one rule
+     carries both the base and the amber/blue alternation */
+  background-color: var(--surface2); background-image: linear-gradient(var(--tint), var(--tint));
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .32s cubic-bezier(.22,.8,.2,1), transform .32s cubic-bezier(.22,.8,.2,1); }
+.vis-tokenise .tk.a { --tint: rgba(242,169,59,.06); }
+.vis-tokenise .tk.b { --tint: rgba(138,164,255,.06); }
+.vis-tokenise .tk-row.in .tk { opacity: 1; transform: none; }
+.vis-tokenise .tk-sp { color: var(--ink3); }
+.vis-tokenise .tk-head { position: absolute; left: 0; top: -6px; width: 1px; height: 100%;
+  background: var(--acc); opacity: 0; pointer-events: none; }
+.vis-tokenise .tk-foot { font-size: 14px; color: var(--ink3); }
+@media (prefers-reduced-motion: reduce) {
+  .vis-tokenise .tk { transition: none; }
+  .vis-tokenise .tk-head { display: none; }
+}
+
+/* ---------- skillrank ---------- */
+.vis-skillrank { height: 120px; }
+/* Each column's top edge is a 1px rounded arc; the camera scales the world by
+   fractional factors, so ask for precision instead of pixel snapping. */
+.vis-skillrank .sr-cap { shape-rendering: geometricPrecision; }
+
+/* ---------- comet (world layer, not a frame visual) ---------- */
+/* The engine draws the route; this keeps it alive. One dash period is 14 + 18 =
+   32 world units, so -32 per cycle loops seamlessly with no visible seam. */
+.vis-comet-live { animation: vis-comet-drift 3s linear infinite; }
+@keyframes vis-comet-drift { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -32; } }
+/* Belt and braces — the module also declines to add the class when reduced. */
+@media (prefers-reduced-motion: reduce) { .vis-comet-live { animation: none; } }
+/* The comet owns no box: it lives in the world's path SVG, so it needs no sizing
+   rule. This one exists only so nothing collapses oddly should the id ever be
+   wired up as a [data-vis] host by mistake; `div.` keeps it off our own <g>. */
+div.vis-comet { height: 0; }
+
+/* ---------- salaryrange ---------- */
+.vis-salaryrange { height: 300px; }
+/* Tracking on the mono caps: the row labels sit in a 260px gutter against a
+   ruled plot, and letter-spaced small caps read as axis furniture rather than
+   competing with the money figures on the bars. */
+.vis-salaryrange .srg-cap { letter-spacing: .12em; }
+.vis-salaryrange .srg-note { letter-spacing: .06em; }
+
+/* ---------- ribbons ---------- */
+.vis-ribbons { height: 280px; }
+/* The whole graphic is one SVG of geometry with no interactive parts, and the
+   frame itself is a click target in overview mode — keep hit-testing off it so
+   a click anywhere on the roads still selects the frame. */
+.vis-ribbons svg { pointer-events: none; }
+
+/* ---------- planscrub (frame 8) ---------- */
+.vis-planscrub { height: 220px; }
+.ps { display: flex; flex-direction: column; gap: 14px; height: 100%; justify-content: center; }
+.ps-tracks { display: grid; gap: 9px; }
+.ps-track { display: grid; grid-template-columns: 200px 1fr 64px; gap: 14px; align-items: center; }
+.ps-name { font-size: 13px; letter-spacing: .13em; }
+.ps-bar { height: 9px; background: var(--surface2); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.ps-bar i { display: block; height: 100%; width: 0; border-radius: 999px; transition: width .18s linear; }
+.ps-pct { font-size: 14px; text-align: right; font-variant-numeric: tabular-nums; }
+.ps-stage { font-size: 15px; color: var(--ink2); }
+.ps-track-wrap { position: relative; height: 58px; cursor: grab; outline: none; touch-action: none; }
+.ps-track-wrap:focus-visible .ps-handle { box-shadow: 0 0 0 4px rgba(242,169,59,.3); }
+.ps-track-wrap:active { cursor: grabbing; }
+.ps-rail, .ps-fill { position: absolute; left: 0; right: 0; top: 26px; height: 6px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); }
+.ps-fill { right: auto; width: 0; background: var(--acc); border-color: var(--acc); transition: width .18s linear; }
+.ps-pip { position: absolute; top: 20px; width: 2px; height: 18px; background: var(--line2); transform: translateX(-1px); }
+.ps-pip b { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font-size: 11.5px; font-weight: 400; color: var(--ink3); }
+.ps-handle { position: absolute; top: 18px; width: 12px; height: 22px; border-radius: 6px; background: var(--acc);
+  transform: translateX(-6px); transition: left .18s linear; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.ps-end { position: absolute; top: 42px; font-size: 12px; color: var(--ink3); }
+.ps-l { left: 0; } .ps-r { right: 0; }
+
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="depth"></div>
+  <div id="world"></div>
+</div>
+
+<div class="ui" id="top">
+  <div id="brand">PSE · CW1 · PROMPT ENGINEER AS A CAREER</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div id="speaker"></div>
+    <div id="clock" class="mono" title="T to start or pause · R to reset">00:00</div>
+  </div>
+</div>
+
+<div class="ui" id="hint">← → move · click to advance · O overview · N notes · T timer · F fullscreen · 1–0 jump</div>
+<div class="ui" id="notes"></div>
+
+<div class="ui" id="bottom">
+  <div id="rail"></div>
+  <div id="ctl">
+    <button id="prev" type="button">←</button>
+    <button id="next" type="button">→</button>
+    <button id="ov" type="button">Overview</button>
+    <button id="ntoggle" type="button">Notes</button>
+  </div>
+</div>
+
+<script>
+/* =============================================================================
+   visuals.js — the graphics layer.
+   Every visual registers as VIS.<id> = { mount(el, api), unmount? }.
+   The engine mounts a frame's visuals when the camera lands on it and unmounts
+   them when it leaves, so nothing animates off-screen and nothing leaks.
+
+   api gives each visual: reduced (bool), raf(fn) for a managed animation loop,
+   after(ms, fn) for a managed timeout, svg()/canvas() helpers, and the design
+   tokens. Everything is generated — no external assets, works offline.
+   ========================================================================== */
+
+const VIS = {};
+
+const T = {
+  bg: "#0B0E17", surface: "#131829", surface2: "#182036", line: "#232B46", line2: "#2E3859",
+  ink: "#F3EFE6", ink2: "#B8BED2", ink3: "#7C86A6",
+  acc: "#F2A93B", acc2: "#FFD08A", blue: "#8AA4FF", ok: "#5FD3A2", bad: "#FF7A6B",
+  mono: '"JetBrains Mono", ui-monospace, monospace',
+  serif: '"Literata", Georgia, serif'
+};
+
+const VisRuntime = (function () {
+  const live = new Map();          /* element -> {id, teardown[]} */
+  const NS = "http://www.w3.org/2000/svg";
+  const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function makeApi(rec) {
+    const api = {
+      T, reduced: reduced(),
+      /* managed rAF loop — stops automatically on unmount */
+      raf(fn) {
+        let id, t0 = null, stopped = false;
+        const step = ts => {
+          if (stopped) return;
+          if (t0 === null) t0 = ts;
+          if (fn((ts - t0) / 1000, ts) !== false) id = requestAnimationFrame(step);
+        };
+        id = requestAnimationFrame(step);
+        rec.teardown.push(() => { stopped = true; cancelAnimationFrame(id); });
+      },
+      after(ms, fn) {
+        const id = setTimeout(fn, api.reduced ? 0 : ms);
+        rec.teardown.push(() => clearTimeout(id));
+      },
+      every(ms, fn) {
+        const id = setInterval(fn, ms);
+        rec.teardown.push(() => clearInterval(id));
+      },
+      onTeardown(fn) { rec.teardown.push(fn); },
+      /* element helpers */
+      svg(w, h, cls) {
+        const s = document.createElementNS(NS, "svg");
+        s.setAttribute("viewBox", `0 0 ${w} ${h}`);
+        s.setAttribute("width", "100%"); s.setAttribute("height", "100%");
+        s.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        if (cls) s.setAttribute("class", cls);
+        return s;
+      },
+      el(name, attrs, parent) {
+        const n = document.createElementNS(NS, name);
+        for (const k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) n.setAttribute(k, attrs[k]);
+        if (parent) parent.appendChild(n);
+        return n;
+      },
+      canvas(host) {
+        const c = document.createElement("canvas");
+        c.style.cssText = "width:100%;height:100%;display:block";
+        host.appendChild(c);
+        const fit = () => {
+          const r = host.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+          c.width = Math.max(1, Math.round(r.width * dpr));
+          c.height = Math.max(1, Math.round(r.height * dpr));
+          const ctx = c.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          return { w: r.width, h: r.height, ctx };
+        };
+        return { c, fit };
+      },
+      /* easing */
+      ease: {
+        out: t => 1 - Math.pow(1 - t, 3),
+        inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+        elastic: t => t === 0 || t === 1 ? t : Math.pow(2, -10 * t) * Math.sin((t * 10 - .75) * (2 * Math.PI / 3)) + 1
+      }
+    };
+    return api;
+  }
+
+  /* Mount every [data-vis] inside a frame. Idempotent. */
+  function mount(frameEl) {
+    frameEl.querySelectorAll("[data-vis]").forEach(el => {
+      if (live.has(el)) return;
+      const id = el.getAttribute("data-vis"), def = VIS[id];
+      if (!def) return;
+      const rec = { id, teardown: [] };
+      live.set(el, rec);
+      try { def.mount(el, makeApi(rec)); }
+      catch (e) { el.setAttribute("data-vis-error", String(e && e.message || e)); }
+    });
+  }
+
+  function unmount(frameEl) {
+    frameEl.querySelectorAll("[data-vis]").forEach(el => {
+      const rec = live.get(el);
+      if (!rec) return;
+      rec.teardown.forEach(fn => { try { fn(); } catch (e) {} });
+      const def = VIS[rec.id];
+      if (def && def.unmount) { try { def.unmount(el); } catch (e) {} }
+      el.innerHTML = "";
+      live.delete(el);
+    });
+  }
+
+  /* A standalone api for visuals that live on the world layer rather than in a
+     frame (the route comet). The caller owns the returned teardown. */
+  function standalone() {
+    const rec = { id: "standalone", teardown: [] };
+    return { api: makeApi(rec), teardown: () => { rec.teardown.forEach(fn => { try { fn(); } catch (e) {} }); rec.teardown.length = 0; } };
+  }
+
+  return { mount, unmount, standalone, T };
+})();
+
+/* Top-level `const` does not become a window property, and the engine guards on
+   `window.VisRuntime` so the deck still runs if this file is absent. Publish both. */
+window.VIS = VIS;
+window.VisRuntime = VisRuntime;
+
+</script>
+<script>
+/* =============================================================================
+   comet — the world layer, not a frame.
+   A zoom canvas can show the one thing slides physically cannot: the journey
+   between topics. The engine already draws the route as a dashed amber bezier
+   through the ten frame centres, but a drawn route is a dead route. This lights
+   it — a slow current along the dashes so it always reads as a live circuit,
+   and a comet of light that runs the exact stretch the camera is flying, on the
+   camera's exact curve, so the audience sees the deck move rather than cut.
+
+   Registered with attach(), not mount(): there is no [data-vis] host and no
+   unmount, because the world never leaves the screen. The caller owns detach().
+   ========================================================================== */
+VIS.comet = { attach(pathEl, api) {
+  const T = api.T;
+  const DUR = 1050;                  /* must equal .moving's transition-duration */
+  const TRAIL = 14, GAP = 9;         /* 14 followers, each sampling 9px further back */
+  const svg = pathEl.ownerSVGElement || pathEl.parentNode;
+
+  /* cubic-bezier(.22,.8,.2,1) solved in JS. The camera runs this precise curve
+     as a CSS transition on #world; any other easing here and the light would
+     visibly drift against the world instead of belonging to it. Newton is safe
+     on this control net — it is monotonic and its slope never approaches zero. */
+  const ease = (() => {
+    const x1 = .22, y1 = .8, x2 = .2, y2 = 1;
+    const A = (a, b) => 1 - 3 * b + 3 * a, B = (a, b) => 3 * b - 6 * a, C = a => 3 * a;
+    const val = (t, a, b) => ((A(a, b) * t + B(a, b)) * t + C(a)) * t;
+    const slope = (t, a, b) => 3 * A(a, b) * t * t + 2 * B(a, b) * t + C(a);
+    return x => {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      let t = x;
+      for (let i = 0; i < 8; i++) {
+        const d = slope(t, x1, x2);
+        if (Math.abs(d) < 1e-6) break;
+        t -= (val(t, x1, x2) - x) / d;
+      }
+      return val(Math.min(1, Math.max(0, t)), y1, y2);
+    };
+  })();
+
+  /* ---------- the layer ---------- */
+  /* Our own <g> above the route rather than nodes loose in the world SVG, so
+     detach() is a single remove and nothing we make can catch a click. */
+  const layer = api.el("g", { class: "vis-comet", "pointer-events": "none" }, svg);
+  const defs = api.el("defs", {}, layer);
+  /* A gradient halo, not stacked circles: at frame zoom the head is ~8 screen px
+     across and concentric rings band visibly. SVG filters would do it better
+     still, but they re-render the whole world layer every frame — far too slow. */
+  const grad = api.el("radialGradient", { id: "vis-comet-glow" }, defs);
+  api.el("stop", { offset: "0%",   "stop-color": T.acc2, "stop-opacity": .5 }, grad);
+  api.el("stop", { offset: "40%",  "stop-color": T.acc2, "stop-opacity": .16 }, grad);
+  api.el("stop", { offset: "100%", "stop-color": T.acc,  "stop-opacity": 0 }, grad);
+
+  /* The dash current lives in CSS: it is one property on one element, and the
+     style engine animates it without holding the main thread for the whole talk. */
+  if (!api.reduced) pathEl.classList.add("vis-comet-live");
+
+  /* ---------- where each frame sits along the route ---------- */
+  /* The engine builds the path from the same centres it hands us, so every point
+     is exactly a segment endpoint — but the path API only speaks arc length, and
+     a cubic's arc length has no closed form. Sample coarsely, then narrow.
+     Measured once per points array and cached: it is fixed world geometry. */
+  let stops = null, stopsFor = null, stopsLen = 0;
+
+  function lengthAt(pt, total) {
+    const N = Math.max(200, Math.min(1200, Math.ceil(total / 12)));
+    let best = 0, bestD = Infinity;
+    for (let i = 0; i <= N; i++) {
+      const l = total * i / N, p = pathEl.getPointAtLength(l);
+      const d = (p.x - pt.x) * (p.x - pt.x) + (p.y - pt.y) * (p.y - pt.y);
+      if (d < bestD) { bestD = d; best = l; }
+    }
+    /* distance to the point is unimodal inside one coarse step, so ternary
+       search converges to well under a pixel in a couple of dozen probes */
+    const step = total / N;
+    let lo = Math.max(0, best - step), hi = Math.min(total, best + step);
+    for (let i = 0; i < 24; i++) {
+      const a = lo + (hi - lo) / 3, b = hi - (hi - lo) / 3;
+      const pa = pathEl.getPointAtLength(a), pb = pathEl.getPointAtLength(b);
+      const da = (pa.x - pt.x) * (pa.x - pt.x) + (pa.y - pt.y) * (pa.y - pt.y);
+      const db = (pb.x - pt.x) * (pb.x - pt.x) + (pb.y - pt.y) * (pb.y - pt.y);
+      if (da < db) hi = b; else lo = a;
+    }
+    return (lo + hi) / 2;
+  }
+
+  function measure(points, total) {
+    if (stops && stopsFor === points && stopsLen === total) return;
+    stops = points.map(p => lengthAt(p, total));
+    stopsFor = points; stopsLen = total;
+  }
+
+  /* ---------- the comet ---------- */
+  let dead = false, active = null;
+
+  function build() {
+    const g = api.el("g", { opacity: 0 }, layer);
+    const glow = api.el("circle", { r: 26, fill: "url(#vis-comet-glow)" }, g);
+    const trail = [];
+    /* far tail first so the head paints last and stays the brightest thing */
+    for (let i = TRAIL; i >= 1; i--) {
+      const u = (i - 1) / (TRAIL - 1);                 /* 0 at the head, 1 at the tip */
+      trail.push({
+        node: api.el("circle", { r: 5 - 4 * u, fill: T.acc2, opacity: 0 }, g),
+        back: i * GAP,
+        op: .8 * (1 - u)
+      });
+    }
+    const head = api.el("circle", { r: 7, fill: T.acc2 }, g);
+    /* a hot near-white centre is what makes the head read as light rather than
+       as an amber dot travelling along a wire */
+    const core = api.el("circle", { r: 2.6, fill: "#FFF6E6" }, g);
+    return { g, glow, head, core, trail };
+  }
+
+  function clear() {
+    if (!active) return;
+    active.g.remove();
+    active = null;
+    pathEl.style.animationPlayState = "";
+  }
+
+  function draw() {
+    const A = active;
+    const p = Math.min(1, (performance.now() - A.t0) / DUR);
+    const len = A.a + (A.b - A.a) * ease(p);
+    const at = pathEl.getPointAtLength(len);
+
+    /* strike and extinguish. A comet that simply vanished at p=1 would pop, and
+       the frame's own reveal has already started by then — so hand over to it. */
+    A.g.setAttribute("opacity", (Math.min(1, p / .08) * Math.min(1, (1 - p) / .18)).toFixed(3));
+
+    [A.glow, A.head, A.core].forEach(n => { n.setAttribute("cx", at.x); n.setAttribute("cy", at.y); });
+
+    A.trail.forEach(t => {
+      const l = len - A.dir * t.back;
+      /* early in a flight the tail would hang off the end of the route; hide it
+         rather than clamp, which would pile every follower on the start point */
+      if (l < 0 || l > A.total) { t.node.setAttribute("opacity", 0); return; }
+      const q = pathEl.getPointAtLength(l);
+      t.node.setAttribute("cx", q.x); t.node.setAttribute("cy", q.y);
+      t.node.setAttribute("opacity", t.op);
+    });
+
+    if (p >= 1) clear();
+  }
+
+  /* One loop for the life of the deck, gated on `active`. api.raf pushes a
+     teardown entry per call and this layer never unmounts, so starting a loop
+     per flight would pile dead handles onto a list nothing flushes; an idle
+     early return costs one function call a frame. */
+  if (!api.reduced) api.raf(() => {
+    if (dead) return false;
+    if (active) draw();
+  });
+
+  /* ---------- api ---------- */
+  function run(fromIndex, toIndex, points) {
+    if (dead || api.reduced) return;                  /* reduced motion: no comet at all */
+    if (!points || fromIndex === toIndex) return;
+    const from = points[fromIndex], to = points[toIndex];
+    if (!from || !to) return;
+    const total = pathEl.getTotalLength();
+    if (!(total > 0)) return;
+
+    measure(points, total);
+    const a = stops[fromIndex], b = stops[toIndex];
+    if (a == null || b == null || a === b) return;
+
+    clear();                     /* a presenter on the arrow keys can outrun 1050ms */
+    const c = build();
+    active = { a, b, total, dir: b > a ? 1 : -1, t0: performance.now(),
+               g: c.g, glow: c.glow, head: c.head, core: c.core, trail: c.trail };
+    /* Both the drift and the comet repaint the full-world stroke. During the
+       flight the comet is the thing being read, so pay for one, not two. */
+    pathEl.style.animationPlayState = "paused";
+    draw();                      /* place it now so it never shows at 0,0 for a frame */
+  }
+
+  function detach() {
+    if (dead) return;
+    dead = true;                 /* the loop retires itself on its next tick */
+    clear();
+    pathEl.classList.remove("vis-comet-live");
+    pathEl.style.animationPlayState = "";
+    layer.remove();
+  }
+
+  api.onTeardown(detach);        /* so VisRuntime.standalone()'s teardown also clears us */
+  return { run, detach };
+}};
+
+</script>
+<script>
+/* =============================================================================
+   divergence — frame 7's hero graphic.
+   The argument of the whole talk in one picture: the job TITLE rises and falls
+   while the SKILL keeps climbing. Sourced observations are drawn as ringed
+   points; the curve between them is explicitly labelled indicative, because we
+   have four real observations, not a continuous series.
+   ========================================================================== */
+VIS.divergence = { mount(host, api) {
+  const W = 1180, H = 400, P = { l: 64, r: 230, t: 34, b: 54 };
+  const iw = W - P.l - P.r, ih = H - P.t - P.b;
+  const s = api.svg(W, H); host.appendChild(s);
+
+  const X = t => P.l + t * iw;                       /* t: 0..1 across 2022→2026 */
+  const Y = v => P.t + ih - (v / 100) * ih;          /* v: 0..100 */
+  const YEARS = ["2022", "2023", "2024", "2025", "2026"];
+
+  /* gridlines + year axis */
+  [0, 25, 50, 75, 100].forEach(v => {
+    api.el("line", { x1: P.l, x2: P.l + iw, y1: Y(v), y2: Y(v), stroke: T.line, "stroke-width": 1 }, s);
+    const g = api.el("text", { x: P.l - 12, y: Y(v) + 5, "text-anchor": "end", fill: T.ink3,
+      "font-family": T.mono, "font-size": 13 }, s); g.textContent = v;
+  });
+  YEARS.forEach((y, i) => {
+    const g = api.el("text", { x: X(i / 4), y: H - 20, "text-anchor": "middle", fill: T.ink3,
+      "font-family": T.mono, "font-size": 14 }, s); g.textContent = y;
+  });
+
+  /* two series. `src` marks an observation we can cite; the rest is shape. */
+  const SERIES = [
+    { key: "title", colour: T.acc, label: "The job TITLE",
+      note: "standalone postings", end: "−30%",
+      pts: [{ t: 0, v: 4, src: 1 }, { t: .25, v: 100, src: 1 }, { t: .5, v: 82 }, { t: .75, v: 78 }, { t: 1, v: 70, src: 1 }] },
+    { key: "skill", colour: T.blue, label: "The SKILL",
+      note: "share of AI job adverts", end: "78%",
+      pts: [{ t: 0, v: 3 }, { t: .25, v: 10 }, { t: .5, v: 20, src: 1 }, { t: .75, v: 52 }, { t: 1, v: 78, src: 1 }] }
+  ];
+
+  const smooth = pts => {
+    let d = `M${X(pts[0].t)},${Y(pts[0].v)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1], mx = (X(a.t) + X(b.t)) / 2;
+      d += ` C${mx},${Y(a.v)} ${mx},${Y(b.v)} ${X(b.t)},${Y(b.v)}`;
+    }
+    return d;
+  };
+
+  const drawn = [];
+  SERIES.forEach(ser => {
+    /* soft area under the curve */
+    const area = api.el("path", {
+      d: smooth(ser.pts) + ` L${X(1)},${Y(0)} L${X(0)},${Y(0)} Z`,
+      fill: ser.colour, "fill-opacity": 0, stroke: "none"
+    }, s);
+    const line = api.el("path", {
+      d: smooth(ser.pts), fill: "none", stroke: ser.colour, "stroke-width": 3.5,
+      "stroke-linecap": "round", "stroke-linejoin": "round"
+    }, s);
+    const len = line.getTotalLength();
+    line.style.strokeDasharray = len; line.style.strokeDashoffset = api.reduced ? 0 : len;
+    if (api.reduced) area.setAttribute("fill-opacity", .1);
+
+    /* ringed dots on the observations we can actually cite */
+    const dots = ser.pts.filter(p => p.src).map(p => {
+      const c = api.el("circle", { cx: X(p.t), cy: Y(p.v), r: 6, fill: ser.colour,
+        stroke: T.surface, "stroke-width": 3, opacity: api.reduced ? 1 : 0 }, s);
+      return c;
+    });
+
+    drawn.push({ ser, line, area, dots, len, endY: Y(ser.pts[ser.pts.length - 1].v) });
+  });
+
+  /* End labels in the right gutter. The two lines finish 8 units apart, so the
+     blocks would collide — push them apart and run a leader line back to each
+     line's actual end point. */
+  const GAP = 104, lx = X(1) + 26;
+  const order = drawn.slice().sort((a, b) => a.endY - b.endY);
+  if (order.length === 2 && order[1].endY - order[0].endY < GAP) {
+    const mid = (order[0].endY + order[1].endY) / 2;
+    order[0].labelY = Math.max(P.t + 20, mid - GAP / 2);
+    order[1].labelY = order[0].labelY + GAP;
+  } else order.forEach(d => { d.labelY = d.endY; });
+
+  drawn.forEach(d => {
+    const g = api.el("g", { opacity: api.reduced ? 1 : 0 }, s);
+    if (Math.abs(d.labelY - d.endY) > 3) {
+      api.el("path", { d: `M${X(1) + 6},${d.endY} L${lx - 8},${d.labelY - 5}`, fill: "none",
+        stroke: d.ser.colour, "stroke-width": 1, "stroke-opacity": .5 }, g);
+    }
+    const t1 = api.el("text", { x: lx, y: d.labelY - 8, fill: d.ser.colour, "font-family": T.mono,
+      "font-size": 15, "font-weight": 500 }, g); t1.textContent = d.ser.label;
+    const t2 = api.el("text", { x: lx, y: d.labelY + 12, fill: T.ink3, "font-family": T.mono,
+      "font-size": 12.5 }, g); t2.textContent = d.ser.note;
+    const t3 = api.el("text", { x: lx, y: d.labelY + 46, fill: d.ser.colour, "font-family": T.mono,
+      "font-size": 30, "font-weight": 500 }, g); t3.textContent = d.ser.end;
+    d.g = g;
+  });
+
+  /* the crossing: where the skill overtakes the title in narrative terms */
+  const cross = api.el("g", { opacity: 0 }, s);
+  api.el("line", { x1: X(.62), x2: X(.62), y1: P.t + 6, y2: P.t + ih, stroke: T.ink3,
+    "stroke-width": 1, "stroke-dasharray": "4 5" }, cross);
+  const ct = api.el("text", { x: X(.62) + 10, y: P.t + 22, fill: T.ink2, "font-family": T.mono, "font-size": 13 }, cross);
+  ct.textContent = "the title stops being the point";
+
+  const foot = api.el("text", { x: P.l, y: H - 2, fill: T.ink3, "font-family": T.mono, "font-size": 11.5 }, s);
+  foot.textContent = "Ringed points are sourced observations. Curves between them are indicative, not measured.";
+
+  if (api.reduced) { cross.setAttribute("opacity", 1); return; }
+
+  /* draw the two lines in, then the evidence, then the crossing */
+  api.raf(t => {
+    const p = Math.min(1, t / 1.8), e = api.ease.out(p);
+    drawn.forEach((d, i) => {
+      const own = Math.max(0, Math.min(1, (e - i * .12) / (1 - i * .12)));
+      d.line.style.strokeDashoffset = d.len * (1 - own);
+      d.area.setAttribute("fill-opacity", (own * .1).toFixed(3));
+      if (own > .92) { d.dots.forEach(c => c.setAttribute("opacity", 1)); d.g.setAttribute("opacity", 1); }
+    });
+    if (p >= 1) { cross.setAttribute("opacity", 1); return false; }
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   planscrub — frame 8.
+   A career plan is a claim about TIME, and a list of three boxes hides that.
+   This is the one element the audience watches a human hand steer: drag the
+   handle and the three tracks fill in sequence, which makes the dependency
+   legible — the portfolio cannot start before fluency, and the credential is
+   worth little before the portfolio.
+   ========================================================================== */
+VIS.planscrub = { mount(host, api) {
+  const MONTHS = 36;
+  const MILE = [
+    { m: 0,  label: "start" },
+    { m: 9,  label: "20 experiments" },
+    { m: 21, label: "3 projects published" },
+    { m: 33, label: "certificate + placement" }
+  ];
+  /* Each track is a pure function of t so scrubbing backwards is exact. */
+  const TRACK = [
+    { id: "fluency", name: "PROMPT FLUENCY", colour: T.acc,  f: t => clamp(t / 12) },
+    { id: "folio",   name: "PORTFOLIO",      colour: T.blue, f: t => clamp((t - 12) / 14) },
+    { id: "cred",    name: "CREDENTIAL",     colour: T.ok,   f: t => clamp((t - 26) / 8) }
+  ];
+  const clamp = v => Math.max(0, Math.min(1, v));
+
+  host.innerHTML = `
+    <div class="ps">
+      <div class="ps-tracks">
+        ${TRACK.map(tr => `
+          <div class="ps-track" data-t="${tr.id}">
+            <span class="ps-name mono" style="color:${tr.colour}">${tr.name}</span>
+            <span class="ps-bar"><i style="background:${tr.colour}"></i></span>
+            <span class="ps-pct mono" style="color:${tr.colour}">0%</span>
+          </div>`).join("")}
+      </div>
+      <div class="ps-stage mono" id="ps-stage">Month 0 · starting out</div>
+      <div class="ps-track-wrap" id="ps-wrap" tabindex="0" role="slider"
+           aria-valuemin="0" aria-valuemax="${MONTHS}" aria-valuenow="0" aria-label="Months into the plan">
+        <div class="ps-rail"></div>
+        <div class="ps-fill" id="ps-fill"></div>
+        ${MILE.map(m => `<span class="ps-pip" style="left:${(m.m / MONTHS) * 100}%">
+            <b class="mono">${m.label}</b></span>`).join("")}
+        <div class="ps-handle" id="ps-handle"></div>
+        <span class="ps-end mono ps-l">Sep 2026</span><span class="ps-end mono ps-r">Sep 2029</span>
+      </div>
+    </div>`;
+
+  const wrap = host.querySelector("#ps-wrap"), handle = host.querySelector("#ps-handle"),
+        fill = host.querySelector("#ps-fill"), stage = host.querySelector("#ps-stage");
+  const bars = TRACK.map(tr => ({
+    tr,
+    i: host.querySelector(`.ps-track[data-t="${tr.id}"] i`),
+    pct: host.querySelector(`.ps-track[data-t="${tr.id}"] .ps-pct`)
+  }));
+
+  let t = 0;
+  function stageText(m) {
+    if (m < 12) return "Month " + m + " · learning to talk to models";
+    if (m < 26) return "Month " + m + " · building the portfolio";
+    if (m < 34) return "Month " + m + " · credential and placement";
+    return "Month " + m + " · employable";
+  }
+  function render(m) {
+    t = Math.max(0, Math.min(MONTHS, m));
+    const p = (t / MONTHS) * 100;
+    handle.style.left = p + "%"; fill.style.width = p + "%";
+    wrap.setAttribute("aria-valuenow", Math.round(t));
+    bars.forEach(b => {
+      const v = b.tr.f(t);
+      b.i.style.width = (v * 100) + "%";
+      b.pct.textContent = Math.round(v * 100) + "%";
+    });
+    stage.textContent = stageText(Math.round(t));
+  }
+
+  /* pointer + keyboard. Arrow keys must not reach the deck, or scrubbing a
+     month would also change frame. */
+  let dragging = false;
+  const toMonths = clientX => {
+    const r = wrap.getBoundingClientRect();
+    return ((clientX - r.left) / r.width) * MONTHS;
+  };
+  const onDown = e => { dragging = true; wrap.setPointerCapture?.(e.pointerId); render(toMonths(e.clientX)); e.preventDefault(); };
+  const onMove = e => { if (dragging) render(toMonths(e.clientX)); };
+  const onUp   = () => { dragging = false; };
+  const onKey  = e => {
+    if (e.key === "ArrowLeft")  { render(t - 1); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "ArrowRight") { render(t + 1); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "Home") { render(0); e.preventDefault(); e.stopPropagation(); }
+    if (e.key === "End")  { render(MONTHS); e.preventDefault(); e.stopPropagation(); }
+  };
+  wrap.addEventListener("pointerdown", onDown);
+  wrap.addEventListener("pointermove", onMove);
+  wrap.addEventListener("pointerup", onUp);
+  wrap.addEventListener("pointercancel", onUp);
+  wrap.addEventListener("keydown", onKey);
+  api.onTeardown(() => {
+    wrap.removeEventListener("pointerdown", onDown); wrap.removeEventListener("pointermove", onMove);
+    wrap.removeEventListener("pointerup", onUp); wrap.removeEventListener("pointercancel", onUp);
+    wrap.removeEventListener("keydown", onKey);
+  });
+
+  if (api.reduced) { render(MONTHS); return; }
+  /* run the whole arc once on arrival, then hand the handle to the presenter */
+  render(0);
+  api.raf(el => {
+    if (dragging) return false;
+    const p = Math.min(1, el / 2.6);
+    render(api.ease.out(p) * MONTHS);
+    if (p >= 1) return false;
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   promptlab — the demonstration.
+   A continuously looping terminal that shows the craft rather than describing
+   it: a vague prompt typed out, a weak answer, the diagnosis, then the same
+   request engineered properly and the answer that comes back. This is the
+   "video" of the deck, and it is on-subject — a talk about prompting that
+   demonstrates prompting.
+   ========================================================================== */
+VIS.promptlab = { mount(host, api) {
+  host.innerHTML = `
+    <div class="pl">
+      <div class="pl-side">
+        <div class="pl-head mono"><span class="pl-dot"></span><span id="pl-title">THE VAGUE ASK</span></div>
+        <div class="pl-body">
+          <div class="pl-line mono"><span class="pl-pfx">user ›</span><span id="pl-in"></span><span class="pl-car" id="pl-car"></span></div>
+          <div class="pl-out" id="pl-out"></div>
+        </div>
+        <div class="pl-verdict" id="pl-verdict"></div>
+      </div>
+      <div class="pl-anat">
+        <div class="pl-head mono">WHAT CHANGED</div>
+        <div class="pl-parts" id="pl-parts"></div>
+      </div>
+    </div>`;
+
+  const $ = s => host.querySelector(s);
+  const inEl = $("#pl-in"), outEl = $("#pl-out"), verd = $("#pl-verdict"),
+        title = $("#pl-title"), parts = $("#pl-parts"), car = $("#pl-car");
+
+  const PARTS = [
+    { k: "ROLE",       v: "You are a retail copywriter." },
+    { k: "CONTEXT",    v: "Product: insulated 500ml flask. Buyer: commuters, 25–40." },
+    { k: "CONSTRAINTS",v: "40 words max. No superlatives. Mention one measurable fact." },
+    { k: "FORMAT",     v: "Return: headline, then one paragraph." },
+    { k: "EXAMPLE",    v: "Tone like: “Keeps coffee hot from Chilonzor to the office.”" }
+  ];
+
+  const SCENES = [
+    { title: "THE VAGUE ASK", cls: "bad",
+      prompt: "write a product description",
+      out: "Introducing our amazing product! It is high quality, innovative and perfect for everyone. With its sleek design and unbeatable value, it will change the way you live. Order today!",
+      verdict: "✗  Generic. No audience, no facts, no length, no format. Could describe anything.",
+      show: 0 },
+    { title: "THE ENGINEERED ASK", cls: "good",
+      prompt: "You are a retail copywriter. Product: insulated 500ml flask. Buyer: commuters, 25–40. 40 words max. No superlatives. Mention one measurable fact. Return: headline, then one paragraph.",
+      out: "Hot at 9am. Still hot at 2pm.\n\nA 500ml vacuum flask that holds temperature for six hours — long enough for the commute, the morning, and the meeting you did not plan for.",
+      verdict: "✓  Specific, measurable, formatted. The same model — a different instruction.",
+      show: 5 }
+  ];
+
+  let scene = 0, stop = false;
+  api.onTeardown(() => { stop = true; });
+
+  /* one tracked handle rather than a new teardown entry per wait — this loop
+     runs for the whole time the frame is on screen. */
+  let waitId = null;
+  api.onTeardown(() => clearTimeout(waitId));
+  const wait = ms => new Promise(r => { waitId = setTimeout(r, api.reduced ? 0 : ms); });
+
+  async function type(el, text, speed) {
+    if (api.reduced) { el.textContent = text; return; }
+    el.textContent = "";
+    for (let i = 0; i < text.length && !stop; i++) {
+      el.textContent = text.slice(0, i + 1);
+      await wait(speed);
+    }
+  }
+
+  function renderParts(n) {
+    parts.innerHTML = PARTS.map((p, i) => `
+      <div class="pl-part ${i < n ? "on" : ""}" style="transition-delay:${i * 90}ms">
+        <span class="mono pl-k">${p.k}</span><span class="pl-v">${p.v}</span></div>`).join("");
+  }
+
+  async function run() {
+    while (!stop) {
+      const s = SCENES[scene];
+      title.textContent = s.title;
+      title.className = "mono " + s.cls;
+      host.querySelector(".pl-side").className = "pl-side " + s.cls;
+      outEl.textContent = ""; outEl.classList.remove("in");
+      verd.textContent = ""; verd.className = "pl-verdict";
+      renderParts(0);
+      car.style.display = "";
+
+      await wait(300); if (stop) return;
+      await type(inEl, s.prompt, s.show ? 16 : 42);
+      if (stop) return;
+      car.style.display = "none";
+      if (s.show) { renderParts(s.show); await wait(700); }
+      await wait(420); if (stop) return;
+
+      outEl.classList.add("in");
+      await type(outEl, s.out, api.reduced ? 0 : 10);
+      if (stop) return;
+
+      await wait(360); if (stop) return;
+      verd.textContent = s.verdict;
+      verd.className = "pl-verdict show " + s.cls;
+
+      await wait(api.reduced ? 4000 : 3400); if (stop) return;
+      scene = (scene + 1) % SCENES.length;
+    }
+  }
+  run();
+}};
+
+</script>
+<script>
+/* =============================================================================
+   provenance — frame 10, the references frame.
+   Referencing is on the mark scheme, so this frame argues instead of listing:
+   every figure the talk quotes sits on the left, every source on the right, and
+   a thread ties each claim to the source it actually came from. The threads
+   draw in on arrival so the room watches the evidence get connected rather than
+   being told it exists, and hovering either end isolates that one link — if we
+   are challenged on a number mid-Q&A the answer is a gesture, not a hunt
+   through a bibliography.
+   ========================================================================== */
+VIS.provenance = { mount(host, api) {
+  const T = api.T;
+  const W = 1432, H = 340;
+
+  /* Column geometry. Claim text is ragged-right but the thread anchors are
+     aligned on a rail at CX — a ragged set of start points reads as noise and
+     the eye needs one place to look for the connection. */
+  const FX = 0, TX = 34, CX = 442;      /* frame tag / claim text / claim rail */
+  const SX = 1000, LX = 1018, RX = 1424; /* source rail / source text / count   */
+  const R0 = 62, R1 = 322;               /* first and last claim baseline band  */
+
+  /* Colour is the key: each source owns one hue and every thread reaching it
+     carries that hue, so the label and its threads match without a legend. */
+  const SOURCES = [
+    { id: "glassdoor", label: "Glassdoor (2026)",               colour: T.acc },
+    { id: "indeed",    label: "Indeed (2026)",                  colour: T.blue },
+    { id: "linkedin",  label: "LinkedIn Economic Graph (2025)", colour: T.ok },
+    { id: "wef",       label: "WEF Future of Jobs (2025)",      colour: T.acc2 },
+    { id: "press",     label: "Press reporting, 2023",          colour: T.ink3 }
+  ];
+
+  const CLAIMS = [
+    { f: "f2", text: "$375k listing, 2023",          src: "press" },
+    { f: "f6", text: "$131,483 Glassdoor avg",       src: "glassdoor" },
+    { f: "f6", text: "$112,806 Indeed avg",          src: "indeed" },
+    { f: "f6", text: "+156% AI postings 24-25",      src: "linkedin" },
+    { f: "f7", text: "-30% standalone postings",     src: "linkedin" },
+    { f: "f7", text: "78% of AI adverts",            src: "linkedin" },
+    { f: "f7", text: "+250% skill tags",             src: "linkedin" },
+    { f: "f7", text: "170M created / 92M displaced", src: "wef" }
+  ];
+
+  const srcOf = id => SOURCES.find(s => s.id === id);
+  const claimY = i => R0 + i * ((R1 - R0) / (CLAIMS.length - 1));
+  const srcY = i => {
+    const gap = 57, mid = (R0 + R1) / 2;
+    return mid + (i - (SOURCES.length - 1) / 2) * gap;
+  };
+
+  const s = api.svg(W, H); host.appendChild(s);
+
+  const text = (x, y, str, fill, size, extra) => {
+    const n = api.el("text", Object.assign({
+      x, y, fill, "font-family": T.mono, "font-size": size
+    }, extra || {}), null);
+    n.textContent = str;
+    return n;
+  };
+
+  /* --- column headers -------------------------------------------------- */
+  const head = api.el("g", { class: "pv-head" }, s);
+  [[FX, 430, "CLAIM ON SCREEN"], [SX, W - SX, "SOURCE"]].forEach(([x, w, label]) => {
+    head.appendChild(text(x, 16, label, T.ink3, 11, { "letter-spacing": 1.8 }));
+    api.el("line", { x1: x, x2: x + w, y1: 26, y2: 26, stroke: T.line, "stroke-width": 1 }, head);
+  });
+  /* the two rails the threads spring from — they turn eight loose beziers into
+     one table with a spine on each side */
+  api.el("line", { x1: CX, x2: CX, y1: claimY(0), y2: claimY(CLAIMS.length - 1),
+    stroke: T.line, "stroke-width": 1 }, head);
+  api.el("line", { x1: SX, x2: SX, y1: srcY(0), y2: srcY(SOURCES.length - 1),
+    stroke: T.line, "stroke-width": 1 }, head);
+
+  /* --- threads (drawn first so labels always sit on top) ---------------- */
+  const threads = CLAIMS.map((c, i) => {
+    const src = srcOf(c.src), y0 = claimY(i), y1 = srcY(SOURCES.indexOf(src));
+    const dx = (SX - CX) * .45;
+    const p = api.el("path", {
+      class: "pv-thread",
+      d: `M${CX},${y0} C${CX + dx},${y0} ${SX - dx},${y1} ${SX},${y1}`,
+      stroke: src.colour
+    }, s);
+    const len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = api.reduced ? 0 : len;
+    return { path: p, len, src, claim: i };
+  });
+
+  /* --- left column: the claims ----------------------------------------- */
+  const rows = CLAIMS.map((c, i) => {
+    const y = claimY(i), src = srcOf(c.src);
+    const g = api.el("g", { class: "pv-row", opacity: api.reduced ? 1 : 0 }, s);
+    g.appendChild(text(FX, y + 5, c.f, T.acc, 12));
+    g.appendChild(text(TX, y + 5, c.text, T.ink2, 14));
+    /* the dot is the claim's end of the thread, so it takes the source colour */
+    api.el("circle", { cx: CX, cy: y, r: 3, fill: src.colour }, g);
+    return { g, y, src };
+  });
+
+  /* --- right column: the sources --------------------------------------- */
+  const counts = {};
+  CLAIMS.forEach(c => { counts[c.src] = (counts[c.src] || 0) + 1; });
+
+  const srcRows = SOURCES.map((src, i) => {
+    const y = srcY(i);
+    const g = api.el("g", { class: "pv-src", opacity: api.reduced ? 1 : 0 }, s);
+    api.el("circle", { cx: SX, cy: y, r: 3.5, fill: src.colour }, g);
+    g.appendChild(text(LX, y + 5, src.label, src.colour, 14));
+    /* how many of the talk's numbers rest on this one source — the honest
+       reading of the map is that LinkedIn carries half of them */
+    const n = counts[src.id] || 0;
+    g.appendChild(text(RX, y + 5, n + (n === 1 ? " claim" : " claims"), T.ink3, 12,
+      { "text-anchor": "end" }));
+    return { g, src, y };
+  });
+
+  /* --- isolation on hover ---------------------------------------------- */
+  /* One class on the host dims everything; `.on` marks the survivors. Doing it
+     in CSS keeps the transitions off the animation loop entirely. */
+  const clear = () => {
+    host.classList.remove("pv-lit");
+    threads.forEach(t => t.path.classList.remove("on"));
+    rows.forEach(r => r.g.classList.remove("on"));
+    srcRows.forEach(r => r.g.classList.remove("on"));
+  };
+  const light = keep => {
+    clear();
+    host.classList.add("pv-lit");
+    threads.forEach(t => {
+      if (!keep(t)) return;
+      t.path.classList.add("on");
+      rows[t.claim].g.classList.add("on");
+      srcRows[SOURCES.indexOf(t.src)].g.classList.add("on");
+    });
+  };
+
+  const hit = (x, w, y, h, on) => {
+    const r = api.el("rect", { class: "pv-hit", x, y: y - h / 2, width: w, height: h }, s);
+    r.addEventListener("pointerenter", on);
+    r.addEventListener("pointerleave", clear);
+  };
+  rows.forEach((r, i) => hit(FX, CX - FX + 10, r.y, 34, () => light(t => t.claim === i)));
+  srcRows.forEach(r => hit(SX - 10, W - SX + 10, r.y, 46, () => light(t => t.src === r.src)));
+
+  /* a pointer that leaves the frame between two hit rects would otherwise
+     strand the deck in a dimmed state on screen */
+  host.addEventListener("pointerleave", clear);
+  /* The runtime only wipes innerHTML on unmount — the host div itself survives,
+     so any state class we put on it would still be there on the next landing.
+     Leave the host exactly as we found it or the frame returns dimmed. */
+  api.onTeardown(() => {
+    host.removeEventListener("pointerleave", clear);
+    host.classList.remove("pv-lit", "pv-arrive");
+  });
+
+  if (api.reduced) return;
+
+  /* --- arrival: claims, then sources, then the threads that join them --- */
+  const C_STEP = .06, C_DUR = .20;
+  const S_AT = .68, S_STEP = .07, S_DUR = .22;
+  const W_AT = 1.10, W_STEP = .09, W_DUR = .70;
+  const END = W_AT + (threads.length - 1) * W_STEP + W_DUR;
+  const seg = (t, at, dur) => Math.max(0, Math.min(1, (t - at) / dur));
+
+  /* The hover isolation is a CSS opacity transition, but the arrival drives the
+     same property from the rAF loop — left alone, every frame would restart a
+     200ms transition and the fade would smear along behind the translate that
+     rides with it. Suspend the transition until the entrance has landed. */
+  host.classList.add("pv-arrive");
+
+  api.raf(t => {
+    rows.forEach((r, i) => {
+      const p = api.ease.out(seg(t, i * C_STEP, C_DUR));
+      r.g.setAttribute("opacity", p.toFixed(3));
+      r.g.setAttribute("transform", `translate(0,${((1 - p) * 10).toFixed(2)})`);
+    });
+    srcRows.forEach((r, i) => {
+      r.g.setAttribute("opacity", api.ease.out(seg(t, S_AT + i * S_STEP, S_DUR)).toFixed(3));
+    });
+    threads.forEach((th, i) => {
+      const p = api.ease.inOut(seg(t, W_AT + i * W_STEP, W_DUR));
+      th.path.style.strokeDashoffset = th.len * (1 - p);
+    });
+    if (t >= END) {
+      /* land on exact values so nothing is left mid-transform */
+      rows.forEach(r => { r.g.setAttribute("opacity", 1); r.g.removeAttribute("transform"); });
+      srcRows.forEach(r => r.g.setAttribute("opacity", 1));
+      threads.forEach(th => { th.path.style.strokeDashoffset = 0; });
+      host.classList.remove("pv-arrive");
+      return false;
+    }
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   ribbons — frame 5's picture of how people get in.
+   Five degrees, five roads, one gate. The argument of the frame is that no
+   single subject owns this job and that the thing actually checked at the door
+   is a portfolio, so the five ribbons are drawn identical in weight and colour
+   and the only hard-edged mark in the whole composition is the amber capsule
+   they all have to pass through. The traffic states it in motion rather than in
+   words: every dot enters the gate blue and leaves it amber.
+   ========================================================================== */
+VIS.ribbons = { mount(host, api) {
+  const T = api.T;
+  const W = 1232, H = 280;
+  const GATE = 900, MID = 140;      /* the gate is the one fixed point everything aims at */
+  const EXIT = 1138;                /* the outbound ribbon stops short of the box so "the job" has room */
+  const TH = 7;                     /* half-thickness: 14px still reads as a band on a projector */
+
+  const s = api.svg(W, H); host.appendChild(s);
+  const defs  = api.el("defs", {}, s);
+  const gRib  = api.el("g", {}, s);
+  const gExit = api.el("g", {}, s);
+  const gDots = api.el("g", {}, s);
+  const gGate = api.el("g", {}, s);   /* over the dots, so the colour flip happens *inside* the gate */
+  const gText = api.el("g", {}, s);
+  const gGuide = api.el("g", { fill: "none", stroke: "none" }, s);
+
+  /* Rows are evenly spaced and the gate offsets keep the same order, so no two
+     roads cross — a crossing here would imply a relationship we are not claiming. */
+  const ROADS = [
+    { name: "Computer science", y: 46,  off: -32, v: 128 },
+    { name: "Business",         y: 93,  off: -16, v: 142 },
+    { name: "Communications",   y: 140, off:   0, v: 118 },
+    { name: "Linguistics",      y: 187, off:  16, v: 152 },
+    { name: "Psychology",       y: 234, off:  32, v: 134 }
+  ];
+
+  const cl = v => v < 0 ? 0 : v > 1 ? 1 : v;
+
+  /* The deck's motion signature is cubic-bezier(.22,.8,.2,1). SVG geometry
+     attributes are not reliably CSS-animatable across browsers and this has to
+     run offline from a USB stick, so the wipe is driven from rAF and the curve
+     is solved here rather than approximated with api.ease.out. */
+  const bez = (function () {
+    const x1 = .22, y1 = .8, x2 = .2, y2 = 1;
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const fx = t => ((ax * t + bx) * t + cx) * t;
+    const dx = t => (3 * ax * t + 2 * bx) * t + cx;
+    return p => {
+      if (p <= 0) return 0;
+      if (p >= 1) return 1;
+      let t = p;
+      for (let i = 0; i < 5; i++) {
+        const e = fx(t) - p; if (Math.abs(e) < 1e-4) break;
+        const d = dx(t); if (Math.abs(d) < 1e-6) break;
+        t -= e / d;
+      }
+      return ((ay * t + by) * t + cy) * t;
+    };
+  })();
+
+  /* A ribbon is an outline, not a stroke, so its thickness can change along its
+     length and its ends stay square. Both ends leave horizontal, so offsetting
+     the two beziers vertically is exact where it shows and only thins the band
+     imperceptibly through the shallow middle. */
+  const ribbon = (x0, y0, x1, y1, h0, h1) => {
+    const k = (x1 - x0) * .45, a = x0 + k, b = x1 - k;
+    return `M${x0},${y0 - h0} C${a},${y0 - h0} ${b},${y1 - h1} ${x1},${y1 - h1}` +
+           ` L${x1},${y1 + h1} C${b},${y1 + h1} ${a},${y0 + h0} ${x0},${y0 + h0} Z`;
+  };
+  const spine = (x0, y0, x1, y1) => {
+    const k = (x1 - x0) * .45;
+    return `M${x0},${y0} C${x0 + k},${y0} ${x1 - k},${y1} ${x1},${y1}`;
+  };
+
+  ROADS.forEach((r, i) => {
+    const tx = api.el("text", { x: 8, y: r.y + 5.5, fill: T.ink2,
+      "font-family": T.mono, "font-size": 16 }, gText);
+    tx.textContent = r.name;
+    r.label = tx;
+
+    /* Each road starts where its own name ends, so measure it. If the webfont
+       has not settled getComputedTextLength can report 0 — fall back to the
+       monospace advance of 0.6em. */
+    let w = 0;
+    try { w = tx.getComputedTextLength(); } catch (e) { w = 0; }
+    if (!(w > 0)) w = r.name.length * 9.6;
+    r.x0 = Math.round(8 + w + 18);
+
+    /* one clip per road: the wipe is staggered, so they cannot share a rect */
+    const cp = api.el("clipPath", { id: `rb-clip-${i}` }, defs);
+    r.clip = api.el("rect", { x: 0, y: 0, width: W, height: H }, cp);
+
+    const g = api.el("g", { "clip-path": `url(#rb-clip-${i})` }, gRib);
+    api.el("path", {
+      d: ribbon(r.x0, r.y, GATE, MID + r.off, TH, TH),
+      fill: T.blue, "fill-opacity": .12,
+      stroke: T.blue, "stroke-opacity": .3, "stroke-width": 1
+    }, g);
+
+    /* the centre line, carried on past the gate and folded into the single
+       outbound road so one dot can make the whole journey */
+    r.guide = api.el("path", {
+      d: spine(r.x0, r.y, GATE, MID + r.off) +
+         ` C${GATE + 30},${MID + r.off} ${GATE + 40},${MID} ${GATE + 70},${MID} L${EXIT},${MID}`
+    }, gGuide);
+  });
+
+  /* The outbound ribbon leaves the gate exactly as wide as the bundle arriving
+     into it and necks down to one road — five intakes, one hire. */
+  const exitClip = api.el("clipPath", { id: "rb-clip-exit" }, defs);
+  const exitRect = api.el("rect", { x: GATE, y: 0, width: EXIT - GATE + 10, height: H }, exitClip);
+  const exitG = api.el("g", { "clip-path": "url(#rb-clip-exit)" }, gExit);
+  api.el("path", {
+    d: ribbon(904, MID, EXIT, MID, 39, 14),
+    fill: T.acc, "fill-opacity": .14,
+    stroke: T.acc, "stroke-opacity": .3, "stroke-width": 1
+  }, exitG);
+
+  const jobLabel = api.el("text", { x: EXIT + 12, y: MID + 5.5, fill: T.ink2,
+    "font-family": T.mono, "font-size": 16 }, gText);
+  jobLabel.textContent = "the job";
+
+  api.el("rect", { x: GATE - 4, y: MID - 60, width: 8, height: 120, rx: 4, fill: T.acc }, gGate);
+
+  /* Captions sit above the outbound ribbon rather than beside the capsule,
+     which is where the ribbon itself now is. */
+  const cap = api.el("g", {}, gText);
+  const cap1 = api.el("text", { x: GATE + 16, y: 62, fill: T.acc,
+    "font-family": T.mono, "font-size": 15, "font-weight": 500 }, cap);
+  cap1.textContent = "PORTFOLIO";
+  const cap2 = api.el("text", { x: GATE + 16, y: 84, fill: T.ink3,
+    "font-family": T.mono, "font-size": 13 }, cap);
+  cap2.textContent = "what employers actually check";
+
+  /* Reduced motion: the composition above is already the finished state, and
+     moving traffic is exactly what someone with this setting asked not to see. */
+  if (api.reduced) return;
+
+  const START = 1.1, ENTR = 1.8;
+  ROADS.forEach(r => { r.clip.setAttribute("width", 0); r.label.setAttribute("opacity", 0); });
+  exitRect.setAttribute("width", 0);
+  jobLabel.setAttribute("opacity", 0);
+  cap.setAttribute("opacity", 0);
+  gGate.setAttribute("transform", `translate(${GATE} ${MID}) scale(0) translate(${-GATE} ${-MID})`);
+
+  const DOTS = 10, traffic = [];
+  ROADS.forEach((r, i) => {
+    const len = r.guide.getTotalLength();
+    for (let j = 0; j < DOTS; j++) {
+      traffic.push({
+        c: api.el("circle", { r: 2.5, fill: T.blue, opacity: 0 }, gDots),
+        guide: r.guide, len, d0: (j / DOTS) * len,
+        /* a small per-dot variation on the road's own speed keeps the stream
+           from marching in lockstep, which reads as a graphic, not as traffic */
+        v: r.v * (1 + .09 * Math.sin(i * 2.3 + j * 1.7)),
+        amber: false, o: null
+      });
+    }
+  });
+
+  let settled = false;
+  api.raf(t => {
+    if (t < ENTR) {
+      ROADS.forEach((r, i) => {
+        const p = bez(cl((t - i * .09) / .9));
+        r.clip.setAttribute("width", (W * p).toFixed(1));
+        r.label.setAttribute("opacity", cl((t - i * .09) / .45).toFixed(2));
+      });
+      const g = t < .7 ? 0 : api.ease.elastic(cl((t - .7) / .6));
+      gGate.setAttribute("transform",
+        `translate(${GATE} ${MID}) scale(${g.toFixed(3)}) translate(${-GATE} ${-MID})`);
+      cap.setAttribute("opacity", cl((t - .9) / .4).toFixed(2));
+      exitRect.setAttribute("width", ((EXIT - GATE + 10) * bez(cl((t - .95) / .7))).toFixed(1));
+      jobLabel.setAttribute("opacity", cl((t - 1.3) / .4).toFixed(2));
+    } else if (!settled) {
+      settled = true;
+      ROADS.forEach(r => { r.clip.setAttribute("width", W); r.label.setAttribute("opacity", 1); });
+      gGate.removeAttribute("transform");
+      cap.setAttribute("opacity", 1);
+      exitRect.setAttribute("width", EXIT - GATE + 10);
+      jobLabel.setAttribute("opacity", 1);
+    }
+
+    if (t >= START) {
+      const alpha = cl((t - START) / .4);
+      for (let i = 0; i < traffic.length; i++) {
+        const d = traffic[i];
+        let at = (d.d0 + (t - START) * d.v) % d.len;
+        if (at < 0) at += d.len;
+        const p = d.guide.getPointAtLength(at);
+        d.c.setAttribute("cx", p.x.toFixed(1));
+        d.c.setAttribute("cy", p.y.toFixed(1));
+        const amber = p.x >= GATE;
+        if (amber !== d.amber) { d.amber = amber; d.c.setAttribute("fill", amber ? T.acc : T.blue); }
+        /* fade the last stride at each end so a dot never pops in or out */
+        const o = (alpha * Math.min(1, at / 26, (d.len - at) / 26)).toFixed(2);
+        if (o !== d.o) { d.o = o; d.c.setAttribute("opacity", o); }
+      }
+    }
+    /* never returns false: the traffic is the point, and the managed loop is
+       cancelled for us when the camera leaves the frame */
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   salaryrange — frame 6's evidence.
+   The frame states four salary figures as counters, which lets each one read as
+   a fact. Put all four on ONE money axis and the thing the counters hide comes
+   out: two reputable aggregators, measuring the same job in the same market,
+   disagree — Indeed's range is nearly twice as wide as Glassdoor's and its
+   average sits $19k lower. So the honest answer is the spread, not a point, and
+   the amber bracket marks the only stretch both sources actually vouch for.
+   ========================================================================== */
+VIS.salaryrange = { mount(host, api) {
+  const T = api.T;
+  const W = 1332, H = 300;
+  const GUT = 260, RM = 40;                 /* row-label gutter | right margin  */
+  const PL = GUT, PW = W - GUT - RM;
+  const TOP = 48, BOT = 268;                /* the ruled band the gridlines span */
+  const MAX = 250000;
+  const X = v => PL + (v / MAX) * PW;
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+
+  /* Locale-independent: toLocaleString would render "131 483" or "131.483" on a
+     machine set to another locale, and this deck runs off a USB stick on a
+     lectern PC we do not control. */
+  const money = v => "$" + String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  /* Rows 1–2 are the disagreement; 3–4 are the context that explains it. The
+     bracket therefore sits in a band directly under the first pair rather than
+     at the foot of the chart, where it would read as a claim about all four. */
+  const ROWS = [
+    { label: "GLASSDOOR", lo: 103859, hi: 168386, pt: 131483, c: T.acc,  cy: 61  },
+    { label: "INDEED",    lo: 66879,  hi: 174165, pt: 112806, c: T.blue, cy: 107 },
+    { label: "STARTUPS",  lo: 60000,  hi: 90000,  pt: null,   c: T.ink3, cy: 195 },
+    { label: "BIG TECH",  lo: 140000, hi: 230000, pt: null,   c: T.ink3, cy: 241 }
+  ];
+  /* Glassdoor's quartiles fall entirely inside Indeed's reported range, so the
+     intersection IS Glassdoor's range. Stated as an intersection anyway — that
+     the narrower source is wholly contained is itself the finding. */
+  const OV = { lo: Math.max(ROWS[0].lo, ROWS[1].lo), hi: Math.min(ROWS[0].hi, ROWS[1].hi), y: 144 };
+
+  /* The brief's curve. Solved rather than swapped for api.ease.out because the
+     long flat tail is what makes a bar look like it settles onto a measured
+     value instead of snapping to it. Bisection: 18 steps, four bars a frame. */
+  const bezier = (p1x, p1y, p2x, p2y) => {
+    const at = (a, b) => t => 3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t;
+    const fx = at(p1x, p2x), fy = at(p1y, p2y);
+    return x => {
+      if (x <= 0) return 0; if (x >= 1) return 1;
+      let lo = 0, hi = 1, t = x;
+      for (let i = 0; i < 18; i++) { t = (lo + hi) / 2; if (fx(t) < x) lo = t; else hi = t; }
+      return fy(t);
+    };
+  };
+  const grow = bezier(.2, .8, .2, 1);
+
+  /* api.ease.elastic overshoots by a third, which sends the dot 8px BELOW its
+     own bar — it reads as punching through rather than landing on. So: fall
+     under gravity into the bar, then one small rebound upward. */
+  const drop = q => q < .55
+    ? -24 * (1 - Math.pow(q / .55, 2))
+    : -8 * Math.sin(Math.PI * (q - .55) / .45) * (1 - (q - .55) / .45);
+
+  const AXIS_IN = .30, BAR_DUR = .90, STAGGER = .13, DOT_DUR = .50, BRK_DUR = .60;
+  const BRK_AT = AXIS_IN + (ROWS.length - 1) * STAGGER + BAR_DUR + .30;
+
+  const s = api.svg(W, H); host.appendChild(s);
+
+  /* ---- chrome: gridlines, money axis, row labels. One group, one fade. ---- */
+  const chrome = api.el("g", { opacity: api.reduced ? 1 : 0 }, s);
+  for (let v = 0; v <= MAX; v += 50000) {
+    api.el("line", { x1: X(v), x2: X(v), y1: TOP, y2: BOT, stroke: T.line, "stroke-width": 1 }, chrome);
+    const lab = api.el("text", { x: X(v), y: BOT + 22, "text-anchor": "middle", fill: T.ink3,
+      "font-family": T.mono, "font-size": 13 }, chrome);
+    lab.textContent = v === 0 ? "$0" : "$" + (v / 1000) + "k";
+  }
+  /* A rule along the foot so the tick labels attach to something; without it
+     six free-floating gridlines read as a texture rather than as an axis. */
+  api.el("line", { x1: PL, x2: X(MAX), y1: BOT, y2: BOT, stroke: T.line, "stroke-width": 1 }, chrome);
+
+  ROWS.forEach(r => {
+    const t1 = api.el("text", { x: PL - 22, y: r.cy + 5, "text-anchor": "end", fill: T.ink2,
+      "font-family": T.mono, "font-size": 15, class: "srg-cap" }, chrome);
+    t1.textContent = r.label;
+  });
+
+  /* ---- the ranges ---- */
+  ROWS.forEach(r => {
+    r.x0 = X(r.lo); r.full = X(r.hi) - X(r.lo);
+    const g = api.el("g", {}, s);
+    r.rect = api.el("rect", { x: r.x0, y: r.cy - 7, width: api.reduced ? r.full : 0, height: 14,
+      rx: 7, ry: 7, fill: r.c, "fill-opacity": .22 }, g);
+    /* Ends only — a full outline would turn an interval into a box and invite
+       the eye to read the fill as a quantity rather than as a span. */
+    r.capL = api.el("line", { x1: r.x0, x2: r.x0, y1: r.cy - 10, y2: r.cy + 10,
+      stroke: r.c, "stroke-width": 2, opacity: api.reduced ? 1 : 0 }, g);
+    r.capR = api.el("line", { x1: api.reduced ? r.x0 + r.full : r.x0, x2: api.reduced ? r.x0 + r.full : r.x0,
+      y1: r.cy - 10, y2: r.cy + 10, stroke: r.c, "stroke-width": 2, opacity: api.reduced ? 1 : 0 }, g);
+
+    if (r.pt === null) return;
+    r.dotG = api.el("g", { opacity: api.reduced ? 1 : 0,
+      transform: api.reduced ? "translate(0,0)" : "translate(0,-24)" }, s);
+    api.el("circle", { cx: X(r.pt), cy: r.cy, r: 8, fill: r.c, stroke: T.surface, "stroke-width": 3 }, r.dotG);
+    const v = api.el("text", { x: X(r.pt), y: r.cy - 20, "text-anchor": "middle", fill: r.c,
+      "font-family": T.mono, "font-size": 16, "font-weight": 500 }, r.dotG);
+    v.textContent = money(r.pt);
+  });
+
+  /* ---- the payoff: the agreed stretch, bracketed ---- */
+  const bx1 = X(OV.lo), bx2 = X(OV.hi), TICK = 8;
+  const brk = api.el("path", {
+    d: `M${bx1},${OV.y - TICK} L${bx1},${OV.y} L${bx2},${OV.y} L${bx2},${OV.y - TICK}`,
+    fill: "none", stroke: T.acc, "stroke-width": 1.5, "stroke-linecap": "square", "stroke-opacity": .85
+  }, s);
+  /* Computed, not measured: getTotalLength() needs the path laid out, and this
+     module must survive being mounted while the frame is still off-screen. */
+  const brkLen = TICK * 2 + (bx2 - bx1);
+  brk.style.strokeDasharray = brkLen;
+  brk.style.strokeDashoffset = api.reduced ? 0 : brkLen;
+  const brkLab = api.el("text", { x: (bx1 + bx2) / 2, y: OV.y + 22, "text-anchor": "middle",
+    fill: T.acc, "font-family": T.mono, "font-size": 13, class: "srg-note",
+    opacity: api.reduced ? 1 : 0 }, s);
+  brkLab.textContent = "where both sources agree";
+
+  if (api.reduced) return;
+
+  api.raf(t => {
+    chrome.setAttribute("opacity", clamp01(t / AXIS_IN).toFixed(3));
+    ROWS.forEach((r, i) => {
+      const p = clamp01((t - (AXIS_IN + i * STAGGER)) / BAR_DUR), w = r.full * grow(p);
+      r.rect.setAttribute("width", w.toFixed(2));
+      r.capR.setAttribute("x1", (r.x0 + w).toFixed(2));
+      r.capR.setAttribute("x2", (r.x0 + w).toFixed(2));
+      if (p > 0) { r.capL.setAttribute("opacity", 1); r.capR.setAttribute("opacity", 1); }
+      if (!r.dotG) return;
+      /* The dot lands as its own bar finishes, so the estimate reads as a claim
+         made about that range rather than as a fifth mark on the chart. */
+      const q = clamp01((t - (AXIS_IN + i * STAGGER + BAR_DUR)) / DOT_DUR);
+      r.dotG.setAttribute("opacity", clamp01(q * 3).toFixed(3));
+      r.dotG.setAttribute("transform", `translate(0,${drop(q).toFixed(2)})`);
+    });
+    const b = clamp01((t - BRK_AT) / BRK_DUR);
+    brk.style.strokeDashoffset = (brkLen * (1 - api.ease.out(b))).toFixed(2);
+    brkLab.setAttribute("opacity", clamp01((t - (BRK_AT + BRK_DUR - .15)) / .35).toFixed(3));
+    if (t > BRK_AT + BRK_DUR + .4) return false;
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   skillrank — frame 4's proof line.
+   The frame above splits the ten skills into a HUMAN column and a TECHNICAL
+   column, which lets the audience compare inside each list but never across
+   them — so the frame's real claim ("the human column is heavier") survives
+   only in the speaker notes. Merging all ten into one ranked strip makes that
+   claim checkable in a glance: the ordering does the arguing, and the speaker
+   never has to assert anything the picture does not already show.
+   ========================================================================== */
+VIS.skillrank = { mount(host, api) {
+  const T = api.T;
+  const W = 1332, H = 120, BASE = 88;      /* baseline leaves 32px for the rank row + the verdict */
+  const N = 10, GAP = 8, CW = (W - (N - 1) * GAP) / N;   /* 126px columns, flush to both edges */
+  const R = 5;
+
+  /* Same weights as the bars above — one ordering instead of two. `human` is
+     the only editorial call in this file; everything else is arithmetic. */
+  const RANKED = [
+    { v: 96, human: 1, name: "Precise, structured writing" },
+    { v: 94, human: 0, name: "How LLMs behave" },
+    { v: 92, human: 1, name: "Critical thinking" },
+    { v: 88, human: 0, name: "Evaluation and testing" },
+    { v: 84, human: 1, name: "Domain knowledge" },
+    { v: 82, human: 1, name: "Communication across teams" },
+    { v: 78, human: 1, name: "Patience for iteration" },
+    { v: 74, human: 0, name: "Python basics and APIs" },
+    { v: 70, human: 0, name: "Retrieval and context design" },
+    { v: 68, human: 0, name: "Data literacy" }
+  ];
+
+  /* 22px of height for 28 points of weight is a deliberately short scale: the
+     ORDER carries the argument, and a taller scale would dramatise gaps of two
+     points that our judgement cannot defend anyway. */
+  const hOf = v => 52 + (v - 68) * (74 - 52) / (96 - 68);
+  const q = v => Math.round(v * 100) / 100;   /* the scale is fractional; the emitted geometry need not be */
+
+  /* Count the claim rather than trust it — the sentence is generated from the
+     data, so it cannot drift if a weight is ever edited. */
+  const CUT = 6;
+  const humanTop = RANKED.slice(0, CUT).filter(d => d.human).length;
+  const SUMMARY = `Ranked together: ${humanTop} of the top ${CUT} are human skills.`;
+
+  /* The brief's cubic-bezier(.2,.8,.2,1) — the deck's own camera curve — solved
+     rather than approximated with ease.out, so ten staggered columns snap in
+     the same way the frames do. Bisection: 18 steps is far under a pixel here. */
+  const bezier = (x1, y1, x2, y2) => {
+    const at = (a, b) => t => 3 * t * (1 - t) * (1 - t) * a + 3 * t * t * (1 - t) * b + t * t * t;
+    const cx = at(x1, x2), cy = at(y1, y2);
+    return x => {
+      let lo = 0, hi = 1, t = x;
+      for (let i = 0; i < 18; i++) { if (cx(t) > x) hi = t; else lo = t; t = (lo + hi) / 2; }
+      return cy(t);
+    };
+  };
+
+  const s = api.svg(W, H); host.appendChild(s);
+  const head = api.el("title", {}, s);
+  head.textContent = "All ten required skills ranked together by weight. " + SUMMARY;
+
+  /* the common ground the columns stand on */
+  api.el("line", { x1: 0, x2: W, y1: BASE + .5, y2: BASE + .5, stroke: T.line, "stroke-width": 1 }, s);
+
+  const text = (x, y, size, fill, str) => {
+    const t = api.el("text", { x, y, fill, "font-family": T.mono, "font-size": size,
+      "text-anchor": "middle", opacity: api.reduced ? 1 : 0 }, s);
+    t.textContent = str; return t;
+  };
+
+  const cols = RANKED.map((d, i) => {
+    const x = i * (CW + GAP), cx = x + CW / 2, colour = d.human ? T.acc : T.blue, h = hOf(d.v);
+    const g = api.el("g", { opacity: 0 }, s);
+    api.el("title", {}, g).textContent = `${d.name} — ${d.v}`;
+    return {
+      x, h,
+      g,
+      fill: api.el("path", { fill: colour, "fill-opacity": .85, stroke: "none" }, g),
+      cap: api.el("path", { class: "sr-cap", fill: "none", stroke: colour, "stroke-width": 1 }, g),
+      /* the weight sits just above its own column, so the labels descend in a
+         staircase that repeats the ranking; 11 is the ceiling the tallest
+         column allows before 13px type would clip the viewBox. */
+      wt: text(cx, q(Math.max(11, BASE - h - 6)), 13, colour, d.v),
+      rank: text(cx, 100, 13, T.ink3, i + 1)
+    };
+  });
+
+  /* The verdict, and a hairline where the top six ends — without the cut the
+     audience has to count columns to check the sentence. Both arrive together. */
+  const tail = api.el("g", { opacity: api.reduced ? 1 : 0 }, s);
+  api.el("line", { x1: CUT * (CW + GAP) - GAP / 2, x2: CUT * (CW + GAP) - GAP / 2, y1: 6, y2: BASE,
+    stroke: T.line2, "stroke-width": 1, "stroke-dasharray": "3 6", "stroke-opacity": .8 }, tail);
+  const verdict = api.el("text", { x: W / 2, y: 115, fill: T.ink2, "font-family": T.mono,
+    "font-size": 15, "text-anchor": "middle" }, tail);
+  verdict.textContent = SUMMARY;
+
+  /* Redraw the whole column each frame instead of scaling a group: a scaleY
+     would squash the rounded top and the 1px edge on the way up. */
+  const paint = (c, k) => {
+    const h = q(c.h * k), top = q(BASE - h), r = q(Math.min(R, h));
+    c.g.setAttribute("opacity", h < .75 ? 0 : 1);   /* no coloured slivers lying on the baseline before a column starts */
+    c.fill.setAttribute("d", `M${c.x},${BASE}V${top + r}Q${c.x},${top} ${c.x + r},${top}`
+      + `H${c.x + CW - r}Q${c.x + CW},${top} ${c.x + CW},${top + r}V${BASE}Z`);
+    c.cap.setAttribute("d", `M${c.x + .5},${top + r}Q${c.x + .5},${top + .5} ${c.x + r},${top + .5}`
+      + `H${c.x + CW - r}Q${c.x + CW - .5},${top + .5} ${c.x + CW - .5},${top + r}`);
+  };
+
+  if (api.reduced) { cols.forEach(c => paint(c, 1)); return; }
+
+  const STAG = .07, DUR = .52, FADE = .35, LAST = (N - 1) * STAG + DUR, ez = bezier(.2, .8, .2, 1);
+  api.raf(t => {
+    cols.forEach((c, i) => {
+      const k = Math.max(0, Math.min(1, (t - i * STAG) / DUR));
+      paint(c, ez(k));
+      c.rank.setAttribute("opacity", Math.min(1, k * 2).toFixed(2));            /* the rank is the point, so it comes up with the column */
+      c.wt.setAttribute("opacity", Math.max(0, (k - .55) / .45).toFixed(2));    /* the weight lands only once the height it describes is true */
+    });
+    tail.setAttribute("opacity", Math.max(0, Math.min(1, (t - LAST) / FADE)).toFixed(2));
+    if (t > LAST + FADE) return false;
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   tokenise — frame 1, directly under the sentence that types itself out.
+   The same sentence, re-cut into the chips a tokeniser actually emits. It puts
+   the substrate of the whole talk on screen in one glance: "desc|ribe" and
+   "engine|er" show that the model is not handed words, and the middle dots show
+   that a leading space belongs to the token that follows it. The amber hairline
+   sweeping the row is the model reading — left to right, one token at a time.
+   ========================================================================== */
+VIS.tokenise = { mount(host, api) {
+
+  /* Exactly the nine tokens of `describe the career of a prompt engineer`.
+     `sp` = this token carries a leading space, drawn as a faint · so the space
+     is visibly INSIDE the chip rather than between chips. */
+  const TOKENS = [
+    { sp: 0, t: "desc" },   { sp: 0, t: "ribe" },   { sp: 1, t: "the" },
+    { sp: 1, t: "career" }, { sp: 1, t: "of" },     { sp: 1, t: "a" },
+    { sp: 1, t: "prompt" }, { sp: 1, t: "engine" }, { sp: 0, t: "er" }
+  ];
+
+  const STEP = 70;                     /* ms between chip entrances */
+  const CYCLE = 5, SWEEP = .9;         /* s: one read-head pass every CYCLE */
+  const ATT = .08, DEC = .18;          /* s: chip glow attack, then decay */
+
+  /* Alternating a/b tints are the whole point of the graphic — they make the
+     token boundaries unmistakable at projector distance. */
+  host.innerHTML = `
+    <div class="tk-row">
+      ${TOKENS.map((k, i) => `<span class="tk ${i % 2 ? "b" : "a"}" style="transition-delay:${i * STEP}ms"
+        >${k.sp ? `<span class="tk-sp">·</span>` : ""}${k.t}</span>`).join("")}
+      <i class="tk-head"></i>
+    </div>
+    <div class="tk-foot mono">9 tokens · the model never sees your sentence, only these</div>`;
+
+  const row = host.querySelector(".tk-row");
+  const head = host.querySelector(".tk-head");
+  const chips = Array.prototype.slice.call(row.querySelectorAll(".tk"));
+
+  /* Reduced motion: the finished state, no entrance, no loop, no read head. */
+  if (api.reduced) { row.classList.add("in"); return; }
+
+  api.after(30, () => {
+    void row.offsetWidth;              /* flush the pre-transition style so the
+                                          rise actually animates rather than
+                                          being coalesced into one recalc */
+    row.classList.add("in");
+  });
+
+  /* --- the read head ----------------------------------------------------- */
+  /* Colours are interpolated in JS rather than with color-mix()/CSS transitions
+     so this works on whatever browser the USB stick is plugged into, and so the
+     glow is driven from the same clock as the head's position. */
+  const L2 = [46, 56, 89], AC = [242, 169, 59], I2 = [184, 190, 210], I1 = [243, 239, 230];
+  const mix = (a, b, k) => `rgb(${Math.round(a[0] + (b[0] - a[0]) * k)},`
+    + `${Math.round(a[1] + (b[1] - a[1]) * k)},${Math.round(a[2] + (b[2] - a[2]) * k)})`;
+
+  const last = chips.map(() => -1);
+  const paint = (c, i, k, force) => {
+    if (!force && Math.abs(k - last[i]) < .02) return;   /* skip invisible deltas */
+    last[i] = k;
+    c.style.borderColor = k ? mix(L2, AC, k) : "";       /* "" = back to --line2 */
+    c.style.color = k ? mix(I2, I1, k) : "";
+  };
+
+  let geo = null, cycle = -1, idle = false;
+  const measure = () => {
+    const w = row.clientWidth;
+    if (!w) return;                                     /* not laid out yet */
+    /* The head travels from -8 to w+8, so a chip is reached at this fraction of
+       the pass. Re-measured once per cycle because the mono webface can land
+       after mount and shift every chip. */
+    geo = { w, hit: chips.map(c => SWEEP * (c.offsetLeft + 8) / (w + 16)) };
+    head.style.height = (chips[0].offsetHeight + 12) + "px";
+  };
+
+  /* ONE loop for the whole time the frame is on screen: the cycle is read out of
+     elapsed time, so no timer or rAF is ever queued a second time. */
+  api.after(1150, () => api.raf(t => {                  /* 1150ms ≈ after the last chip lands */
+    const n = Math.floor(t / CYCLE), phase = t - n * CYCLE;
+    if (n !== cycle) { cycle = n; measure(); }
+    if (!geo) return;
+
+    if (phase > SWEEP + ATT + DEC + .2) {                /* dead air between passes */
+      if (!idle) { idle = true; head.style.opacity = 0; chips.forEach((c, i) => paint(c, i, 0, 1)); }
+      return;
+    }
+    idle = false;
+
+    if (phase <= SWEEP) {
+      const p = phase / SWEEP;                          /* linear: a scan head has no easing */
+      head.style.transform = `translateX(${(-8 + p * (geo.w + 16)).toFixed(1)}px)`;
+      head.style.opacity = Math.min(1, Math.min(p, 1 - p) / .06).toFixed(3);
+    } else head.style.opacity = 0;
+
+    chips.forEach((c, i) => {
+      const e = phase - geo.hit[i];
+      paint(c, i, e <= 0 ? 0 : e < ATT ? e / ATT : Math.max(0, 1 - (e - ATT) / DEC));
+    });
+  }));
+}};
+
+</script>
+<script>
+/* =============================================================================
+   deck.js — the presentation content. Edit this file, not the engine.
+   Ten frames on one world; the camera flies between them. Every number here
+   carries its source in the References frame; verify before submission.
+   ========================================================================== */
+
+const TEAM = [
+  { name: "Speaker 1 — add name", frames: "1–3" },
+  { name: "Speaker 2 — add name", frames: "4–5" },
+  { name: "Speaker 3 — add name", frames: "6–7" },
+  { name: "Speaker 4 — add name", frames: "8–10" }
+];
+
+const ACCESSED = "10 September 2026";
+
+/* helper: reveal-on-arrival wrapper with stagger index */
+const R = (i, html, tag) => `<${tag || "div"} class="r" style="--i:${i}">${html}</${tag || "div"}>`;
+
+const DECK = {
+  title: "Prompt Engineer as a Career",
+  world: { w: 5800, h: 6200 },
+  accessed: ACCESSED,
+
+  frames: [
+
+  /* ───────────────────────── 1 · TITLE ───────────────────────── */
+  { id: "title", label: "Title", speaker: 0, x: 300, y: 300, w: 1600, h: 1100,
+    notes: "Open with the prompt typing itself out. Let it finish before you speak. Then: 'This is a career that did not exist four years ago — and by this year, the job title is already fading while the skill is everywhere. We spent this project working out what that means for us.' Introduce the team and who covers what.",
+    html: `
+      <div class="kicker mono">PSE · CW1 GROUP PRESENTATION · WESTMINSTER INTERNATIONAL UNIVERSITY IN TASHKENT · 2026/27</div>
+      <div class="prompt mono"><span class="pfx">&gt;</span> <span class="type" data-text="describe the career of a prompt engineer"></span><span class="caret"></span></div>
+      ${R(1, `<h1>Prompt <em>Engineer</em></h1>`)}
+      ${R(2, `<div class="vis vis-tokenise" data-vis="tokenise"></div>`)}
+      ${R(3, `<p class="lede">A career that was born in 2022, peaked in 2023, and by 2026 had dissolved into almost every AI job. Is it a <em>job</em> — or a <em>skill</em> everyone now needs?</p>`)}
+      ${R(4, `<div class="team">${TEAM.map(t => `<span class="chip mono">${t.name} <b>· ${t.frames}</b></span>`).join("")}</div>`)}
+      ${R(5, `<div class="tiny mono dim">→ next &nbsp;·&nbsp; O overview &nbsp;·&nbsp; N notes &nbsp;·&nbsp; T timer</div>`)}` },
+
+  /* ───────────────────────── 2 · OVERVIEW ───────────────────────── */
+  { id: "overview", label: "Career overview", speaker: 0, x: 2100, y: 300, w: 1400, h: 900,
+    notes: "Definition first, plainly. Then the timeline — three beats: appears, peaks, absorbs. The $375k figure was a 2023 Anthropic listing that made global headlines; say it is an outlier, not a norm. End on the question that structures the rest of the talk: job or skill?",
+    html: `
+      <div class="kicker mono">02 · CAREER OVERVIEW</div>
+      ${R(1, `<h2>Talking to machines, <em>precisely</em>.</h2>`)}
+      ${R(2, `<p class="body">A prompt engineer designs, tests and maintains the instructions that make a large language model behave reliably inside a product — the system prompts, examples, guardrails and evaluation sets that turn a general model into a dependable tool.</p>`)}
+      ${R(3, `<div class="timeline">
+        <div class="tl"><span class="yr mono">2022</span><b>The title appears</b><span>ChatGPT launches; companies discover that how you ask changes what you get.</span></div>
+        <div class="tl"><span class="yr mono">2023</span><b>Hype peak</b><span>An Anthropic listing offering up to <b>$375k</b> makes global headlines. "Prompt engineer" becomes the hottest new job.</span></div>
+        <div class="tl"><span class="yr mono">2026</span><b>Absorbed into every AI role</b><span>Standalone postings fall ~30%; the skill appears in <b>78%</b> of AI job adverts.</span></div>
+      </div>`)}
+      ${R(4, `<div class="callout"><span class="mono acc">THE QUESTION</span> Is this a job you can apply for — or a skill you are expected to have?</div>`)}` },
+
+  /* ───────────────────────── 3 · RESPONSIBILITIES ───────────────────────── */
+  { id: "work", label: "Responsibilities & environment", speaker: 0, x: 3700, y: 300, w: 1700, h: 1270,
+    notes: "Walk the week left to right — it is a product job, not a writing job. Stress evaluation: most of the work is measuring whether outputs got better. Then the environment: product teams, mostly remote or hybrid. The progression path is the key message — this title is a doorway, not a destination.",
+    html: `
+      <div class="kicker mono">03 · RESPONSIBILITIES · WORK ENVIRONMENT · PROGRESSION</div>
+      ${R(1, `<h2>A week in the role</h2>`)}
+      <div class="cols">
+        <div>
+          ${R(2, `<ul class="list">
+            <li><b>Design</b> system prompts and few-shot examples for a feature</li>
+            <li><b>Build</b> evaluation sets — hundreds of test cases with expected answers</li>
+            <li><b>Measure</b> output quality; run A/B tests between prompt versions</li>
+            <li><b>Red-team</b> the model: jailbreaks, bias, failure modes</li>
+            <li><b>Document</b> the prompt library so engineers can reuse it</li>
+            <li><b>Translate</b> between product managers, domain experts and engineers</li>
+          </ul>`)}
+        </div>
+        <div>
+          ${R(3, `<div class="env">
+            <div><span class="mono dim">WHERE</span><b>Inside AI product teams</b> — startups, big tech, consultancies, and increasingly banks, retailers and government.</div>
+            <div><span class="mono dim">HOW</span><b>Remote or hybrid</b> — one of the most location-flexible technical roles; work runs in short iterations.</div>
+            <div><span class="mono dim">WITH</span><b>Engineers, PMs, domain experts</b> — the role is the connective tissue between them.</div>
+          </div>`)}
+          ${R(4, `<div class="flow mono">
+            <span>Prompt Engineer</span><i>→</i><span>AI / LLM Engineer</span><i>→</i><span>AI Product Lead</span><i>→</i><span>Head of Applied AI</span>
+          </div>`)}
+        </div>
+      </div>
+      ${R(5, `<div class="vis vis-promptlab" data-vis="promptlab"></div>`)}` },
+
+  /* ───────────────────────── 4 · SKILLS ───────────────────────── */
+  { id: "skills", label: "Required skills", speaker: 1, x: 3700, y: 1750, w: 1500, h: 940,
+    notes: "The bars are our judgement from job adverts and the three vendor guides, not a survey — say so. Two columns on purpose: this is the rare technical career where the human column is heavier. Point at 'precise writing' — for business students that is the transferable entry point. Then technical: you do not need to be a developer, but you need Python basics and you must understand how models fail.",
+    html: `
+      <div class="kicker mono">04 · REQUIRED SKILLS AND ABILITIES</div>
+      ${R(1, `<h2>Half language, <em>half engineering</em>.</h2>`)}
+      <div class="cols">
+        <div>
+          ${R(2, `<div class="colhead mono">HUMAN SKILLS</div>`)}
+          ${R(3, `<div class="skill"><span>Precise, structured writing</span><div class="bar" style="--w:96%"><i></i></div></div>
+            <div class="skill"><span>Critical thinking — spotting a confident wrong answer</span><div class="bar" style="--w:92%"><i></i></div></div>
+            <div class="skill"><span>Domain knowledge of the product's field</span><div class="bar" style="--w:84%"><i></i></div></div>
+            <div class="skill"><span>Communication across teams</span><div class="bar" style="--w:82%"><i></i></div></div>
+            <div class="skill"><span>Patience for iteration</span><div class="bar" style="--w:78%"><i></i></div></div>`)}
+        </div>
+        <div>
+          ${R(2, `<div class="colhead mono alt">TECHNICAL SKILLS</div>`)}
+          ${R(3, `<div class="skill alt"><span>How LLMs behave — and where they fail</span><div class="bar" style="--w:94%"><i></i></div></div>
+            <div class="skill alt"><span>Evaluation and testing methods</span><div class="bar" style="--w:88%"><i></i></div></div>
+            <div class="skill alt"><span>Python basics and APIs</span><div class="bar" style="--w:74%"><i></i></div></div>
+            <div class="skill alt"><span>Retrieval and context design (RAG)</span><div class="bar" style="--w:70%"><i></i></div></div>
+            <div class="skill alt"><span>Data literacy — reading a result honestly</span><div class="bar" style="--w:68%"><i></i></div></div>`)}
+        </div>
+      </div>
+      ${R(4, `<div class="vis vis-skillrank" data-vis="skillrank"></div>`)}
+      ${R(5, `<div class="foot mono dim">Relative importance: our reading of 2025–26 job adverts and the Anthropic, OpenAI and Google prompting guides. Judgement, not a survey.</div>`)}` },
+
+  /* ───────────────────────── 5 · EDUCATION ───────────────────────── */
+  { id: "education", label: "Education & training", speaker: 1, x: 2000, y: 1750, w: 1400, h: 1160,
+    notes: "There is no degree called prompt engineering, and that is the point. Any degree plus a portfolio. Name the three free vendor guides — they are the real syllabus. The Vanderbilt course is the most recognised credential. Then connect to us: the AI Literacy Course on our own module is the first step.",
+    html: `
+      <div class="kicker mono">05 · EDUCATION AND TRAINING</div>
+      ${R(1, `<h2>No degree in it — <em>and that is the point</em>.</h2>`)}
+      ${R(2, `<p class="body">Entrants come from computer science, linguistics, business, psychology and communications. What employers check is a <b>portfolio</b>: prompt systems you built, with evaluations showing they work.</p>`)}
+      ${R(3, `<div class="vis vis-ribbons" data-vis="ribbons"></div>`)}
+      ${R(4, `<div class="cards3">
+        <div><span class="mono acc">THE SYLLABUS</span><b>Vendor guides</b><span>Anthropic <i>Prompt engineering overview</i> · OpenAI <i>Prompt engineering guide</i> · Google <i>Prompt Engineering</i> whitepaper (Boonstra, 2025). All free.</span></div>
+        <div><span class="mono acc">CREDENTIALS</span><b>Short courses</b><span>Vanderbilt <i>Prompt Engineering for ChatGPT</i> (Coursera) · DeepLearning.AI short courses · vendor certifications as they appear.</span></div>
+        <div><span class="mono acc">AT WIUT</span><b>Start here</b><span>The <i>AI Literacy Course</i> on this module, then Quantitative Methods for evaluation, then a Python elective.</span></div>
+      </div>`)}` },
+
+  /* ───────────────────────── 6 · JOB MARKET ───────────────────────── */
+  { id: "market", label: "Job market & salary", speaker: 2, x: 300, y: 1750, w: 1500, h: 1240,
+    notes: "Let the counters run before speaking. Two aggregators, deliberately: they disagree, and that spread is the honest answer. Startups pay far less; big tech far more. Then the demand strip — LinkedIn's numbers are about AI roles broadly, which is where this skill is now hired. Close on the Uzbekistan line: we did not find enough local postings under this exact title to quote a figure, so we say so.",
+    html: `
+      <div class="kicker mono">06 · CURRENT DEMAND AND SALARY</div>
+      ${R(1, `<h2>Well paid — <em>where the title still exists</em>.</h2>`)}
+      ${R(2, `<div class="stats">
+        <div><span class="mono dim">GLASSDOOR · US AVERAGE</span><b class="num" data-to="131483" data-prefix="$">$0</b><span>25th–75th percentile <b>$104k – $168k</b></span></div>
+        <div><span class="mono dim">INDEED · US AVERAGE</span><b class="num" data-to="112806" data-prefix="$">$0</b><span>reported range <b>$67k – $174k</b></span></div>
+        <div><span class="mono dim">STARTUPS</span><b>$60–90k</b><span>base, early-stage</span></div>
+        <div><span class="mono dim">BIG TECH</span><b>$140k+</b><span>to $230k at Meta, Google, Anthropic</span></div>
+      </div>`)}
+      ${R(3, `<div class="vis vis-salaryrange" data-vis="salaryrange"></div>`)}
+      ${R(4, `<div class="strip">
+        <div><b class="num" data-to="156" data-suffix="%">0%</b><span>growth in AI job postings on LinkedIn, 2024 → 2025</span></div>
+        <div><b class="num" data-to="639" data-suffix="k">0</b><span>AI-related postings added in the US, 2023–2025</span></div>
+        <div><b>#1</b><span>AI engineer: fastest-growing job for young workers, two years running</span></div>
+      </div>`)}
+      ${R(5, `<div class="foot mono dim">UZBEKISTAN · too few postings under this exact title on hh.uz and UzJobs to quote a range honestly; the skill appears inside "AI specialist" and "data" roles. Verified ${ACCESSED}.</div>`)}` },
+
+  /* ───────────────────────── 7 · AI & FUTURE ───────────────────────── */
+  { id: "future", label: "AI & the future", speaker: 2, x: 300, y: 3250, w: 1700, h: 1300,
+    notes: "This is the turn in the story. The title is shrinking and the skill is exploding — both are true. Read the three numbers, then the arrows: prompts became context engineering, single prompts became agent design, writing became evaluation. The irony: AI made prompt engineering less of a job by getting better at understanding people. Land on WEF: the skills that survive are human ones.",
+    html: `
+      <div class="kicker mono">07 · AI, AUTOMATION AND GLOBAL TRENDS</div>
+      ${R(1, `<h2>The job dissolved <em>into every job</em>.</h2>`)}
+      ${R(2, `<div class="trio">
+        <div><b class="num" data-to="30" data-prefix="−" data-suffix="%">0</b><span>standalone "Prompt Engineer" postings since the 2023 peak</span></div>
+        <div><b class="num" data-to="78" data-suffix="%">0</b><span>of AI job postings now list prompt engineering as a skill — from under 20% in early 2024</span></div>
+        <div><b class="num" data-to="250" data-prefix="+" data-suffix="%">0</b><span>growth in LinkedIn postings tagging it as a skill</span></div>
+      </div>`)}
+      ${R(3, `<div class="vis vis-divergence" data-vis="divergence"></div>`)}
+      ${R(4, `<div class="shift mono">
+        <div><span>Crafting the perfect prompt</span><i>→</i><b>Context engineering</b></div>
+        <div><span>One prompt, one answer</span><i>→</i><b>Designing agents that plan and act</b></div>
+        <div><span>Writing instructions</span><i>→</i><b>Evaluating whether they worked</b></div>
+        <div><span>A specialist's job</span><i>→</i><b>Every knowledge worker's skill</b></div>
+      </div>`)}
+      ${R(5, `<div class="callout"><span class="mono acc">WEF FUTURE OF JOBS 2025</span> 170 million roles created and 92 million displaced by 2030. <b>AI and big data</b> is the fastest-growing skill — and creative thinking, resilience and flexibility stay critical.</div>`)}` },
+
+  /* ───────────────────────── 8 · DEVELOPMENT PLAN ───────────────────────── */
+  { id: "plan", label: "Career development plan", speaker: 3, x: 2200, y: 3250, w: 1500, h: 1140,
+    notes: "This is our SMART plan as business students, not a generic one. Each year has a measurable target. Year 1 is free and starts this semester. Year 2 is the portfolio — three systems with evaluations, on GitHub. Year 3 is credential plus a real team. Ongoing: the field changes every six months, so reading release notes is a habit, not a task.",
+    html: `
+      <div class="kicker mono">08 · CAREER DEVELOPMENT PLAN</div>
+      ${R(1, `<h2>From business student to <em>AI-fluent professional</em>.</h2>`)}
+      ${R(2, `<div class="vis vis-planscrub" data-vis="planscrub"></div>`)}
+      ${R(3, `<div class="plan">
+        <div><span class="mono acc">YEAR 1 · FOUNDATIONS</span><b>Learn to talk to models properly</b><span>Complete the AI Literacy Course · work through all three vendor guides · Python basics (one course, finished) · <i>Target: 20 documented prompt experiments by June.</i></span></div>
+        <div><span class="mono acc">YEAR 2 · BUILD</span><b>A portfolio with evidence</b><span>Three prompt systems for real tasks (a study assistant, a data-cleaning helper, a customer-reply drafter) · each with a 50-case evaluation set · published on GitHub · <i>Target: 3 repos, 3 write-ups.</i></span></div>
+        <div><span class="mono acc">YEAR 3 · CREDENTIAL + TEAM</span><b>Work inside a real product</b><span>Vanderbilt certificate · internship or project with an AI product team in Tashkent · LinkedIn profile built around the portfolio · <i>Target: 1 certificate, 1 placement, 500 connections.</i></span></div>
+        <div><span class="mono acc">ONGOING</span><b>Stay current, stay honest</b><span>Read model release notes monthly · re-run old evaluations on new models · never present an AI output you have not checked.</span></div>
+      </div>`)}` },
+
+  /* ───────────────────────── 9 · CONCLUSION ───────────────────────── */
+  { id: "conclusion", label: "Conclusion", speaker: 3, x: 3900, y: 3250, w: 1300, h: 800,
+    notes: "Answer the question from frame 2 directly. Learn it as a skill; do not bet a career on the title. Then the three takeaways, slowly. Final line, then stop — do not add anything after it.",
+    html: `
+      <div class="kicker mono">09 · CONCLUSION</div>
+      ${R(1, `<h2>Learn it as a <em>skill</em>. Don't bet on it as a <em>title</em>.</h2>`)}
+      ${R(2, `<ol class="takeaways">
+        <li><b>The work is real and well paid</b> — but it is hired under AI engineer, AI product and analyst titles now.</li>
+        <li><b>The human half is the durable half.</b> Precise writing, critical judgement and domain knowledge outlast any model.</li>
+        <li><b>For us, it is the fastest bridge</b> from a business degree into AI work — no computer science degree required, a portfolio is.</li>
+      </ol>`)}
+      ${R(3, `<div class="callout final"><span class="mono acc">OUR VERDICT</span> Every one of us should be a competent prompt engineer by graduation. None of us should plan to be only that.</div>`)}` },
+
+  /* ───────────────────────── 10 · REFERENCES ───────────────────────── */
+  { id: "references", label: "References", speaker: 3, x: 2200, y: 4750, w: 1600, h: 1180,
+    notes: "Leave this frame up for questions. Every number in the talk traces to one of these. If challenged on a figure, point to the line.",
+    html: `
+      <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
+      ${R(1, `<div class="vis vis-provenance" data-vis="provenance"></div>`)}
+      ${R(2, `<ol class="refs">
+        <li>World Economic Forum (2025) <i>The Future of Jobs Report 2025</i>. Available at: https://www.weforum.org/publications/the-future-of-jobs-report-2025/ (Accessed: ${ACCESSED}).</li>
+        <li>LinkedIn Economic Graph (2025) <i>Jobs on the Rise 2025</i>. Available at: https://www.linkedin.com/pulse/linkedin-jobs-rise-2025 (Accessed: ${ACCESSED}).</li>
+        <li>Glassdoor (2026) <i>Prompt Engineer: average salary and pay trends</i>. Available at: https://www.glassdoor.com/Salaries/prompt-engineer-salary-SRCH_KO0,15.htm (Accessed: ${ACCESSED}).</li>
+        <li>Indeed (2026) <i>Prompt engineer salary in United States</i>. Available at: https://www.indeed.com/career/prompt-engineer/salaries (Accessed: ${ACCESSED}).</li>
+        <li>Anthropic (2026) <i>Prompt engineering overview</i>. Available at: https://docs.anthropic.com/ (Accessed: ${ACCESSED}).</li>
+        <li>OpenAI (2026) <i>Prompt engineering guide</i>. Available at: https://platform.openai.com/docs/guides/prompt-engineering (Accessed: ${ACCESSED}).</li>
+        <li>Boonstra, L. (2025) <i>Prompt Engineering</i>. Google. Available at: https://www.kaggle.com/whitepaper-prompt-engineering (Accessed: ${ACCESSED}).</li>
+        <li>White, J. (2023) <i>Prompt Engineering for ChatGPT</i> [online course]. Vanderbilt University / Coursera. Available at: https://www.coursera.org/learn/prompt-engineering (Accessed: ${ACCESSED}).</li>
+        <li>PromptLayer (2025) <i>AI prompt engineering jobs in 2025: skills, salaries and future outlook</i>. Available at: https://blog.promptlayer.com/ai-prompt-engineering-jobs-in-2025-skills-salaries-future-outlook/ (Accessed: ${ACCESSED}).</li>
+        <li>The AI Career Lab (2026) <i>What happened to the prompt engineer?</i> Available at: https://theaicareerlab.com/careers/what-happened-to-the-prompt-engineer (Accessed: ${ACCESSED}).</li>
+      </ol>`)}
+      ${R(3, `<div class="foot mono warn">Team: re-open every link and re-check every figure the week before submission. Aggregator salaries move monthly.</div>`)}` }
+  ]
+};
+
+</script>
+<script>
+/* =============================================================================
+   engine.js — a zoom-canvas presentation engine.
+   One world, ten frames, a camera. Arriving at a frame reveals its content in
+   sequence; counters count; bars fill. O zooms out to the whole map, N shows
+   speaker notes, T runs the 5–7 minute clock. No libraries.
+   ========================================================================== */
+(function () {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const W = DECK.world.w, H = DECK.world.h, F = DECK.frames;
+
+  const stage = $("#stage"), world = $("#world"), depth = $("#depth"), rail = $("#rail"),
+        notes = $("#notes"), clock = $("#clock"), spk = $("#speaker"), hint = $("#hint"), ovBtn = $("#ov");
+  let idx = 0, overview = false, cam = { tx: 0, ty: 0, s: 1 }, revealT = [], typeT = null;
+
+  /* ---------- build ---------- */
+  const centre = f => ({ x: f.x + f.w / 2, y: f.y + f.h / 2 });
+  function pathD() {
+    const p = F.map(centre); let d = `M${p[0].x},${p[0].y}`;
+    for (let i = 0; i < p.length - 1; i++) {
+      const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
+      d += ` C${p1.x + (p2.x - p0.x) / 6},${p1.y + (p2.y - p0.y) / 6} ${p2.x - (p3.x - p1.x) / 6},${p2.y - (p3.y - p1.y) / 6} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }
+  const TOKENS = ["system prompt", "few-shot", "context window", "temperature 0.2", "eval set", "chain of thought", "guardrail", "tokens", "RAG", "red-team", "rubric", "agent", "{{variable}}", "assistant:", "user:", "top_p", "grounding", "hallucination"];
+
+  function build() {
+    world.style.width = W + "px"; world.style.height = H + "px";
+    world.innerHTML = `<svg class="path" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><path d="${pathD()}"/></svg>` +
+      F.map((f, i) => `<section class="frame" data-i="${i}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
+        <div class="fnum mono">${String(i + 1).padStart(2, "0")}</div><div class="fin">${f.html}</div></section>`).join("");
+    depth.innerHTML = TOKENS.map((t, i) => `<span class="tok mono" style="left:${(i * 137) % 100}%;top:${(i * 71 + 13) % 100}%;animation-delay:${-i * 1.7}s;animation-duration:${18 + (i % 5) * 4}s">${t}</span>`).join("");
+    rail.innerHTML = F.map((f, i) => `<button class="dot" data-i="${i}" title="${f.label}"><span></span></button>`).join("") + `<div class="rlabel" id="rlabel"></div>`;
+
+    /* The route between frames is the one thing a zoom canvas can do that slides
+       cannot. Light it, if the module is present. */
+    if (window.VIS && VIS.comet && window.VisRuntime) {
+      const st = VisRuntime.standalone();
+      comet = VIS.comet.attach(world.querySelector(".path path"), st.api);
+      cometPoints = F.map(centre);
+    }
+  }
+  let comet = null, cometPoints = null;
+
+  /* ---------- camera ---------- */
+  function apply(animate) {
+    const mv = animate && !reduced;
+    world.classList.toggle("moving", mv); depth.classList.toggle("moving", mv);
+    world.style.transform = `translate(${cam.tx}px,${cam.ty}px) scale(${cam.s})`;
+    depth.style.transform = `translate(${cam.tx * 0.3}px,${cam.ty * 0.3}px) scale(${1 + (cam.s - 1) * 0.2})`;
+  }
+  function fitFrame(f) {
+    const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / f.w, vh / f.h) * 0.88;
+    return { s, tx: vw / 2 - (f.x + f.w / 2) * s, ty: vh / 2 - (f.y + f.h / 2) * s };
+  }
+  function go(i, instant) {
+    i = Math.max(0, Math.min(F.length - 1, i));
+    const from = idx;
+    idx = i; overview = false; stage.classList.remove("ov");
+    if (comet && !instant && from !== i && cometPoints) {
+      try { comet.run(from, i, cometPoints); } catch (e) {}
+    }
+    cam = fitFrame(F[i]); apply(!instant);
+    activate(i, instant); paintRail(); history.replaceState(null, "", "#" + (i + 1));
+  }
+  function showOverview() {
+    overview = true; stage.classList.add("ov");
+    const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / W, vh / H) * 0.93;
+    cam = { s, tx: vw / 2 - W / 2 * s, ty: vh / 2 - H / 2 * s }; apply(true);
+    document.querySelectorAll(".frame").forEach(el => el.classList.remove("active"));
+    $("#rlabel").textContent = "Overview — click a frame";
+  }
+
+  /* ---------- reveal ---------- */
+  function activate(i, instant) {
+    revealT.forEach(clearTimeout); revealT = []; clearInterval(typeT);
+    document.querySelectorAll(".frame").forEach((el, k) => {
+      const on = k === i; el.classList.toggle("active", on);
+      if (!on) {
+        el.querySelectorAll(".num").forEach(n => n.textContent = fmt(n, 0));
+        el.querySelectorAll(".type").forEach(t => t.textContent = "");
+        if (window.VisRuntime) VisRuntime.unmount(el);     /* nothing animates off-screen */
+      }
+    });
+    const el = document.querySelector(`.frame[data-i="${i}"]`), delay = (instant || reduced) ? 0 : 520;
+    revealT.push(setTimeout(() => {
+      el.querySelectorAll(".num").forEach(n => count(n));
+      el.querySelectorAll(".type").forEach(t => typewrite(t));
+      if (window.VisRuntime) VisRuntime.mount(el);         /* graphics start as the camera lands */
+    }, delay));
+    spk.textContent = TEAM[F[i].speaker] ? TEAM[F[i].speaker].name : "";
+    notes.textContent = F[i].notes || "";
+  }
+  function fmt(n, v) {
+    const pre = n.getAttribute("data-prefix") || "", suf = n.getAttribute("data-suffix") || "";
+    return pre + Math.round(v).toLocaleString("en-US") + suf;
+  }
+  function count(n) {
+    const to = +n.getAttribute("data-to"); if (reduced) { n.textContent = fmt(n, to); return; }
+    const t0 = performance.now(), dur = 1100;
+    (function tick(now) { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      n.textContent = fmt(n, to * e); if (p < 1) requestAnimationFrame(tick); })(t0);
+  }
+  function typewrite(t) {
+    const text = t.getAttribute("data-text"); if (reduced) { t.textContent = text; return; }
+    let k = 0; t.textContent = "";
+    typeT = setInterval(() => { t.textContent = text.slice(0, ++k); if (k >= text.length) clearInterval(typeT); }, 34);
+  }
+  function paintRail() {
+    rail.querySelectorAll(".dot").forEach((d, k) => { d.classList.toggle("on", k === idx); d.classList.toggle("done", k < idx); });
+    $("#rlabel").textContent = (idx + 1) + " / " + F.length + " · " + F[idx].label;
+  }
+
+  /* ---------- clock: 5–7 minutes per speaker ---------- */
+  let sec = 0, tid = null;
+  function paintClock() {
+    clock.textContent = String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
+    clock.className = "mono" + (sec >= 300 && sec <= 420 ? " in" : sec > 420 ? " over" : "");
+  }
+  function toggleClock() { if (tid) { clearInterval(tid); tid = null; clock.classList.remove("run"); } else { tid = setInterval(() => { sec++; paintClock(); }, 1000); clock.classList.add("run"); } }
+  function resetClock() { clearInterval(tid); tid = null; sec = 0; paintClock(); clock.classList.remove("run"); }
+
+  /* ---------- input ---------- */
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case "ArrowRight": case "PageDown": case " ": case "Enter": if (overview) go(idx); else go(idx + 1); e.preventDefault(); break;
+      case "ArrowLeft": case "PageUp": case "Backspace": go(idx - 1); e.preventDefault(); break;
+      case "Home": go(0); break; case "End": go(F.length - 1); break;
+      case "o": case "O": case "Escape": overview ? go(idx) : showOverview(); break;
+      case "n": case "N": document.body.classList.toggle("notes"); break;
+      case "t": case "T": toggleClock(); break;
+      case "r": case "R": resetClock(); break;
+      case "f": case "F": document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
+      default: if (/^[1-9]$/.test(e.key)) go(+e.key - 1); else if (e.key === "0") go(9);
+    }
+  });
+  stage.addEventListener("click", e => {
+    const fr = e.target.closest(".frame");
+    if (overview && fr) { go(+fr.getAttribute("data-i")); return; }
+    if (e.target.closest(".ui")) return;
+    if (!overview) go(idx + 1);
+  });
+  rail.addEventListener("click", e => { const d = e.target.closest(".dot"); if (d) { e.stopPropagation(); go(+d.getAttribute("data-i")); } });
+  $("#prev").addEventListener("click", e => { e.stopPropagation(); go(idx - 1); });
+  $("#next").addEventListener("click", e => { e.stopPropagation(); go(idx + 1); });
+  ovBtn.addEventListener("click", e => { e.stopPropagation(); overview ? go(idx) : showOverview(); });
+  $("#ntoggle").addEventListener("click", e => { e.stopPropagation(); document.body.classList.toggle("notes"); });
+  clock.addEventListener("click", e => { e.stopPropagation(); toggleClock(); });
+  let sx = null;
+  stage.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) go(idx + (dx < 0 ? 1 : -1)); sx = null; });
+  new ResizeObserver(() => { overview ? showOverview() : (cam = fitFrame(F[idx]), apply(false)); }).observe(stage);
+
+  /* ---------- start ---------- */
+  build(); paintClock();
+  const start = Math.min(F.length, Math.max(1, parseInt(location.hash.slice(1)) || 1)) - 1;
+  if (reduced) { go(start, true); }
+  else { showOverview(); apply(false); setTimeout(() => go(start), 900); }   /* arrive: see the whole map, then fly in */
+  setTimeout(() => hint.classList.add("fade"), 6000);
+})();
+
+</script>
+</body>
+</html>

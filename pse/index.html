@@ -1,0 +1,2513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PSE Career Platform</title>
+<meta name="description" content="A career-development workspace for the Westminster International University Professional Skills and Employability module: career research, skills assessment, SMART goals, CW1 presentation preparation and LinkedIn development.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* =============================================================================
+   PSE Career Platform — design system
+   A light foundation with one accent, deliberately committed to a single
+   visual world (the brief specifies a white/light product). Dark panels are
+   used as emphasis, not as a theme.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  --canvas:    #F6F8FB;
+  --surface:   #FFFFFF;
+  --surface-2: #F1F4F9;
+  --surface-3: #E8EDF5;
+  --ink-900:   #0C1425;
+  --ink-700:   #2B3648;
+  --ink-500:   #55617A;
+  --ink-400:   #7C889F;
+  --ink-300:   #A3AEC2;
+  --line:      #E2E8F0;
+  --line-2:    #CBD5E4;
+
+  --accent:      #2559C7;
+  --accent-deep: #1B4296;
+  --accent-soft: #EDF2FD;
+  --accent-line: #C3D4F5;
+
+  --ok:    #0B7A4B;
+  --ok-bg: #E8F6EF;
+  --warn:  #A8620A;
+  --warn-bg:#FDF3E5;
+  --bad:   #B3261E;
+  --bad-bg:#FCEDEC;
+
+  --dark:      #0E1626;
+  --dark-2:    #17223A;
+  --dark-line: #263349;
+  --dark-ink:  #F2F5FA;
+  --dark-ink-2:#9FADC6;
+
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+
+  --sans:  "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
+  --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --r-sm: 6px; --r: 10px; --r-lg: 14px; --r-xl: 20px;
+  --sh-1: 0 1px 2px rgba(12,20,37,.05);
+  --sh-2: 0 1px 3px rgba(12,20,37,.06), 0 8px 24px -12px rgba(12,20,37,.14);
+  --sh-3: 0 12px 40px -12px rgba(12,20,37,.24);
+  --rail: 258px;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--canvas); color: var(--ink-900);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4 { margin: 0; text-wrap: balance; letter-spacing: -0.019em; line-height: 1.2; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+[hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* --- shell ------------------------------------------------------------------ */
+.app { display: grid; grid-template-columns: var(--rail) minmax(0,1fr); min-height: 100vh; }
+
+.rail {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: var(--dark); border-right: 1px solid var(--dark-line);
+  display: flex; flex-direction: column; gap: 6px; padding: 18px 14px 14px;
+}
+.brand { display: flex; gap: 11px; align-items: center; padding: 4px 8px 16px; }
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 9px; flex: none;
+  background: linear-gradient(150deg, #3E7BE8, #2559C7 62%, #1B4296);
+  display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px;
+  letter-spacing: -0.03em; box-shadow: 0 2px 10px rgba(37,89,199,.4);
+}
+.brand-txt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.brand-txt b { color: var(--dark-ink); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.brand-txt span { color: var(--dark-ink-2); font-size: 11px; }
+
+.nav { display: flex; flex-direction: column; gap: 1px; }
+.nav-label {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .11em;
+  color: #6B7A96; padding: 14px 10px 6px; font-weight: 600;
+}
+.nav a {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  border-radius: 8px; color: var(--dark-ink-2); text-decoration: none;
+  font-size: 13.5px; font-weight: 500; transition: background .13s, color .13s;
+}
+.nav a svg { width: 17px; height: 17px; flex: none; opacity: .85; }
+.nav a .count {
+  margin-left: auto; font-size: 11px; color: #7E8DA8; background: #1C2941;
+  padding: 1px 7px; border-radius: 999px; font-variant-numeric: tabular-nums;
+}
+.nav a:hover { background: #18233A; color: var(--dark-ink); }
+.nav a.on { background: #1E3A6B; color: #EAF1FE; }
+.nav a.on svg { opacity: 1; }
+.nav a.on .count { background: #2A4C86; color: #CFE0FB; }
+
+.rail-foot { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--dark-line); display: grid; gap: 8px; }
+.rail-score { padding: 10px 11px; background: var(--dark-2); border: 1px solid var(--dark-line); border-radius: var(--r); }
+.rail-score .k { font-size: 11px; color: var(--dark-ink-2); }
+.rail-score .v { font-size: 22px; font-weight: 650; color: var(--dark-ink); letter-spacing: -0.03em; }
+.rail-score .v small { font-size: 12px; font-weight: 500; color: var(--dark-ink-2); }
+.rail-mini { display: flex; gap: 6px; }
+.rail-mini button {
+  flex: 1; background: transparent; border: 1px solid var(--dark-line); color: var(--dark-ink-2);
+  border-radius: 7px; padding: 6px; font-size: 11.5px; cursor: pointer;
+}
+.rail-mini button:hover { color: var(--dark-ink); border-color: #35455F; }
+
+/* --- main ------------------------------------------------------------------- */
+main { min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  position: sticky; top: 0; z-index: 20; background: rgba(246,248,251,.86);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
+  padding: 14px clamp(20px,3.4vw,40px) 13px;
+}
+.crumb { font-size: 12px; color: var(--ink-400); display: flex; gap: 7px; align-items: center; margin-bottom: 5px; }
+.crumb span + span::before { content: "/"; margin-right: 7px; color: var(--line-2); }
+.topbar-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.topbar h1 { font-size: clamp(20px,2.4vw,26px); font-weight: 650; }
+.topbar .sub { font-size: 13.5px; color: var(--ink-500); margin-top: 3px; max-width: 68ch; }
+.page { padding: 24px clamp(20px,3.4vw,40px) 72px; display: grid; gap: 18px; animation: zoomin .28s cubic-bezier(.2,.8,.2,1); transform-origin: 50% 12%; }
+@keyframes zoomin { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .page { animation: none; } * { transition: none !important; } }
+
+/* --- primitives -------------------------------------------------------------- */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-1); }
+.card-h { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.card-h h3 { font-size: 15px; font-weight: 620; }
+.card-h .sub { font-size: 12.5px; color: var(--ink-400); margin-top: 2px; max-width: 62ch; }
+.card-b { padding: 18px; }
+.card-f { padding: 12px 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-400); background: var(--surface-2); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); }
+.split { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(280px,1fr); gap: 16px; align-items: start; }
+@media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 8px 15px; border-radius: 8px; border: 1px solid var(--line-2);
+  background: var(--surface); color: var(--ink-700); font-size: 13.5px; font-weight: 550;
+  cursor: pointer; transition: background .13s, border-color .13s, color .13s; text-decoration: none;
+}
+.btn:hover { background: var(--surface-2); color: var(--ink-900); }
+.btn svg { width: 15px; height: 15px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--sh-1); }
+.btn-primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--ink-500); }
+.btn-ghost:hover { background: var(--surface-2); }
+.btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 7px; }
+.btn-danger { color: var(--bad); border-color: #F0C9C6; background: var(--surface); }
+.btn-danger:hover { background: var(--bad-bg); }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+
+.field { display: grid; gap: 6px; }
+.field > label { font-size: 12.5px; font-weight: 550; color: var(--ink-700); }
+.field .help { font-size: 12px; color: var(--ink-400); }
+input[type=text], input[type=number], input[type=date], input[type=url], select, textarea {
+  width: 100%; padding: 9px 11px; background: var(--surface);
+  border: 1px solid var(--line-2); border-radius: 8px; font-size: 14px; transition: border-color .13s, box-shadow .13s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 550;
+  padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--ink-500); background: var(--surface); white-space: nowrap; }
+.pill.ok   { color: var(--ok);   background: var(--ok-bg);   border-color: #BFE5D2; }
+.pill.warn { color: var(--warn); background: var(--warn-bg); border-color: #F2DCBB; }
+.pill.bad  { color: var(--bad);  background: var(--bad-bg);  border-color: #F2C9C6; }
+.pill.acc  { color: var(--accent-deep); background: var(--accent-soft); border-color: var(--accent-line); }
+.pill.dot::before { content:""; width:6px; height:6px; border-radius:50%; background: currentColor; }
+
+.bar { height: 7px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width .5s cubic-bezier(.2,.7,.2,1); }
+.bar.ok > i { background: var(--ok); }
+
+.ring { display: grid; place-items: center; position: relative; }
+.ring svg { transform: rotate(-90deg); }
+.ring .mid { position: absolute; text-align: center; }
+.ring .mid b { display: block; font-size: 26px; font-weight: 680; letter-spacing: -0.03em; line-height: 1; }
+.ring .mid span { font-size: 11px; color: var(--ink-400); }
+
+.stat { padding: 14px 16px; }
+.stat .k { font-size: 12px; color: var(--ink-400); }
+.stat .v { font-size: 25px; font-weight: 660; letter-spacing: -0.028em; line-height: 1.15; margin-top: 2px; }
+.stat .d { font-size: 12px; color: var(--ink-400); margin-top: 2px; }
+
+.empty { text-align: center; padding: 34px 20px; color: var(--ink-400); }
+.empty h4 { font-size: 14.5px; color: var(--ink-700); margin-bottom: 5px; }
+.empty p { font-size: 13px; max-width: 46ch; margin: 0 auto 14px; }
+
+.list { display: grid; }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .grow { flex: 1; min-width: 0; }
+.row .t { font-size: 13.5px; font-weight: 550; }
+.row .s { font-size: 12px; color: var(--ink-400); }
+
+table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th, .tbl td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+.tbl th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-400); font-weight: 600; }
+.tbl td.num, .tbl th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --- dark emphasis panel ------------------------------------------------------ */
+.panel-dark {
+  background: var(--dark); color: var(--dark-ink); border-radius: var(--r-lg);
+  border: 1px solid var(--dark-line); box-shadow: var(--sh-2);
+}
+.panel-dark .k, .panel-dark .sub { color: var(--dark-ink-2); }
+.panel-dark h2, .panel-dark h3 { color: #fff; }
+
+/* --- hero / dashboard --------------------------------------------------------- */
+.hero-dark { padding: 26px 28px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 26px; align-items: center; }
+@media (max-width: 820px) { .hero-dark { grid-template-columns: 1fr; } }
+.hero-dark .greet { font-size: 13px; color: var(--dark-ink-2); }
+.hero-dark h2 { font-size: clamp(21px,2.6vw,29px); font-weight: 620; margin: 5px 0 8px; letter-spacing: -0.026em; }
+.hero-dark p { font-size: 14px; color: var(--dark-ink-2); max-width: 56ch; }
+.hero-actions { display: flex; gap: 9px; margin-top: 16px; flex-wrap: wrap; }
+.hero-dark .btn { background: #1E2B45; border-color: #2C3B58; color: var(--dark-ink); }
+.hero-dark .btn:hover { background: #253355; color: #fff; }
+.hero-dark .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hero-dark .btn-primary:hover { background: #2F68DC; }
+
+.nextstep { border: 1px solid var(--accent-line); background: var(--accent-soft); border-radius: var(--r-lg); padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
+.nextstep .ic { width: 34px; height: 34px; border-radius: 9px; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.nextstep h3 { font-size: 15px; font-weight: 620; color: var(--accent-deep); }
+.nextstep p { font-size: 13px; color: var(--ink-700); margin-top: 3px; max-width: 62ch; }
+
+/* --- roadmap ------------------------------------------------------------------ */
+.road { display: grid; gap: 0; }
+.road-item { display: grid; grid-template-columns: 46px minmax(0,1fr) auto; gap: 14px; padding: 14px 18px; border-top: 1px solid var(--line); align-items: center; cursor: pointer; transition: background .13s; }
+.road-item:first-child { border-top: 0; }
+.road-item:hover { background: var(--surface-2); }
+.road-n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 640;
+  background: var(--surface-2); color: var(--ink-400); border: 1px solid var(--line-2); }
+.road-item.done .road-n { background: var(--ok-bg); color: var(--ok); border-color: #BFE5D2; }
+.road-item.now .road-n { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.road-item .t { font-size: 14px; font-weight: 570; }
+.road-item .s { font-size: 12.5px; color: var(--ink-400); margin-top: 1px; }
+
+/* --- career cards -------------------------------------------------------------- */
+.career-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 17px; display: flex; flex-direction: column; gap: 11px; transition: border-color .14s, box-shadow .14s, transform .14s; cursor: pointer; }
+.career-card:hover { border-color: var(--accent-line); box-shadow: var(--sh-2); transform: translateY(-1px); }
+.career-card h3 { font-size: 15.5px; font-weight: 620; }
+.career-card .ind { font-size: 12px; color: var(--ink-400); }
+.career-card .ov { font-size: 13px; color: var(--ink-500); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.career-card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.career-card .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 4px; }
+.chipbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chip { padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); font-size: 12.5px; color: var(--ink-500); cursor: pointer; }
+.chip:hover { border-color: var(--line-2); background: var(--surface-2); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* --- detail sections ----------------------------------------------------------- */
+.detail-sec { padding: 18px; border-top: 1px solid var(--line); }
+.detail-sec:first-child { border-top: 0; }
+.detail-sec h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-400); font-weight: 620; margin-bottom: 9px; }
+.detail-sec p { font-size: 14px; color: var(--ink-700); max-width: 74ch; }
+.bullets { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.bullets li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; font-size: 13.5px; color: var(--ink-700); }
+.bullets li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-line); margin-top: 8px; }
+.steps-flow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.steps-flow .st { padding: 6px 12px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 12.5px; }
+.steps-flow .ar { color: var(--ink-300); }
+
+/* --- AI shift ------------------------------------------------------------------ */
+.shift { display: grid; gap: 0; }
+.shift-row { display: grid; grid-template-columns: minmax(0,1fr) 28px minmax(0,1fr); gap: 12px; align-items: center; padding: 13px 18px; border-top: 1px solid var(--dark-line); }
+.shift-row:first-child { border-top: 0; }
+.shift .a { font-size: 13.5px; color: var(--dark-ink-2); }
+.shift .b { font-size: 13.5px; color: #fff; font-weight: 550; }
+.shift .ar { color: #46587A; text-align: center; }
+.shift .note { grid-column: 1/-1; font-size: 12px; color: #7286A6; }
+
+/* --- skills --------------------------------------------------------------------- */
+.skill-row { padding: 15px 18px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+.skill-row:first-child { border-top: 0; }
+.skill-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.skill-top .nm { font-size: 14px; font-weight: 570; }
+.skill-top .hint { font-size: 12.5px; color: var(--ink-400); }
+.skill-scale { display: grid; grid-template-columns: 74px 1fr 64px; gap: 12px; align-items: center; }
+.skill-scale .lab { font-size: 12px; color: var(--ink-400); }
+.skill-scale .val { font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.gapbar { position: relative; height: 8px; background: var(--surface-3); border-radius: 999px; }
+.gapbar .cur { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 999px; transition: width .4s; }
+.gapbar .tgt { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--ink-900); border-radius: 2px; transition: left .4s; }
+
+/* --- wizard ---------------------------------------------------------------------- */
+.wiz-steps { display: flex; gap: 4px; padding: 14px 18px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.wiz-step { display: flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; font-size: 12.5px; color: var(--ink-400); white-space: nowrap; cursor: pointer; border: 1px solid transparent; }
+.wiz-step b { width: 18px; height: 18px; border-radius: 50%; background: var(--surface-3); display: grid; place-items: center; font-size: 10.5px; color: var(--ink-500); }
+.wiz-step.on { background: var(--accent-soft); color: var(--accent-deep); border-color: var(--accent-line); }
+.wiz-step.on b { background: var(--accent); color: #fff; }
+.wiz-step.ok b { background: var(--ok); color: #fff; }
+
+/* --- checklist ------------------------------------------------------------------- */
+.check-row { display: flex; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--line); align-items: flex-start; cursor: pointer; }
+.check-row:first-child { border-top: 0; }
+.check-row:hover { background: var(--surface-2); }
+.box { width: 19px; height: 19px; border-radius: 6px; border: 1.5px solid var(--line-2); flex: none; display: grid; place-items: center; margin-top: 1px; background: var(--surface); transition: background .13s, border-color .13s; }
+.box svg { width: 12px; height: 12px; color: #fff; opacity: 0; }
+.check-row.on .box { background: var(--accent); border-color: var(--accent); }
+.check-row.on .box svg { opacity: 1; }
+.check-row.on .t { color: var(--ink-400); text-decoration: line-through; }
+
+/* --- coach ------------------------------------------------------------------------ */
+.coach { display: grid; gap: 8px; }
+.coach-item { display: grid; grid-template-columns: 18px 1fr; gap: 10px; font-size: 13px; align-items: start; }
+.coach-item .ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px; }
+.coach-item.yes .ic { background: var(--ok-bg); color: var(--ok); }
+.coach-item.no  .ic { background: var(--warn-bg); color: var(--warn); }
+.coach-item .fix { font-size: 12px; color: var(--ink-400); margin-top: 2px; }
+.coach-item.yes .t { color: var(--ink-400); }
+
+/* --- LinkedIn preview --------------------------------------------------------------- */
+.li-prev { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); position: sticky; top: 90px; }
+.li-cover { height: 74px; background: linear-gradient(120deg,#1B4296,#2559C7 55%,#3E7BE8); }
+.li-body { padding: 0 18px 18px; }
+.li-avatar { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #fff; background: var(--surface-3); margin-top: -38px; display: grid; place-items: center; color: var(--ink-300); font-size: 25px; font-weight: 600; }
+.li-name { font-size: 18px; font-weight: 640; margin-top: 10px; }
+.li-head { font-size: 13.5px; color: var(--ink-700); margin-top: 3px; }
+.li-meta { font-size: 12px; color: var(--ink-400); margin-top: 6px; }
+.li-sec { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 14px; }
+.li-sec h5 { font-size: 12.5px; font-weight: 620; margin-bottom: 4px; }
+.li-sec p { font-size: 12.5px; color: var(--ink-500); white-space: pre-wrap; }
+.li-sec.missing p { color: var(--ink-300); font-style: italic; }
+
+/* --- timer ---------------------------------------------------------------------------- */
+.timer-face { font-size: 54px; font-weight: 660; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; line-height: 1; }
+.timer-face.in { color: var(--ok); }
+.timer-face.over { color: var(--bad); }
+.timer-band { font-size: 12.5px; color: var(--ink-400); margin-top: 6px; }
+
+/* --- misc ------------------------------------------------------------------------------ */
+.wordcount { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-400); }
+.wordcount.ok { color: var(--ok); } .wordcount.warn { color: var(--warn); }
+.ref-out { font-family: var(--mono); font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; color: var(--ink-700); word-break: break-word; }
+.toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(14px); background: var(--dark); color: #fff;
+  padding: 10px 18px; border-radius: 999px; font-size: 13px; box-shadow: var(--sh-3); opacity: 0; pointer-events: none; transition: all .22s; z-index: 90; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.railtoggle { display: none; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .rail { position: fixed; inset: 0 auto 0 0; width: 262px; z-index: 60; transform: translateX(-100%); transition: transform .22s; }
+  .rail.open { transform: none; }
+  .railtoggle { display: inline-flex; }
+  .scrim { position: fixed; inset: 0; background: rgba(12,20,37,.42); z-index: 50; }
+}
+
+/* =============================================================================
+   The Journey canvas
+   ========================================================================== */
+.journey { position: relative; height: clamp(480px, calc(100vh - 250px), 820px); overflow: hidden; border-radius: var(--r-lg);
+  background: #0E1626; border: 1px solid var(--dark-line); cursor: grab; user-select: none; touch-action: none; box-shadow: var(--sh-2); }
+.journey.dragging { cursor: grabbing; }
+.journey:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cv-depth, .cv-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.cv-world { width: 2400px; height: 1400px; }
+.cv-depth { width: 3600px; height: 2200px; left: -600px; top: -400px;
+  background:
+    radial-gradient(700px 480px at 22% 32%, rgba(37,89,199,.26), transparent 70%),
+    radial-gradient(820px 560px at 74% 66%, rgba(62,123,232,.16), transparent 70%),
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,.075) 1px, transparent 1.6px) 0 0 / 28px 28px; }
+.moving { transition: transform .9s cubic-bezier(.2,.8,.2,1), left .9s cubic-bezier(.2,.8,.2,1), top .9s cubic-bezier(.2,.8,.2,1), width .9s cubic-bezier(.2,.8,.2,1), height .9s cubic-bezier(.2,.8,.2,1); }
+.cv-path { position: absolute; left: 0; top: 0; overflow: visible; }
+
+.cv-node { position: absolute; width: 300px; transform: translate(-50%,-50%); text-align: center; cursor: pointer; }
+.cv-ring { width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 20px; font-weight: 650; border: 2px solid #34466A; background: #141F35; color: #9FADC6; transition: transform .3s; }
+.cv-node.focus .cv-ring { transform: scale(1.08); }
+.st-done .cv-ring { background: #0F3D2E; border-color: #1E7A55; color: #7FE0B4; }
+.st-now .cv-ring { background: var(--accent); border-color: #6E9BEF; color: #fff; animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 10px rgba(37,89,199,.24), 0 0 0 22px rgba(37,89,199,.10); }
+  50%     { box-shadow: 0 0 0 16px rgba(37,89,199,.20), 0 0 0 36px rgba(37,89,199,.06); } }
+.cv-title { font-size: 30px; font-weight: 620; color: #F2F5FA; letter-spacing: -.02em; line-height: 1.15; }
+.st-todo .cv-title { color: #B9C4DA; }
+.cv-blurb, .cv-live, .cv-acts { opacity: 0; transition: opacity .35s ease; }
+.z2 .cv-blurb, .z2 .cv-live { opacity: 1; }
+.z3 .cv-acts { opacity: 1; }
+.cv-blurb { font-size: 15px; color: #9FADC6; margin-top: 8px; }
+.cv-live { display: inline-block; margin-top: 10px; font-size: 13px; padding: 4px 11px; border-radius: 999px;
+  background: #17223A; border: 1px solid #2B3B5C; color: #CFE0FB; }
+.st-done .cv-live { color: #7FE0B4; border-color: #1E7A55; }
+.st-now  .cv-live { color: #fff; border-color: #4C7BDD; background: #1E3A6B; }
+.cv-act { position: absolute; left: 50%; top: 50%; width: 176px; padding: 10px 12px; border-radius: 10px;
+  background: #F6F8FB; color: #0C1425; font-size: 12.5px; font-weight: 550; text-align: left; line-height: 1.35;
+  box-shadow: 0 10px 28px -8px rgba(0,0,0,.65); pointer-events: none; transition: transform .35s, box-shadow .2s; }
+.z3 .cv-act { pointer-events: auto; cursor: pointer; }
+.z3 .cv-act:hover { box-shadow: 0 14px 34px -8px rgba(0,0,0,.7); filter: brightness(1.03); }
+.cv-act b { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent-deep); margin-bottom: 3px; }
+
+.cv-hud { position: absolute; left: 14px; top: 14px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 3; }
+.cv-hud .btn { background: rgba(23,34,58,.86); border-color: #2B3B5C; color: #E6EDF8; backdrop-filter: blur(8px); }
+.cv-hud .btn:hover { background: #25355A; color: #fff; }
+.cv-hud .btn-primary { background: var(--accent); border-color: var(--accent); }
+.cv-hud .btn-primary:hover { background: #2F68DC; }
+.cv-hint { position: absolute; left: 14px; bottom: 14px; font-size: 12px; color: #8D9BB6; background: rgba(14,22,38,.72);
+  padding: 6px 10px; border-radius: 8px; z-index: 3; backdrop-filter: blur(8px); }
+.cv-mini { position: absolute; right: 14px; bottom: 14px; width: 192px; height: 112px; overflow: hidden; z-index: 3;
+  background: rgba(14,22,38,.84); border: 1px solid #2B3B5C; border-radius: 10px; backdrop-filter: blur(8px); cursor: crosshair; }
+.cv-mini i { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #5B6D90; transform: translate(-50%,-50%); }
+.cv-mini i.done { background: #1E7A55; }
+.cv-mini i.now  { background: var(--accent); box-shadow: 0 0 0 3px rgba(37,89,199,.38); }
+.cv-view { position: absolute; border: 1.5px solid #CFE0FB; border-radius: 3px; box-shadow: 0 0 0 999px rgba(0,0,0,.28); }
+@media (max-width: 720px) { .cv-hint, .cv-mini { display: none; } .journey { height: 62vh; } }
+@media (prefers-reduced-motion: reduce) { .moving { transition: none; } .st-now .cv-ring { animation: none; box-shadow: 0 0 0 10px rgba(37,89,199,.24); } }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <div class="brand-mark">PSE</div>
+      <div class="brand-txt">
+        <b>Career Platform</b>
+        <span>Westminster · 2026/27</span>
+      </div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <div class="rail-foot">
+      <div class="rail-score" id="railscore"></div>
+      <div class="rail-mini">
+        <button data-act="go" data-route="#/profile">My data</button>
+        <button data-act="go" data-route="#/roadmap">Roadmap</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="crumb" id="crumb"></div>
+      <div class="topbar-row">
+        <div style="min-width:0">
+          <h1 id="ptitle">Dashboard</h1>
+          <p class="sub" id="psub"></p>
+        </div>
+        <button class="btn railtoggle" data-act="railtoggle" aria-label="Open navigation">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.4 5.6h13.2M3.4 10h13.2M3.4 14.4h13.2"/></svg>
+          Menu
+        </button>
+      </div>
+    </div>
+    <div class="page" id="page"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =============================================================================
+   data.js — the fixed content of the platform: the module roadmap, the career
+   library, the skills catalogue, the CW1 requirements, the LinkedIn sections,
+   the reflection types and the research resources.
+
+   Nothing here is student data. Everything a student creates lives in
+   store.js and is saved to their own browser.
+   ========================================================================== */
+
+const PSE = {};
+
+PSE.meta = {
+  module: "Professional Skills and Employability",
+  institution: "Westminster International University",
+  year: "2026/2027",
+  tagline: "Build the career you want."
+};
+
+/* --- The module journey ----------------------------------------------------- */
+PSE.roadmap = [
+  { id: "meet",     n: "01", title: "Meet & Greet",      blurb: "Meet the cohort and the module team; understand how PSE is assessed.",
+    activities: ["Introductions and cohort norms", "Module handbook walkthrough", "Assessment overview"], route: "#/roadmap" },
+  { id: "understand", n: "02", title: "Understand PSE",  blurb: "What employability means and how this module builds it.",
+    activities: ["Employability framework", "CW1 and CW2 briefing", "Attendance and participation"], route: "#/roadmap" },
+  { id: "explore",  n: "03", title: "Explore Careers",   blurb: "Research occupations properly, using real labour-market sources.",
+    activities: ["Use the Career Explorer", "Shortlist three careers", "Save sources to the library"], route: "#/careers" },
+  { id: "skills",   n: "04", title: "Identify Skills",   blurb: "Rate where you are now and where you need to be.",
+    activities: ["Complete the self-assessment", "Set target levels", "Read the gap analysis"], route: "#/skills" },
+  { id: "goals",    n: "05", title: "Set Goals",         blurb: "Turn the gaps into SMART goals with real deadlines.",
+    activities: ["Build a SMART goal", "Plan around obstacles", "Track progress"], route: "#/goals" },
+  { id: "cw1",      n: "06", title: "CW1 — Group Presentation", blurb: "Research a career, build the deck, rehearse to time.",
+    activities: ["Work the research checklist", "Plan ten slides", "Practise to 5–7 minutes"], route: "#/cw1" },
+  { id: "cw2",      n: "07", title: "CW2 — LinkedIn",    blurb: "Build a professional profile and write reflective posts.",
+    activities: ["Complete each profile section", "Write the headline", "Post 70–100 word reflections"], route: "#/cw2" },
+  { id: "reflect",  n: "08", title: "Reflection",        blurb: "Turn experiences into evidence of professional growth.",
+    activities: ["Reflect on guest lectures", "Reflect on the mock interview", "Reflect on the AI Literacy Course"], route: "#/reflections" }
+];
+
+/* --- Skills catalogue ------------------------------------------------------- */
+PSE.skills = [
+  { id: "communication", name: "Communication",      group: "Core",
+    hint: "Explaining ideas clearly in writing and in person, and listening well.",
+    actions: ["Present in every seminar you can", "Write a 200-word summary of a lecture and cut it to 100", "Ask for feedback after each presentation"] },
+  { id: "presentation",  name: "Presentation",       group: "Core",
+    hint: "Delivering to an audience: structure, pace, eye contact, handling questions.",
+    actions: ["Record yourself and watch it back", "Rehearse to a timer, not to a feeling", "Practise the first 30 seconds until it is automatic"] },
+  { id: "teamwork",      name: "Teamwork",           group: "Core",
+    hint: "Contributing to a group, sharing work fairly, resolving disagreement.",
+    actions: ["Take a defined role in your CW1 group", "Run a 10-minute weekly stand-up", "Write down who owns what"] },
+  { id: "problem",       name: "Problem solving",    group: "Core",
+    hint: "Breaking an unfamiliar problem down and working towards a defensible answer.",
+    actions: ["Do one case study a week", "Write the problem in one sentence before solving it", "Compare two possible solutions in writing"] },
+  { id: "technical",     name: "Technical skills",   group: "Professional",
+    hint: "The tools your target role actually uses — Excel, SQL, Python, design tools, accounting software.",
+    actions: ["Finish one structured course end to end", "Build one small project you can show", "Rebuild a real dataset or brief from scratch"] },
+  { id: "ailiteracy",    name: "AI literacy",        group: "Professional",
+    hint: "Using AI tools well, knowing their limits, and being honest about their use.",
+    actions: ["Complete the AI Literacy Course", "Write down three tasks AI does badly in your field", "Check an AI answer against a primary source"] },
+  { id: "criticalthink", name: "Critical thinking",  group: "Professional",
+    hint: "Judging evidence, spotting weak claims, and separating opinion from data.",
+    actions: ["Trace one statistic back to its original source", "Argue the opposite side of a claim you believe", "Check who funded a report before quoting it"] },
+  { id: "timemgmt",      name: "Time management",    group: "Professional",
+    hint: "Planning work backwards from deadlines and protecting time to do it.",
+    actions: ["Put every deadline in one calendar", "Plan CW1 backwards from the presentation date", "Block two fixed study sessions a week"] },
+  { id: "adaptability",  name: "Adaptability",       group: "Professional",
+    hint: "Staying effective when the task, the tools or the team change.",
+    actions: ["Volunteer for the unfamiliar part of a group task", "Learn one tool outside your comfort zone", "Reflect on a change that went badly and why"] },
+  { id: "networking",    name: "Networking",         group: "Professional",
+    hint: "Building genuine professional relationships and using them well.",
+    actions: ["Connect with three guest speakers on LinkedIn", "Write a short note with every connection request", "Ask one professional for a 15-minute conversation"] }
+];
+
+/* --- Career library ---------------------------------------------------------
+   Starter research, not a substitute for the student's own. Every numeric
+   claim carries a source and a year; students must verify before citing in
+   CW1. Salary figures are US medians from the BLS Occupational Outlook
+   Handbook because it is a stable, citable, public source — local ranges vary
+   widely and students should research those themselves. -------------------- */
+
+PSE.careerFields = [
+  { key: "overview",      label: "Career overview" },
+  { key: "responsibilities", label: "Responsibilities" },
+  { key: "environment",   label: "Work environment" },
+  { key: "progression",   label: "Typical career progression" },
+  { key: "skills",        label: "Required skills and abilities" },
+  { key: "education",     label: "Education and training" },
+  { key: "demand",        label: "Current job-market demand" },
+  { key: "ai",            label: "AI, automation and global trends" },
+  { key: "outlook",       label: "Projected growth" },
+  { key: "salary",        label: "Salary information" },
+  { key: "develop",       label: "How to develop these skills" }
+];
+
+const C = (o) => o;
+PSE.careers = [
+  C({ id: "data-analyst", title: "Data Analyst", industry: "Technology & Data", level: "Entry to mid",
+    demand: "High", ai: "Augmented", growth: "+23%", growthNote: "Operations research analysts, 2023–33",
+    salary: 83640, salaryNote: "US median annual wage, operations research analysts, May 2023",
+    majors: ["Business", "Economics", "Computer Science", "Mathematics"],
+    overview: "Data analysts turn raw data into decisions. They collect and clean data, look for patterns, and present findings to people who are not analysts. Almost every sector now employs them — banking, retail, logistics, health, government.",
+    responsibilities: ["Collect, clean and validate data from several systems", "Build dashboards and recurring reports", "Run analyses to answer a specific business question", "Present findings to non-technical colleagues", "Define and monitor performance metrics"],
+    environment: "Office or hybrid, usually inside a business team rather than an IT department. Work is project-based with recurring reporting cycles. Deadlines cluster around month-end and quarter-end.",
+    progression: ["Junior / Graduate Data Analyst", "Data Analyst", "Senior Analyst", "Analytics Lead or Data Scientist", "Head of Analytics"],
+    skillIds: ["technical", "problem", "communication", "criticalthink", "ailiteracy"],
+    education: "A bachelor's degree in business, economics, mathematics, statistics or computer science. Employers increasingly accept a strong portfolio plus certification. SQL is close to mandatory; Excel is assumed.",
+    demandNote: "Demand is strong and broad because the role exists in every sector rather than one. Entry-level competition is high, so a portfolio matters more than the degree title.",
+    ai: "Augmented",
+    aiDetail: "AI writes queries, drafts summaries and finds patterns faster than a person. What it does not do is decide which question matters, judge whether the data can support the claim, or take responsibility for a recommendation. The routine reporting half of this job is shrinking; the judgement half is growing.",
+    outlook: "Growing. The underlying trend — more data, more decisions made from it — has not reversed. The mix of work is shifting from producing numbers to interpreting them.",
+    develop: ["Learn SQL properly before anything else", "Build three portfolio projects using public data", "Learn one BI tool (Power BI or Tableau) end to end", "Practise explaining a finding in two sentences"],
+    sources: ["bls-ooh", "onet", "ncs"] }),
+
+  C({ id: "software-developer", title: "Software Developer", industry: "Technology & Data", level: "Entry to senior",
+    demand: "High", ai: "Augmented", growth: "+17%", growthNote: "Software developers, 2023–33",
+    salary: 132270, salaryNote: "US median annual wage, software developers, May 2023",
+    majors: ["Computer Science", "Engineering", "Mathematics"],
+    overview: "Software developers design, build and maintain the applications and systems people use. The work is as much about reading existing code and communicating with a team as it is about writing something new.",
+    responsibilities: ["Write, test and review code", "Translate requirements into technical designs", "Debug and maintain existing systems", "Work in a team using version control and code review", "Document what you build so others can use it"],
+    environment: "Office, hybrid or fully remote — one of the most remote-friendly professions. Work runs in short iterations with regular team ceremonies.",
+    progression: ["Junior Developer", "Developer", "Senior Developer", "Tech Lead or Architect", "Engineering Manager or Principal Engineer"],
+    skillIds: ["technical", "problem", "teamwork", "ailiteracy", "adaptability"],
+    education: "A bachelor's degree in computer science or a related field is the common route, but this is one of the few professions where a demonstrable portfolio can substitute for the credential.",
+    demandNote: "Still high, though the entry level has become more competitive than it was. Employers now expect graduates to arrive with real projects, not just coursework.",
+    aiDetail: "AI coding assistants write a large share of routine code, and this has genuinely changed the junior role. What remains scarce: system design, debugging unfamiliar systems, judging whether generated code is correct, and knowing what to build. Developers who use AI well are more productive; developers who cannot judge its output are exposed.",
+    outlook: "Growing, but the shape is changing. Fewer people writing boilerplate, more people designing and verifying systems.",
+    develop: ["Build and ship something real that other people use", "Learn version control properly — branches, reviews, conflicts", "Read a large unfamiliar codebase and explain it", "Practise reviewing AI-generated code critically"],
+    sources: ["bls-ooh", "onet", "collegegrad"] }),
+
+  C({ id: "financial-analyst", title: "Financial Analyst", industry: "Finance & Accounting", level: "Entry to mid",
+    demand: "Moderate", ai: "Augmented", growth: "+9%", growthNote: "Financial analysts, 2023–33",
+    salary: 99890, salaryNote: "US median annual wage, financial and investment analysts, May 2023",
+    majors: ["Finance", "Economics", "Accounting", "Business"],
+    overview: "Financial analysts assess the performance of investments, companies or projects and recommend what to do about it. The role sits between raw financial data and a decision someone has to defend.",
+    responsibilities: ["Build and maintain financial models", "Analyse financial statements and market data", "Prepare forecasts and variance analysis", "Write investment or budget recommendations", "Present findings to management or clients"],
+    environment: "Office-based, often in banking, corporate finance or consulting. Reporting cycles drive intense periods around quarter and year end.",
+    progression: ["Analyst", "Senior Analyst", "Finance Manager", "Head of Finance or Portfolio Manager", "CFO or Investment Director"],
+    skillIds: ["technical", "criticalthink", "communication", "problem", "timemgmt"],
+    education: "A bachelor's degree in finance, economics or accounting. Professional certification (CFA, ACCA) is a strong differentiator and often expected for progression.",
+    demandNote: "Steady rather than booming. Competition for graduate places in banking and consultancy is intense; corporate finance roles are more accessible.",
+    aiDetail: "Model building, data gathering and first-draft commentary are increasingly automated. Judgement about assumptions, and accountability for a recommendation, are not. The analyst who can explain why a forecast is wrong is worth more than the one who produced it.",
+    outlook: "Stable to growing. Volume of routine analysis falls; demand for people who can interrogate assumptions holds.",
+    develop: ["Master Excel modelling before learning anything fancier", "Read a real annual report end to end and summarise it", "Learn to defend an assumption out loud", "Start CFA Level 1 or ACCA groundwork early"],
+    sources: ["bls-ooh", "onet", "ncs"] }),
+
+  C({ id: "marketing-specialist", title: "Digital Marketing Specialist", industry: "Marketing & Communications", level: "Entry to mid",
+    demand: "High", ai: "Transformed", growth: "+8%", growthNote: "Market research analysts, 2023–33",
+    salary: 74680, salaryNote: "US median annual wage, market research analysts, May 2023",
+    majors: ["Marketing", "Business", "Communications", "Economics"],
+    overview: "Digital marketing specialists plan and run campaigns across search, social, email and content, then measure what worked. The role has become substantially analytical: budget decisions are justified with data.",
+    responsibilities: ["Plan and run campaigns across digital channels", "Produce or commission content", "Analyse campaign performance and report on it", "Run A/B tests and act on the results", "Manage a budget against measurable targets"],
+    environment: "Agency or in-house marketing team. Agency work is faster and more varied; in-house is deeper on one brand. Campaign launches create peak periods.",
+    progression: ["Marketing Assistant", "Digital Marketing Specialist", "Marketing Manager", "Head of Marketing", "Marketing Director"],
+    skillIds: ["communication", "technical", "criticalthink", "adaptability", "ailiteracy"],
+    education: "A bachelor's degree in marketing, business or communications. Platform certifications (Google Ads, Meta, Google Analytics) are cheap, fast and genuinely respected by employers.",
+    demandNote: "High volume of entry-level openings, but also high turnover. Demonstrable campaign results — even from a student society or a side project — separate candidates.",
+    aiDetail: "This is one of the most visibly transformed roles. AI generates copy, images, variants and audience segments at scale. The work is moving from producing content to directing strategy, judging brand fit and interpreting results. Volume production skills are depreciating fastest.",
+    outlook: "Growing overall, but the job description is changing faster than most. Strategy and analysis rise; content production falls.",
+    develop: ["Run one real campaign, even with a tiny budget", "Get Google Analytics and Google Ads certified", "Learn to read a conversion funnel", "Build a portfolio of results, not of designs"],
+    sources: ["bls-ooh", "onet", "careersportal"] }),
+
+  C({ id: "accountant", title: "Accountant / Auditor", industry: "Finance & Accounting", level: "Entry to senior",
+    demand: "Moderate", ai: "Augmented", growth: "+6%", growthNote: "Accountants and auditors, 2023–33",
+    salary: 79880, salaryNote: "US median annual wage, accountants and auditors, May 2023",
+    majors: ["Accounting", "Finance", "Business", "Economics"],
+    overview: "Accountants prepare and examine financial records, make sure they are accurate and compliant, and advise on the consequences. Auditors check that other people's records are what they claim to be.",
+    responsibilities: ["Prepare financial statements and reports", "Ensure compliance with accounting standards and tax law", "Examine records for accuracy and irregularities", "Advise on cost control and financial planning", "Liaise with external auditors and regulators"],
+    environment: "Practice firm or in-house finance team. Highly seasonal: year-end and tax deadlines dominate the calendar.",
+    progression: ["Trainee Accountant", "Accountant", "Senior Accountant", "Finance Manager or Audit Manager", "Partner or Finance Director"],
+    skillIds: ["technical", "criticalthink", "timemgmt", "communication", "problem"],
+    education: "A bachelor's degree plus professional qualification — ACCA, CIMA or a national equivalent. The qualification, not the degree, is the real entry ticket for progression.",
+    demandNote: "Consistently steady. Qualified accountants remain in demand; unqualified bookkeeping roles are the ones under pressure from automation.",
+    aiDetail: "Transaction processing, reconciliation and first-pass anomaly detection are heavily automated already. What grows in value: interpreting standards in ambiguous cases, professional scepticism, and signing your name to a judgement. Automation is reducing junior headcount while raising the bar for what juniors do.",
+    outlook: "Stable. The profession is not disappearing, but the entry-level task mix is changing quickly.",
+    develop: ["Start ACCA or CIMA papers during your degree", "Learn one accounting system properly", "Practise explaining a financial statement to a non-accountant", "Build genuine Excel depth"],
+    sources: ["bls-ooh", "onet", "ncs"] }),
+
+  C({ id: "business-analyst", title: "Business Analyst", industry: "Business & Consulting", level: "Entry to mid",
+    demand: "High", ai: "Augmented", growth: "+11%", growthNote: "Management analysts, 2023–33",
+    salary: 99410, salaryNote: "US median annual wage, management analysts, May 2023",
+    majors: ["Business", "Economics", "Information Systems", "Management"],
+    overview: "Business analysts sit between the people who have a problem and the people who can build a solution. They work out what is actually needed, write it down clearly, and make sure what gets delivered matches.",
+    responsibilities: ["Gather and document requirements from stakeholders", "Map and improve business processes", "Write specifications developers can build from", "Analyse data to support a recommendation", "Support testing and roll-out of new systems"],
+    environment: "Consultancy or in-house change team. Heavily meeting-based and collaborative; strong written communication matters more than in most roles.",
+    progression: ["Junior Business Analyst", "Business Analyst", "Senior BA or Product Owner", "Lead Consultant", "Head of Change or Product Director"],
+    skillIds: ["communication", "problem", "criticalthink", "teamwork", "adaptability"],
+    education: "A bachelor's degree in business, economics or information systems. Certification (BCS, IIBA) is recognised but experience of a real project matters more.",
+    demandNote: "Strong and stable, because organisations keep changing systems. Good route for business graduates who want a technical-adjacent career without becoming developers.",
+    aiDetail: "AI drafts documentation, summarises interviews and models processes. Eliciting what a stakeholder actually means — as opposed to what they first say — remains stubbornly human, as does navigating disagreement between departments.",
+    outlook: "Growing. Digital transformation programmes keep generating demand.",
+    develop: ["Practise writing a one-page requirement that cannot be misread", "Learn basic process mapping (BPMN)", "Run a requirements interview and document it", "Learn enough SQL to check your own assumptions"],
+    sources: ["bls-ooh", "onet", "careersportal"] }),
+
+  C({ id: "hr-specialist", title: "Human Resources Specialist", industry: "Business & Consulting", level: "Entry to mid",
+    demand: "Moderate", ai: "Augmented", growth: "+8%", growthNote: "Human resources specialists, 2023–33",
+    salary: 67650, salaryNote: "US median annual wage, human resources specialists, May 2023",
+    majors: ["Business", "Management", "Psychology", "Law"],
+    overview: "HR specialists recruit, develop and support the people an organisation depends on. The role spans hiring, onboarding, training, employee relations and increasingly workforce data.",
+    responsibilities: ["Manage recruitment from advert to offer", "Run onboarding and induction", "Advise managers on employment policy and law", "Coordinate training and development", "Maintain records and report on workforce metrics"],
+    environment: "Office-based within an HR team, or a generalist role in a smaller organisation. Confidential and people-facing; requires discretion.",
+    progression: ["HR Assistant", "HR Specialist", "HR Business Partner", "HR Manager", "HR Director"],
+    skillIds: ["communication", "teamwork", "criticalthink", "timemgmt", "adaptability"],
+    education: "A bachelor's degree in business, management or psychology; CIPD or equivalent professional membership strengthens progression considerably.",
+    demandNote: "Steady. Recruitment-heavy roles fluctuate with the economy; employee relations and compliance work is more stable.",
+    aiDetail: "CV screening, scheduling and first-line policy questions are being automated. This raises real fairness and bias questions that someone has to own. Handling a grievance, a redundancy or a difficult conversation is not delegable.",
+    outlook: "Stable. Administrative HR shrinks; advisory and people-analytics HR grows.",
+    develop: ["Learn the basics of employment law in your jurisdiction", "Practise a difficult conversation role-play", "Learn to read workforce data, not just collect it", "Start CIPD Level 3 if you are serious"],
+    sources: ["bls-ooh", "onet", "ncs"] }),
+
+  C({ id: "cybersecurity-analyst", title: "Cybersecurity Analyst", industry: "Technology & Data", level: "Entry to senior",
+    demand: "Very high", ai: "Augmented", growth: "+33%", growthNote: "Information security analysts, 2023–33",
+    salary: 120360, salaryNote: "US median annual wage, information security analysts, May 2023",
+    majors: ["Computer Science", "Information Systems", "Engineering"],
+    overview: "Cybersecurity analysts protect an organisation's systems and data from attack. The work mixes monitoring, investigation, and persuading colleagues to change how they work.",
+    responsibilities: ["Monitor systems for security incidents", "Investigate and respond to breaches", "Run vulnerability assessments", "Implement and maintain security controls", "Train staff on security practice"],
+    environment: "Office or remote, often with on-call rotation. Incident response can be intense and unpredictable.",
+    progression: ["Security Analyst", "Senior Security Analyst", "Security Engineer or Incident Lead", "Security Architect", "Chief Information Security Officer"],
+    skillIds: ["technical", "problem", "criticalthink", "communication", "adaptability"],
+    education: "A bachelor's degree in computer science or information systems, plus certification. CompTIA Security+ is the common entry certificate; CISSP matters later.",
+    demandNote: "One of the strongest sustained shortages in the technology sector. Employers repeatedly report unfilled positions.",
+    aiDetail: "AI accelerates both sides. Defenders get faster anomaly detection and automated triage; attackers get better phishing and faster exploit development. This is an area where AI raises demand for human expertise rather than reducing it.",
+    outlook: "Growing fast — among the highest projected growth of any occupation in this library.",
+    develop: ["Get CompTIA Security+ certified", "Practise on a legal hands-on platform such as TryHackMe", "Learn networking fundamentals properly", "Practise writing an incident report clearly"],
+    sources: ["bls-ooh", "onet", "collegegrad"] }),
+
+  C({ id: "project-manager", title: "Project Manager", industry: "Business & Consulting", level: "Mid",
+    demand: "High", ai: "Augmented", growth: "+7%", growthNote: "Project management specialists, 2023–33",
+    salary: 98580, salaryNote: "US median annual wage, project management specialists, May 2023",
+    majors: ["Business", "Management", "Engineering", "Information Systems"],
+    overview: "Project managers deliver work on time, in budget and to specification, by coordinating people who do not report to them. It is a role built on communication and judgement rather than technical depth.",
+    responsibilities: ["Plan scope, schedule and budget", "Coordinate a team across functions", "Identify and manage risks", "Report progress to stakeholders", "Manage change requests and scope creep"],
+    environment: "Varies enormously by sector — construction, IT, finance, consultancy. Meeting-heavy, deadline-driven, with visible accountability.",
+    progression: ["Project Coordinator", "Project Manager", "Senior Project Manager", "Programme Manager", "Portfolio Director"],
+    skillIds: ["communication", "teamwork", "timemgmt", "problem", "adaptability"],
+    education: "A bachelor's degree in any relevant discipline plus certification. PRINCE2, PMP or an Agile certification is usually expected within a few years.",
+    demandNote: "Consistently strong across sectors. Rarely a graduate entry role — most people arrive after a few years in a delivery role.",
+    aiDetail: "Scheduling, status reporting and risk logging are increasingly automated. Negotiating between a client who wants more and a team that has no capacity is not. The administrative half of project management is shrinking; the political half is not.",
+    outlook: "Stable to growing, with demand concentrated in organisations running complex change.",
+    develop: ["Take a defined coordination role in CW1 and do it properly", "Learn one PM tool well", "Study PRINCE2 Foundation or an Agile certification", "Practise writing a status report nobody has to chase"],
+    sources: ["bls-ooh", "onet", "careersportal"] }),
+
+  C({ id: "ux-designer", title: "UX / Product Designer", industry: "Design & Product", level: "Entry to mid",
+    demand: "Moderate", ai: "Transformed", growth: "+8%", growthNote: "Web developers and digital designers, 2023–33",
+    salary: 92750, salaryNote: "US median annual wage, web developers and digital designers, May 2023",
+    majors: ["Design", "Computer Science", "Psychology", "Communications"],
+    overview: "UX designers work out how a product should behave so people can actually use it, then design the screens that deliver it. The job is research and reasoning as much as visual craft.",
+    responsibilities: ["Research user needs through interviews and testing", "Design wireframes, flows and prototypes", "Run usability tests and iterate", "Build and maintain a design system", "Work closely with developers through delivery"],
+    environment: "Product team inside a company, or an agency. Highly collaborative; a large share of the work is explaining and defending decisions.",
+    progression: ["Junior Designer", "Product Designer", "Senior Designer", "Design Lead", "Head of Design"],
+    skillIds: ["communication", "problem", "criticalthink", "teamwork", "technical"],
+    education: "A degree in design, psychology or computer science, or a strong portfolio from a conversion route. The portfolio decides hiring in this field more than in almost any other.",
+    demandNote: "Moderate and more competitive than it was during the 2021 hiring peak. Portfolio quality separates candidates sharply.",
+    aiDetail: "AI generates layouts, copy and visual variations quickly, compressing the production end of the job. Understanding why users fail at a task, and choosing what to build, is where the value has concentrated. Designers who only produce screens are most exposed.",
+    outlook: "Growing modestly. Research and strategy skills grow in value faster than visual production.",
+    develop: ["Build a portfolio of three case studies showing your reasoning", "Run five real usability tests", "Learn Figma to a professional standard", "Practise presenting a design decision with evidence"],
+    sources: ["bls-ooh", "onet", "careersportal"] })
+];
+
+/* --- AI and the future of work ---------------------------------------------- */
+PSE.aiShift = [
+  { today: "Manual data analysis",   future: "AI-assisted analysis",        note: "The analysis is faster; choosing the question still is not." },
+  { today: "Routine reporting",      future: "Automated reporting",         note: "Reports generate themselves; someone must still notice what matters." },
+  { today: "Basic desk research",    future: "AI-supported research",       note: "Sources are found faster; verifying them is now the skill." },
+  { today: "Drafting documents",     future: "AI drafts, human edits",      note: "First drafts are cheap; judgement about what to keep is not." },
+  { today: "Human decisions",        future: "Human + AI decisions",        note: "Accountability cannot be delegated to a model." }
+];
+PSE.aiSkills = [
+  { skill: "Communication",     why: "Explaining an AI-supported conclusion to someone who must act on it." },
+  { skill: "Critical thinking", why: "Judging whether a confident output is actually correct." },
+  { skill: "AI literacy",       why: "Knowing what these tools do well, badly, and where using them is not appropriate." },
+  { skill: "Problem solving",   why: "Framing the problem — the part no tool does for you." },
+  { skill: "Adaptability",      why: "The tools will change again within your first five years of work." }
+];
+
+/* --- CW1 requirements -------------------------------------------------------- */
+PSE.cw1Checklist = [
+  { id: "career",   group: "Career",        label: "Career selected and justified", help: "Which occupation is the group researching, and why that one?" },
+  { id: "research", group: "Career",        label: "Career research completed",     help: "Overview of the occupation drawn from more than one reliable source." },
+  { id: "resp",     group: "Career",        label: "Responsibilities, work environment and progression", help: "What the job involves day to day, where it is done, and where it leads." },
+  { id: "skills",   group: "Skills",        label: "Required skills and abilities",  help: "Both technical and employability skills, evidenced not assumed." },
+  { id: "edu",      group: "Education",     label: "Education and training routes",  help: "Degrees, certifications and alternative entry routes." },
+  { id: "demand",   group: "Job market",    label: "Current job-market demand",      help: "Evidence of demand: vacancy data, employer reports, labour statistics." },
+  { id: "ai",       group: "Future",        label: "AI, automation and global trends", help: "How the occupation is changing, with sources." },
+  { id: "outlook",  group: "Future",        label: "Projected growth, decline or stability", help: "A numeric projection with its source and time period." },
+  { id: "salary",   group: "Job market",    label: "Salary ranges",                  help: "Entry, mid and senior ranges, with the source and region stated." },
+  { id: "plan",     group: "Development",   label: "Career development plan",        help: "What a student must do to become employable in this career." },
+  { id: "intv",     group: "Interview",     label: "Specialist interview (optional)", help: "A conversation with someone working in the field, summarised." },
+  { id: "refs",     group: "References",    label: "References in Westminster Harvard style", help: "Every claim traceable; reference list complete and formatted." },
+  { id: "slides",   group: "Delivery",      label: "Slides built",                   help: "Ten slides planned, written and designed." },
+  { id: "practice", group: "Delivery",      label: "Presentation practised to time", help: "Each speaker rehearsed to their 5–7 minute share." }
+];
+
+PSE.cw1Slides = [
+  { n: 1,  title: "Introduction",            purpose: "Introduce the group, the career chosen and why.",              ask: ["Who is presenting which part?", "Why did the group choose this career?"] },
+  { n: 2,  title: "Career Overview",         purpose: "What the occupation actually is.",                             ask: ["How would you describe this job in two sentences?", "Which sector does it sit in?"] },
+  { n: 3,  title: "Responsibilities",        purpose: "Day-to-day duties and work environment.",                      ask: ["What does a typical week look like?", "Office, field, remote or hybrid?"] },
+  { n: 4,  title: "Required Skills",         purpose: "Technical and employability skills the role demands.",          ask: ["Which skills appear in most job adverts?", "Which are technical and which are transferable?"] },
+  { n: 5,  title: "Education & Training",    purpose: "Routes into the profession.",                                  ask: ["What qualification is expected?", "Is there a non-degree route?"] },
+  { n: 6,  title: "Job Market",              purpose: "Current demand and salary evidence.",                          ask: ["What evidence shows demand?", "What are the salary ranges and where from?"] },
+  { n: 7,  title: "AI & the Future",         purpose: "How automation is changing the occupation.",                   ask: ["Which tasks are being automated?", "Which human skills become more valuable?"] },
+  { n: 8,  title: "Career Development Plan", purpose: "What a student must do to get there.",                         ask: ["What are the concrete next steps?", "What is the realistic timeline?"] },
+  { n: 9,  title: "Conclusion",              purpose: "The group's judgement on this career.",                        ask: ["Would you recommend this career? On what grounds?", "What is the single most important finding?"] },
+  { n: 10, title: "References",              purpose: "Westminster Harvard reference list.",                          ask: ["Is every source in the list cited on a slide?", "Is the formatting consistent?"] }
+];
+
+PSE.practiceCriteria = [
+  { id: "body",     label: "Body language",     hint: "Posture, gestures, not reading from the screen." },
+  { id: "eye",      label: "Eye contact",       hint: "Addressing the room, not the laptop." },
+  { id: "voice",    label: "Voice projection",  hint: "Audible at the back, varied in pace." },
+  { id: "fluency",  label: "Fluency",           hint: "Few fillers, sentences that finish." },
+  { id: "language", label: "Language accuracy", hint: "Correct terminology and grammar." },
+  { id: "slides",   label: "Slide design",      hint: "Readable, uncluttered, supporting the speech." },
+  { id: "citation", label: "Citations",         hint: "Sources shown on the slides they support." }
+];
+
+/* --- CW2 LinkedIn ------------------------------------------------------------ */
+PSE.linkedinSections = [
+  { id: "photo",     label: "Profile photo",       weight: 8,  help: "A clear, well-lit headshot. Plain background, professional clothing, face filling most of the frame.", type: "check" },
+  { id: "headline",  label: "Headline",            weight: 12, help: "120 characters describing who you are and where you are heading — not just 'Student'.", type: "text", max: 220 },
+  { id: "about",     label: "About",               weight: 15, help: "Three short paragraphs: who you are, what you are building towards, what you are looking for.", type: "long", min: 60 },
+  { id: "education", label: "Education",           weight: 10, help: "Your degree, institution, dates, and relevant modules or achievements.", type: "long" },
+  { id: "experience",label: "Experience",          weight: 12, help: "Any work, internship or significant project. Describe outcomes, not duties.", type: "long" },
+  { id: "volunteer", label: "Volunteer experience",weight: 8,  help: "Volunteering counts as professional experience and shows initiative.", type: "long" },
+  { id: "orgs",      label: "Organisations",       weight: 7,  help: "Student societies, clubs, professional bodies you belong to.", type: "long" },
+  { id: "skills",    label: "Skills & expertise",  weight: 12, help: "At least five skills relevant to your target role. Endorsements help.", type: "long" },
+  { id: "courses",   label: "Courses",             weight: 8,  help: "Relevant modules and any external courses completed.", type: "long" },
+  { id: "ai",        label: "AI Literacy certificate", weight: 8, help: "Add the AI Literacy Course certificate to your profile once completed.", type: "check" }
+];
+
+PSE.headlineParts = {
+  status:   ["Undergraduate Student", "Final-year Student", "BSc Student", "Business Student"],
+  target:   ["Aspiring Data Analyst", "Future Financial Analyst", "Aspiring Software Developer", "Future Marketing Specialist", "Aspiring Business Analyst"],
+  field:    ["Business Management", "Economics & Finance", "Computer Science", "Marketing", "Accounting"],
+  strength: ["SQL & Data Visualisation", "Financial Modelling", "Python & Problem Solving", "Campaign Analytics", "Process Improvement"],
+  interest: ["Open to internships", "Seeking 2027 graduate roles", "Building projects in public", "Interested in fintech"]
+};
+
+/* --- Reflections ------------------------------------------------------------- */
+PSE.reflectionTypes = [
+  { id: "skills",    label: "Skills developed or improved" },
+  { id: "gaps",      label: "Employability skill gaps" },
+  { id: "lecture",   label: "Guest lecture" },
+  { id: "interview", label: "Mock job interview" },
+  { id: "zakovat",   label: "Zakovat quiz" },
+  { id: "ailit",     label: "AI Literacy Course" },
+  { id: "other",     label: "Other professional engagement" }
+];
+PSE.reflectionPrompts = [
+  { key: "what",   label: "What happened?",                              hint: "Describe the experience briefly and factually." },
+  { key: "learn",  label: "What did I learn?",                           hint: "The insight, not the summary." },
+  { key: "skills", label: "What skills did I develop?",                  hint: "Name them specifically." },
+  { key: "career", label: "How does this connect to my future career?",  hint: "Link it to your target role." },
+  { key: "next",   label: "What will I do next?",                        hint: "One concrete action with a timeframe." }
+];
+
+/* --- Research resources ------------------------------------------------------ */
+PSE.resources = [
+  { id: "bls-ooh",     name: "Occupational Outlook Handbook", org: "US Bureau of Labor Statistics", url: "https://www.bls.gov/ooh/",
+    what: "Median pay, entry requirements, job outlook and projected growth for hundreds of occupations.", region: "United States", best: "Salary and growth projections you can cite" },
+  { id: "onet",        name: "O*NET OnLine", org: "US Department of Labor", url: "https://www.onetonline.org/",
+    what: "Detailed breakdowns of tasks, skills, abilities, technologies and work context per occupation.", region: "United States", best: "Required skills and abilities" },
+  { id: "ncs",         name: "National Careers Service", org: "UK Government", url: "https://nationalcareers.service.gov.uk/",
+    what: "UK job profiles with salary ranges, entry routes, day-to-day tasks and career progression.", region: "United Kingdom", best: "Entry routes and UK salary ranges" },
+  { id: "jobbank",     name: "Job Bank", org: "Government of Canada", url: "https://www.jobbank.gc.ca/",
+    what: "Canadian wage data, job outlook by region and current vacancy listings.", region: "Canada", best: "Regional demand comparisons" },
+  { id: "careersportal", name: "Careers Portal", org: "Careers Portal", url: "https://careersportal.co.uk/",
+    what: "Career guidance, sector overviews and job profiles aimed at students.", region: "United Kingdom", best: "Accessible sector overviews" },
+  { id: "collegegrad", name: "CollegeGrad", org: "CollegeGrad", url: "https://collegegrad.com/careers",
+    what: "Entry-level career information written for graduates, including employer guides.", region: "United States", best: "Graduate entry-level reality" },
+  { id: "uzjobs",      name: "UzJobs", org: "UzJobs", url: "https://uzjobs.uz/",
+    what: "Uzbekistan job listings — useful for local vacancy volume and advertised requirements.", region: "Uzbekistan", best: "Local demand evidence" },
+  { id: "headhunter",  name: "HeadHunter", org: "hh.uz", url: "https://hh.uz/",
+    what: "Large regional job board with salary indications and required-skill listings.", region: "Uzbekistan / CIS", best: "Local salary and skill requirements" }
+];
+
+/* --- Career readiness score -------------------------------------------------- */
+PSE.readinessParts = [
+  { id: "explore", label: "Career exploration", max: 15, help: "Shortlisting careers and opening their detail pages." },
+  { id: "skills",  label: "Skills assessment",   max: 15, help: "Rating your current and target level on each skill." },
+  { id: "goals",   label: "SMART goals",         max: 20, help: "Creating goals and moving them forward." },
+  { id: "cw1",     label: "CW1 progress",        max: 20, help: "Research checklist, slides and sources." },
+  { id: "practice",label: "Presentation practice", max: 10, help: "Rehearsing to time and scoring yourself." },
+  { id: "cw2",     label: "LinkedIn profile",    max: 12, help: "Completing each required profile section." },
+  { id: "reflect", label: "Reflections",         max: 8,  help: "Writing reflections within the word range." }
+];
+
+PSE.achievements = [
+  { id: "explorer",  label: "Career Explorer",       need: "Open three career detail pages" },
+  { id: "goalsetter",label: "Goal Setter",           need: "Create your first SMART goal" },
+  { id: "researcher",label: "Researcher",            need: "Save five sources to the library" },
+  { id: "presenter", label: "Presenter",             need: "Complete a timed practice run" },
+  { id: "identity",  label: "Professional Identity", need: "Complete six LinkedIn sections" },
+  { id: "reflective",label: "Reflective Practitioner", need: "Write three reflections in range" }
+];
+
+</script>
+<script>
+/* =============================================================================
+   store.js — everything the student creates.
+   Saved to this browser with localStorage: no account, no server, works from a
+   USB stick. Views subscribe to changes and re-render.
+   ========================================================================== */
+
+const Store = (function () {
+  const KEY = "pse-workspace-v1";
+
+  const blank = () => ({
+    profile: { name: "", major: "", targetRole: "", interests: "" },
+    shortlist: [], viewed: [],
+    skills: {},                 /* skillId -> { current, target, why } */
+    goals: [],
+    cw1: { career: "", checklist: {}, slides: {}, sources: [], practice: [] },
+    cw2: { sections: {}, headline: "" },
+    reflections: [],
+    createdAt: new Date().toISOString()
+  });
+
+  let state = blank();
+  const listeners = [];
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) state = Object.assign(blank(), JSON.parse(raw));
+    } catch (e) { /* private mode or corrupt — start clean */ }
+    return state;
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { /* quota or private mode: the session still works, it just won't persist */ }
+  }
+
+  function get() { return state; }
+
+  /* Mutate through here so every change persists and re-renders exactly once. */
+  function update(fn) {
+    fn(state);
+    save();
+    listeners.forEach(l => l(state));
+  }
+
+  function subscribe(fn) { listeners.push(fn); }
+  function reset() { state = blank(); save(); listeners.forEach(l => l(state)); }
+
+  function exportJSON() { return JSON.stringify(state, null, 2); }
+  function importJSON(text) {
+    const parsed = JSON.parse(text);
+    state = Object.assign(blank(), parsed);
+    save(); listeners.forEach(l => l(state));
+  }
+
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  /* --- derived ------------------------------------------------------------- */
+
+  function skillRows() {
+    return PSE.skills.map(s => {
+      const v = state.skills[s.id] || {};
+      return { ...s, current: v.current || 0, target: v.target || 0, why: v.why || "",
+               gap: Math.max(0, (v.target || 0) - (v.current || 0)) };
+    });
+  }
+
+  function cw1Progress() {
+    const done = PSE.cw1Checklist.filter(i => state.cw1.checklist[i.id]).length;
+    return { done, total: PSE.cw1Checklist.length, pct: Math.round(done / PSE.cw1Checklist.length * 100) };
+  }
+
+  function slidesDone() {
+    return PSE.cw1Slides.filter(s => {
+      const v = state.cw1.slides[s.n];
+      return v && v.notes && v.notes.trim().length > 20;
+    }).length;
+  }
+
+  function cw2Progress() {
+    let earned = 0, total = 0, done = 0;
+    PSE.linkedinSections.forEach(sec => {
+      total += sec.weight;
+      const v = state.cw2.sections[sec.id] || {};
+      const ok = sec.type === "check" ? !!v.done : !!(v.value && v.value.trim().length >= (sec.min || 20));
+      if (ok) { earned += sec.weight; done += 1; }
+    });
+    return { pct: Math.round(earned / total * 100), done, total: PSE.linkedinSections.length };
+  }
+
+  const wordCount = t => (t || "").trim().split(/\s+/).filter(Boolean).length;
+
+  function reflectionsInRange() {
+    return state.reflections.filter(r => {
+      const w = wordCount([r.what, r.learn, r.skills, r.career, r.next].join(" "));
+      return w >= 70;
+    }).length;
+  }
+
+  /* Career readiness — every part is explained in the UI so it never feels
+     arbitrary. Each returns { earned, max, detail }. */
+  function readiness() {
+    const parts = {};
+    const s = state;
+
+    const explored = new Set(s.viewed).size;
+    parts.explore = { earned: Math.min(15, explored * 5), max: 15,
+      detail: explored + " career" + (explored === 1 ? "" : "s") + " explored (5 points each, up to 3)" };
+
+    const rated = skillRows().filter(r => r.current > 0 && r.target > 0).length;
+    parts.skills = { earned: Math.round(Math.min(1, rated / PSE.skills.length) * 15), max: 15,
+      detail: rated + " of " + PSE.skills.length + " skills rated with a target" };
+
+    const goalPts = s.goals.reduce((a, g) => a + 4 + Math.round((g.progress || 0) / 100 * 6), 0);
+    parts.goals = { earned: Math.min(20, goalPts), max: 20,
+      detail: s.goals.length + " goal" + (s.goals.length === 1 ? "" : "s") + " created; progress counts towards the score" };
+
+    const c1 = cw1Progress();
+    const srcPts = Math.min(4, s.cw1.sources.length);
+    parts.cw1 = { earned: Math.min(20, Math.round(c1.pct / 100 * 14) + srcPts + Math.min(2, Math.floor(slidesDone() / 5))), max: 20,
+      detail: c1.done + "/" + c1.total + " checklist items, " + s.cw1.sources.length + " sources, " + slidesDone() + "/10 slides" };
+
+    const runs = s.cw1.practice.length;
+    parts.practice = { earned: Math.min(10, runs * 5), max: 10,
+      detail: runs + " timed practice run" + (runs === 1 ? "" : "s") + " recorded" };
+
+    const c2 = cw2Progress();
+    parts.cw2 = { earned: Math.round(c2.pct / 100 * 12), max: 12,
+      detail: c2.done + "/" + c2.total + " LinkedIn sections complete" };
+
+    const refl = reflectionsInRange();
+    parts.reflect = { earned: Math.min(8, refl * 3), max: 8,
+      detail: refl + " reflection" + (refl === 1 ? "" : "s") + " of sufficient depth" };
+
+    const total = Object.values(parts).reduce((a, p) => a + p.earned, 0);
+    return { total: Math.round(total), parts };
+  }
+
+  function achievements() {
+    const s = state;
+    const got = {
+      explorer:   new Set(s.viewed).size >= 3,
+      goalsetter: s.goals.length >= 1,
+      researcher: s.cw1.sources.length >= 5,
+      presenter:  s.cw1.practice.length >= 1,
+      identity:   cw2Progress().done >= 6,
+      reflective: reflectionsInRange() >= 3
+    };
+    return PSE.achievements.map(a => ({ ...a, earned: !!got[a.id] }));
+  }
+
+  /* --- "Your next step" ----------------------------------------------------
+     One recommendation, chosen by what is most blocking right now. --------- */
+  function nextStep() {
+    const s = state;
+    if (!s.profile.targetRole) return { title: "Set your target role", why: "Everything else — skills, goals, CW1 — gets sharper once you name the job you are aiming at.", cta: "Open Profile", route: "#/profile" };
+    if (new Set(s.viewed).size < 3) return { title: "Explore three careers", why: "Compare at least three before committing. You cannot judge one career in isolation.", cta: "Open Career Explorer", route: "#/careers" };
+    const unrated = skillRows().filter(r => !r.current || !r.target);
+    if (unrated.length > 4) return { title: "Rate your skills", why: "You have " + unrated.length + " skills without a rating. The gap analysis needs both a current and a target level.", cta: "Open Skills", route: "#/skills" };
+    if (!s.goals.length) return { title: "Write your first SMART goal", why: "Your biggest skill gap is " + (skillRows().sort((a, b) => b.gap - a.gap)[0] || {}).name + ". Turn it into a goal with a deadline.", cta: "Open Goal Builder", route: "#/goals" };
+    const c1 = cw1Progress();
+    if (c1.pct < 100) {
+      const missing = PSE.cw1Checklist.find(i => !s.cw1.checklist[i.id]);
+      return { title: "CW1: " + missing.label, why: missing.help, cta: "Open CW1 Workspace", route: "#/cw1" };
+    }
+    if (s.cw1.sources.length < 5) return { title: "Add more references", why: "You have " + s.cw1.sources.length + " sources. A Harvard reference list of five or more shows real research.", cta: "Open Source Library", route: "#/cw1" };
+    if (!s.cw1.practice.length) return { title: "Run a timed practice", why: "You have never rehearsed to the clock. Your individual share is 5–7 minutes.", cta: "Open Practice", route: "#/cw1" };
+    const c2 = cw2Progress();
+    if (c2.pct < 100) {
+      const sec = PSE.linkedinSections.find(x => { const v = s.cw2.sections[x.id] || {}; return x.type === "check" ? !v.done : !(v.value && v.value.trim().length >= (x.min || 20)); });
+      return { title: "LinkedIn: add your " + sec.label.toLowerCase(), why: sec.help, cta: "Open LinkedIn Builder", route: "#/cw2" };
+    }
+    if (reflectionsInRange() < 3) return { title: "Write a reflection", why: "Reflections are assessed evidence of professional growth. Aim for 70–100 words each.", cta: "Open Reflections", route: "#/reflections" };
+    return { title: "Keep your goals moving", why: "The structure is complete. Progress now comes from advancing your goals and rehearsing.", cta: "Open Goals", route: "#/goals" };
+  }
+
+  /* --- The offline coach ---------------------------------------------------
+     Deterministic checks, not generated prose. Works with no network, and is
+     the honest form of help for assessed work: it points at what is missing
+     rather than writing the submission. ---------------------------------- */
+
+  function checkGoal(g) {
+    const out = [];
+    const has = (v, n) => (v || "").trim().length >= n;
+    out.push({ ok: has(g.title, 4), label: "Goal has a title" });
+    out.push({ ok: has(g.specific, 25), label: "Specific — says exactly what will be accomplished",
+      fix: "One sentence naming the concrete outcome, not the intention." });
+    out.push({ ok: /\d/.test(g.measurable || "") && has(g.measurable, 10), label: "Measurable — contains a number",
+      fix: "Add a quantity: how many, how much, what score." });
+    out.push({ ok: has(g.achievable, 20), label: "Achievable — names the resources you have",
+      fix: "What skills, time or support make this realistic?" });
+    out.push({ ok: has(g.relevant, 20), label: "Relevant — links to your career",
+      fix: "Connect it to your target role explicitly." });
+    out.push({ ok: !!g.deadline, label: "Time-bound — has a deadline",
+      fix: "Pick a date. A goal without one is a wish." });
+    out.push({ ok: has(g.actions, 20), label: "Actions listed",
+      fix: "What will you actually do — modules, courses, practice?" });
+    out.push({ ok: (g.obstacles || []).some(o => (o.solution || "").trim().length > 10), label: "At least one obstacle has a solution",
+      fix: "Naming a barrier without a plan does not help you." });
+    return out;
+  }
+
+  function checkReflection(r) {
+    const out = [];
+    PSE.reflectionPrompts.forEach(p => {
+      out.push({ ok: wordCount(r[p.key]) >= 8, label: p.label, fix: p.hint });
+    });
+    const w = wordCount([r.what, r.learn, r.skills, r.career, r.next].join(" "));
+    out.push({ ok: w >= 70 && w <= 140, label: "Length is in a sensible range (" + w + " words)",
+      fix: w < 70 ? "Too thin — the LinkedIn post alone needs 70–100 words." : "Long for a LinkedIn post; tighten it." });
+    out.push({ ok: /\b(I|my|me)\b/i.test([r.learn, r.next].join(" ")), label: "Written in the first person",
+      fix: "A reflection is about you. Use 'I'." });
+    return out;
+  }
+
+  function checkCW1() {
+    const missing = PSE.cw1Checklist.filter(i => !state.cw1.checklist[i.id]);
+    const out = missing.slice(0, 6).map(m => ({ ok: false, label: m.label, fix: m.help }));
+    if (state.cw1.sources.length < 5) out.push({ ok: false, label: "Fewer than five references", fix: "Westminster Harvard referencing is assessed. Add sources as you research, not at the end." });
+    if (slidesDone() < 10) out.push({ ok: false, label: (10 - slidesDone()) + " slides still have no notes", fix: "Every slide needs a purpose and research notes before you design it." });
+    if (!out.length) out.push({ ok: true, label: "Every CW1 requirement is marked complete" });
+    return out;
+  }
+
+  /* --- Harvard reference formatting ---------------------------------------
+     Westminster Harvard: Author (Year) Title. Available at: URL
+     (Accessed: D Month YYYY). ------------------------------------------- */
+  function harvard(src) {
+    const author = (src.author || "Anon.").trim().replace(/\.$/, "");
+    const year = (src.year || "n.d.").trim();
+    const title = (src.title || "Untitled").trim().replace(/\.$/, "");
+    let out = author + " (" + year + ") " + title + ".";
+    if (src.url) out += " Available at: " + src.url.trim();
+    if (src.accessed) {
+      const d = new Date(src.accessed);
+      if (!isNaN(d)) {
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        out += " (Accessed: " + d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear() + ")";
+      }
+    }
+    return out + ".";
+  }
+  function citation(src) {
+    const a = (src.author || "Anon.").split(",")[0].trim();
+    return "(" + a + ", " + (src.year || "n.d.") + ")";
+  }
+
+  /* --- sample workspace ----------------------------------------------------
+     An empty product demonstrates nothing. This fills the workspace with a
+     plausible student so every screen can be seen working; it is clearly
+     labelled and one click removes it. ------------------------------------ */
+  function isEmpty() {
+    return !state.profile.targetRole && !state.goals.length && !state.reflections.length
+      && !Object.keys(state.skills).length && !state.cw1.sources.length;
+  }
+
+  function loadSample() {
+    const today = new Date();
+    const iso = d => d.toISOString().slice(0, 10);
+    const plus = n => { const d = new Date(today); d.setDate(d.getDate() + n); return iso(d); };
+
+    state = blank();
+    state.isSample = true;
+    state.profile = { name: "Sample Student", major: "BSc Business Management",
+      targetRole: "Junior Data Analyst", interests: "Analytics, fintech, consulting" };
+    state.viewed = ["data-analyst", "business-analyst", "financial-analyst", "marketing-specialist"];
+    state.shortlist = ["data-analyst", "business-analyst"];
+
+    const rate = { communication: [6,8,"Confident in seminars, weaker in front of a large room."],
+      presentation: [5,8,"I rush when I am nervous and read from the slide."],
+      teamwork: [7,8,"Comfortable, but I avoid disagreeing with the group."],
+      problem: [6,8,"Fine with structured problems, less so with open ones."],
+      technical: [4,8,"Excel is solid, SQL is beginner level, no Python yet."],
+      ailiteracy: [5,8,"I use AI tools but cannot always tell when they are wrong."],
+      criticalthink: [6,8,"I take published figures at face value too often."],
+      timemgmt: [5,7,"I start coursework late and compress the research."],
+      adaptability: [7,8,"I adjust well once I understand why something changed."],
+      networking: [3,7,"I have almost no professional connections yet."] };
+    Object.keys(rate).forEach(k => { state.skills[k] = { current: rate[k][0], target: rate[k][1], why: rate[k][2] }; });
+
+    state.goals = [
+      { id: uid(), title: "Reach working SQL competence for analyst roles",
+        why: "Every junior analyst advert I have read lists SQL as essential, and it is my largest gap.",
+        specific: "Complete a structured SQL course and use it to build two analysis projects from public datasets.",
+        measurable: "Finish 40 course exercises and publish 2 projects with written findings.",
+        achievable: "I already use Excel well and have 6 free hours a week; the course is free.",
+        relevant: "SQL is the single most requested skill for the Junior Data Analyst role I am targeting.",
+        deadline: plus(75), progress: 45,
+        actions: "Finish the SQL basics course\nRebuild one Excel report as SQL queries\nPublish two projects with written findings",
+        obstacles: [{ type: "Lack of time", solution: "Two fixed 90-minute blocks on Tuesday and Saturday mornings.", date: plus(7) },
+                    { type: "Lack of confidence", solution: "Work through problems with a study partner from the seminar group.", date: plus(14) }] },
+      { id: uid(), title: "Present for seven minutes without reading from the slides",
+        why: "Presentation is assessed in CW1 and it is the skill I am weakest at.",
+        specific: "Deliver my CW1 section from memory using only keyword prompts.",
+        measurable: "Complete 5 timed practice runs scoring 4/5 or above on fluency.",
+        achievable: "I can rehearse alone and record on my phone; the group meets weekly.",
+        relevant: "Presenting confidently is required for CW1 and for any graduate interview.",
+        deadline: plus(30), progress: 20,
+        actions: "Record and watch back each run\nCut slide text to keywords only\nRehearse the opening 30 seconds daily",
+        obstacles: [{ type: "Lack of confidence", solution: "Practise first to one friend, then to the whole group.", date: plus(10) }] }
+    ];
+
+    state.cw1.career = "data-analyst";
+    ["career","research","resp","skills","edu","demand","ai","outlook","salary"].forEach(k => state.cw1.checklist[k] = true);
+    state.cw1.slides = {
+      1: { notes: "Group introduction, why we chose Data Analyst: highest demand of the four careers we compared and it matches three of our majors.", sources: "Team decision" },
+      2: { notes: "Definition of the role, the sectors that employ analysts, and how it differs from data scientist and business analyst.", sources: "BLS OOH; O*NET" },
+      3: { notes: "Daily duties from O*NET task list; hybrid working; monthly reporting cycle drives the workload peaks.", sources: "O*NET" },
+      4: { notes: "SQL, Excel, one BI tool, statistics, and the communication skills to present a finding to a non-analyst.", sources: "O*NET; job adverts sampled on hh.uz" },
+      5: { notes: "Bachelor's degree routes plus certification alternatives; portfolio increasingly substitutes for the degree title.", sources: "National Careers Service" },
+      6: { notes: "Vacancy counts sampled from UzJobs and hh.uz; BLS projection of +23% to 2033 for operations research analysts.", sources: "BLS OOH; UzJobs; hh.uz" },
+      7: { notes: "AI automates query writing and first-draft reporting; judgement about which question matters is what remains scarce.", sources: "Seminar notes; WEF Future of Jobs" }
+    };
+    state.cw1.sources = [
+      { id: uid(), title: "Occupational Outlook Handbook: Operations Research Analysts", author: "US Bureau of Labor Statistics", year: "2024", url: "https://www.bls.gov/ooh/", accessed: iso(today) },
+      { id: uid(), title: "O*NET OnLine summary report for Data Scientists", author: "US Department of Labor", year: "2024", url: "https://www.onetonline.org/", accessed: iso(today) },
+      { id: uid(), title: "Data analyst job profile", author: "National Careers Service", year: "2024", url: "https://nationalcareers.service.gov.uk/", accessed: iso(today) },
+      { id: uid(), title: "Analyst vacancy listings, Tashkent", author: "HeadHunter", year: "2025", url: "https://hh.uz/", accessed: iso(today) },
+      { id: uid(), title: "Entry-level analyst listings", author: "UzJobs", year: "2025", url: "https://uzjobs.uz/", accessed: iso(today) }
+    ];
+    state.cw1.practice = [{ id: uid(), seconds: 388, avg: "3.4", improvement: "Slow down on the job-market slide and stop reading the salary figures.", date: iso(today), scores: {} }];
+
+    const li = { headline: "Undergraduate Student | Aspiring Data Analyst | SQL & Excel",
+      about: "Second-year Business Management student at Westminster International University, working towards a junior data analyst role.\n\nI am building practical analysis skills through the PSE module and self-directed projects: SQL, Excel modelling and clear reporting. I am most interested in how organisations use data to make decisions they can defend.\n\nCurrently looking for a summer internship in analytics or finance.",
+      education: "BSc Business Management, Westminster International University, 2024–2027. Relevant modules: Professional Skills and Employability, Quantitative Methods, Management Information Systems.",
+      experience: "Student ambassador, university open days (2025–present). Guided prospective students and their families, presenting to groups of up to 30 people.",
+      volunteer: "Volunteer tutor, community maths club — weekly sessions with secondary school students preparing for exams.",
+      orgs: "Member, University Business Society. Participant, Zakovat intellectual quiz team.",
+      skills: "SQL (developing) · Microsoft Excel · Data visualisation · Report writing · Presentation · Teamwork · Problem solving",
+      courses: "Professional Skills and Employability; Quantitative Methods; AI Literacy Course (in progress)" };
+    Object.keys(li).forEach(k => { state.cw2.sections[k] = { value: li[k] }; });
+    state.cw2.sections.photo = { done: true };
+
+    state.reflections = [
+      { id: uid(), type: "lecture", title: "Guest lecture: analytics in retail banking", date: iso(today),
+        what: "A senior analyst from a local bank described how her team turns transaction data into decisions about branch staffing.",
+        learn: "I learned that most of the job is deciding which question is worth answering, not running the analysis itself.",
+        skills: "I improved my understanding of how analytical work is framed commercially, and I practised asking a question in front of the room.",
+        career: "It confirmed that a junior analyst role in financial services is a realistic first step for me.",
+        next: "I will rebuild one of my Excel reports as SQL queries this month to close the technical gap she described." },
+      { id: uid(), type: "interview", title: "Mock job interview", date: iso(today),
+        what: "I took part in a 20-minute mock interview for a graduate analyst position with feedback afterwards.",
+        learn: "I learned that my answers were accurate but far too long, and that I gave no concrete examples.",
+        skills: "I developed my ability to structure an answer and to stop talking once the question is answered.",
+        career: "Interviews are the gate to every role I want, so this is a directly transferable skill.",
+        next: "I will prepare five STAR examples and practise each to under 90 seconds before the next mock." },
+      { id: uid(), type: "ailit", title: "AI Literacy Course", date: iso(today),
+        what: "I completed the modules on how large language models work and where they fail.",
+        learn: "I learned that confident output and correct output are unrelated, and that verification is my responsibility.",
+        skills: "I developed practical AI literacy and a habit of checking generated claims against a primary source.",
+        career: "Analysts are increasingly expected to use these tools and to be accountable for what they produce.",
+        next: "I will check every AI-suggested figure in our CW1 research against the original source before it goes on a slide." }
+    ];
+    save(); listeners.forEach(l => l(state));
+  }
+
+  return { load, get, update, subscribe, reset, exportJSON, importJSON, uid, isEmpty, loadSample,
+           skillRows, cw1Progress, slidesDone, cw2Progress, wordCount, reflectionsInRange,
+           readiness, achievements, nextStep, checkGoal, checkReflection, checkCW1,
+           harvard, citation };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   canvas.js — the Journey canvas.
+   One large world; a camera that flies and zooms between stages instead of
+   cutting between pages. Unlike an authored zoom-presentation, the camera is
+   driven by the student's own state: it opens on the current stage, the path
+   fills to the furthest completed one, and "next step" flies to the task that
+   actually needs doing. A parallax depth layer moves at a third of the camera
+   speed; a minimap shows the viewport on the whole world.
+   ========================================================================== */
+
+const Journey = (function () {
+  const W = 2400, H = 1400;
+  const PTS = [{ x: 300, y: 440 }, { x: 640, y: 300 }, { x: 980, y: 470 }, { x: 1320, y: 320 },
+               { x: 1650, y: 500 }, { x: 1980, y: 350 }, { x: 2120, y: 760 }, { x: 1760, y: 990 }];
+  const ANG = [-95, 22, 162].map(a => a * Math.PI / 180);   /* satellites clear the neighbouring stage title */
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let host, world, depth, mini, view, stages, cam = { tx: 0, ty: 0, s: 1 };
+  let focus = -1, level = 1, isActive = false, drag = null, dragged = false, ro, timers = [];
+
+  const clampS = s => Math.max(0.28, Math.min(3.2, s));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function smooth(pts) {
+    let d = `M${pts[0].x},${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += ` C${p1.x + (p2.x - p0.x) / 6},${p1.y + (p2.y - p0.y) / 6} ${p2.x - (p3.x - p1.x) / 6},${p2.y - (p3.y - p1.y) / 6} ${p2.x},${p2.y}`;
+    }
+    return d;
+  }
+
+  /* --- camera ---------------------------------------------------------------- */
+  function apply(animate) {
+    const mv = !!animate && !reduced;
+    world.classList.toggle("moving", mv); depth.classList.toggle("moving", mv); view.classList.toggle("moving", mv);
+    world.style.transform = `translate(${cam.tx}px,${cam.ty}px) scale(${cam.s})`;
+    depth.style.transform = `translate(${cam.tx * 0.35}px,${cam.ty * 0.35}px) scale(${1 + (cam.s - 1) * 0.25})`;
+    host.classList.toggle("z2", cam.s >= 1.15);
+    host.classList.toggle("z3", cam.s >= 1.9);
+    const k = mini.clientWidth / W;
+    view.style.left = (-cam.tx / cam.s) * k + "px";  view.style.top = (-cam.ty / cam.s) * k + "px";
+    view.style.width = (host.clientWidth / cam.s) * k + "px"; view.style.height = (host.clientHeight / cam.s) * k + "px";
+  }
+  function flyTo(cx, cy, s, animate) {
+    cam.s = clampS(s); cam.tx = host.clientWidth / 2 - cx * cam.s; cam.ty = host.clientHeight / 2 - cy * cam.s; apply(animate !== false);
+  }
+  const fitScale = () => Math.min(host.clientWidth / W, host.clientHeight / H) * 0.94;
+
+  function markFocus() { world.querySelectorAll(".cv-node").forEach((n, i) => n.classList.toggle("focus", i === focus)); }
+  function overview(animate) { focus = -1; level = 1; markFocus(); flyTo(W / 2, H / 2, fitScale(), animate); }
+  function stage(i, lvl, animate) {
+    if (i < 0 || i >= PTS.length) return;
+    focus = i; level = lvl || 1; markFocus();
+    const p = PTS[i];
+    flyTo(p.x, p.y + (level === 2 ? 70 : 20), level === 2 ? 2.35 : 1.5, animate);
+  }
+  function step(d) { stage(focus < 0 ? (d > 0 ? 0 : PTS.length - 1) : Math.max(0, Math.min(PTS.length - 1, focus + d)), 1); }
+  function deeper() { if (focus < 0) stage(now(), 1); else if (level === 1) stage(focus, 2); else overview(); }
+  const now = () => { const i = stages.findIndex(s => s.state === "now"); return i < 0 ? 0 : i; };
+
+  /* --- build ------------------------------------------------------------------ */
+  function mount(el, list, intent) {
+    destroy(); host = el; stages = list; isActive = true;
+    const doneN = (() => { let n = 0; for (const s of stages) { if (s.state === "done") n++; else break; } return n; })();
+    const prog = Math.max(0, Math.min(1, (doneN - (doneN === PTS.length ? 0 : 1)) / (PTS.length - 1)));
+
+    host.innerHTML = `
+      <div class="cv-depth"></div>
+      <div class="cv-world">
+        <svg class="cv-path" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">
+          <path d="${smooth(PTS)}" fill="none" stroke="#2B3B5C" stroke-width="4" stroke-dasharray="10 12" stroke-linecap="round"/>
+          <path d="${smooth(PTS)}" fill="none" stroke="#3E7BE8" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="${prog} 1"/>
+        </svg>
+        ${stages.map((s, i) => `
+          <div class="cv-node st-${s.state}" style="left:${PTS[i].x}px;top:${PTS[i].y}px" data-i="${i}">
+            <div class="cv-acts">${s.activities.map((a, k) => `
+              <div class="cv-act" style="transform:translate(calc(-50% + ${Math.round(182 * Math.cos(ANG[k]))}px), calc(-50% + ${Math.round(182 * Math.sin(ANG[k]))}px))"
+                   data-act="go" data-route="${esc(s.route)}"><b>Activity ${k + 1}</b>${esc(a)}</div>`).join("")}</div>
+            <div class="cv-ring">${s.state === "done" ? "✓" : s.n}</div>
+            <div class="cv-title">${esc(s.title)}</div>
+            <div class="cv-blurb">${esc(s.blurb)}</div>
+            <div class="cv-live">${esc(s.live)}</div>
+          </div>`).join("")}
+      </div>
+      <div class="cv-hud">
+        <button class="btn btn-sm" data-act="jout">Overview</button>
+        <button class="btn btn-sm" data-act="jstep" data-d="-1">←</button>
+        <button class="btn btn-sm" data-act="jstep" data-d="1">→</button>
+        <button class="btn btn-sm btn-primary" data-act="jnext">Fly to my next step</button>
+      </div>
+      <div class="cv-hint">Drag to pan · scroll to zoom · click a stage twice to see its tasks · Esc for overview</div>
+      <div class="cv-mini" aria-hidden="true">${stages.map((s, i) => `<i class="${s.state}" style="left:${PTS[i].x / W * 100}%;top:${PTS[i].y / H * 100}%"></i>`).join("")}<div class="cv-view"></div></div>`;
+
+    world = host.querySelector(".cv-world"); depth = host.querySelector(".cv-depth");
+    mini = host.querySelector(".cv-mini"); view = host.querySelector(".cv-view");
+
+    /* pointer: drag to pan; a real click on a node zooms */
+    host.addEventListener("pointerdown", e => {
+      if (e.target.closest(".cv-hud, .cv-mini, .cv-act")) return;
+      drag = { x: e.clientX, y: e.clientY, tx: cam.tx, ty: cam.ty }; dragged = false; host.classList.add("dragging"); host.setPointerCapture(e.pointerId);
+    });
+    host.addEventListener("pointermove", e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) dragged = true;
+      cam.tx = drag.tx + dx; cam.ty = drag.ty + dy; apply(false);
+    });
+    const up = () => { drag = null; host.classList.remove("dragging"); };
+    host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
+    host.addEventListener("click", e => {
+      if (dragged) { e.stopPropagation(); e.preventDefault(); dragged = false; return; }
+      if (e.target.closest(".cv-hud, .cv-act")) return;
+      const m = e.target.closest(".cv-mini");
+      if (m) { const r = m.getBoundingClientRect(); flyTo((e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H, cam.s); return; }
+      const n = e.target.closest(".cv-node");
+      if (n) { const i = +n.getAttribute("data-i"); stage(i, focus === i && level === 1 ? 2 : 1); }
+    });
+    host.addEventListener("wheel", e => {
+      e.preventDefault();
+      const r = host.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+      const wx = (px - cam.tx) / cam.s, wy = (py - cam.ty) / cam.s;
+      const ns = clampS(cam.s * Math.exp(-e.deltaY * 0.0016));
+      cam.tx = px - wx * ns; cam.ty = py - wy * ns; cam.s = ns; apply(false);
+    }, { passive: false });
+    ro = new ResizeObserver(() => { if (!isActive) return; focus < 0 ? overview(false) : stage(focus, level, false); });
+    ro.observe(host);
+
+    /* arrive: overview, then fly to where the student actually is */
+    overview(false);
+    timers.push(setTimeout(() => {
+      if (!isActive) return;
+      if (intent === "next") { flyNext(); return; }
+      stage(now(), 1);
+    }, reduced ? 0 : 420));
+  }
+
+  function flyNext() {
+    const route = Store.nextStep().route;
+    let i = stages.findIndex(s => s.route === route);
+    if (i < 0) i = now();
+    stage(i, 2);
+  }
+
+  function destroy() {
+    isActive = false; timers.forEach(clearTimeout); timers = [];
+    if (ro) { ro.disconnect(); ro = null; }
+    host = world = depth = mini = view = null; focus = -1; level = 1;
+  }
+
+  return { mount, destroy, overview, stage, step, deeper, flyNext, now, active: () => isActive };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   views.js — one render function per route. Each returns the page chrome plus
+   its HTML; app.js mounts it and wires delegated events.
+   ========================================================================== */
+
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+const ICON = {
+  home:'<path d="M3 9.5 10 4l7 5.5V16a1 1 0 0 1-1 1h-3v-4H8v4H4a1 1 0 0 1-1-1z"/>',
+  compass:'<circle cx="10" cy="10" r="7.2"/><path d="m13 7-2 4-4 2 2-4z"/>',
+  spark:'<path d="M10 2.6 11.7 8 17 9.7 11.7 11.4 10 16.8 8.3 11.4 3 9.7 8.3 8z"/>',
+  target:'<circle cx="10" cy="10" r="7.2"/><circle cx="10" cy="10" r="3.6"/><circle cx="10" cy="10" r=".9"/>',
+  deck:'<rect x="2.8" y="4" width="14.4" height="9.5" rx="1.4"/><path d="M10 13.5V17M7 17h6"/>',
+  badge:'<path d="M10 2.6 12 5l3.2.3-.6 3.2 1.8 2.7-2.8 1.6-1 3.1-2.6-1.4-2.6 1.4-1-3.1L3.6 11l1.8-2.7L4.8 5.3 8 5z"/>',
+  book:'<path d="M4 3.6h5a2.4 2.4 0 0 1 2.4 2.4v10a1.8 1.8 0 0 0-1.8-1.8H4z"/><path d="M16.8 3.6h-4.2A2.4 2.4 0 0 0 10.2 6v10a1.8 1.8 0 0 1 1.8-1.8h4.8z"/>',
+  lib:'<path d="M3.2 5.4h13.6M3.2 10h13.6M3.2 14.6h13.6"/>',
+  user:'<circle cx="10" cy="7" r="3.2"/><path d="M4 16.6a6 6 0 0 1 12 0"/>',
+  check:'<path d="m4 10.4 4 4 8-8.4" stroke-width="2.4"/>',
+  arrow:'<path d="M4 10h11M11 5.6 15.4 10 11 14.4"/>',
+  plus:'<path d="M10 4.4v11.2M4.4 10h11.2"/>',
+  trash:'<path d="M4.6 5.6h10.8M8.2 5.6V4.2h3.6v1.4M6 5.6l.7 10.2h6.6L14 5.6"/>',
+  clock:'<circle cx="10" cy="10" r="7.2"/><path d="M10 5.6V10l3 1.8"/>',
+  play:'<path d="M6.6 4.4 15 10l-8.4 5.6z"/>',
+  pause:'<path d="M7 4.6h2.2v10.8H7zM10.8 4.6H13v10.8h-2.2z"/>',
+  menu:'<path d="M3.4 5.6h13.2M3.4 10h13.2M3.4 14.4h13.2"/>'
+};
+const ic = (n, cls) => `<svg class="${cls || ""}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ""}</svg>`;
+const icf = n => `<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">${ICON[n] || ""}</svg>`;
+
+function ring(pct, size, label) {
+  const r = (size / 2) - 7, c = 2 * Math.PI * r;
+  return `<div class="ring" style="width:${size}px;height:${size}px">
+    <svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--surface-3)" stroke-width="8"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct/100)}" style="transition:stroke-dashoffset .7s cubic-bezier(.2,.7,.2,1)"/></svg>
+    <div class="mid"><b>${Math.round(pct)}</b><span>${esc(label || "")}</span></div></div>`;
+}
+const bar = (pct, cls) => `<div class="bar ${cls||""}"><i style="width:${Math.max(0,Math.min(100,pct))}%"></i></div>`;
+const demandPill = d => `<span class="pill dot ${d==="Very high"||d==="High"?"ok":d==="Moderate"?"warn":""}">${esc(d)} demand</span>`;
+const aiPill = a => `<span class="pill ${a==="Transformed"?"warn":"acc"}">AI: ${esc(a)}</span>`;
+const money = n => "$" + n.toLocaleString("en-US");
+
+const V = {};
+
+/* ============================ DASHBOARD ================================== */
+V.dashboard = function () {
+  const s = Store.get(), R = Store.readiness(), ns = Store.nextStep();
+  const c1 = Store.cw1Progress(), c2 = Store.cw2Progress();
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const name = s.profile.name ? ", " + esc(s.profile.name.split(" ")[0]) : "";
+  const stage = PSE.roadmap.find(r => {
+    if (r.id === "explore") return new Set(s.viewed).size < 3;
+    if (r.id === "skills")  return Store.skillRows().filter(x => x.current && x.target).length < PSE.skills.length;
+    if (r.id === "goals")   return !s.goals.length;
+    if (r.id === "cw1")     return c1.pct < 100;
+    if (r.id === "cw2")     return c2.pct < 100;
+    if (r.id === "reflect") return Store.reflectionsInRange() < 3;
+    return false;
+  }) || PSE.roadmap[PSE.roadmap.length - 1];
+
+  const goals = s.goals.slice(0, 3).map(g => `
+    <div class="row"><div class="grow"><div class="t">${esc(g.title || "Untitled goal")}</div>
+      <div class="s">${g.deadline ? "Target " + esc(g.deadline) : "No deadline set"}${g.actions ? " · " + esc(g.actions.split("\n")[0].slice(0, 52)) : ""}</div>
+      <div style="margin-top:7px">${bar(g.progress || 0)}</div></div>
+      <div style="text-align:right"><div class="t">${g.progress || 0}%</div>
+      <button class="btn btn-sm btn-ghost" data-act="go" data-route="#/goals">Open</button></div></div>`).join("");
+
+  const refl = s.reflections.slice(0, 3).map(r => {
+    const w = Store.wordCount([r.what, r.learn, r.skills, r.career, r.next].join(" "));
+    return `<div class="row"><div class="grow"><div class="t">${esc(r.title || "Untitled reflection")}</div>
+      <div class="s">${esc((PSE.reflectionTypes.find(t => t.id === r.type) || {}).label || "")} · ${w} words</div></div>
+      <span class="pill ${w >= 70 ? "ok" : "warn"}">${w >= 70 ? "In range" : "Too short"}</span></div>`;
+  }).join("");
+
+  const firstRun = Store.isEmpty() ? `
+    <div class="nextstep" style="background:var(--surface);border-color:var(--line-2)">
+      <div class="ic" style="background:var(--ink-900)">${ic("spark")}</div>
+      <div style="flex:1"><h3 style="color:var(--ink-900)">This workspace is empty</h3>
+        <p>Load a sample student to see every screen working, then clear it and start your own. Nothing leaves this browser.</p></div>
+      <button class="btn btn-primary" data-act="loadsample">Load sample student</button>
+    </div>` : (Store.get().isSample ? `
+    <div class="nextstep" style="background:var(--warn-bg);border-color:#F2DCBB">
+      <div class="ic" style="background:var(--warn)">${ic("spark")}</div>
+      <div style="flex:1"><h3 style="color:var(--warn)">You are viewing sample data</h3>
+        <p>This is a demonstration workspace, not your own work. Clear it when you are ready to start.</p></div>
+      <button class="btn" data-act="resetall">Clear and start fresh</button>
+    </div>` : "");
+
+  return { title: "Dashboard", sub: "Your PSE progress at a glance, and the one thing to do next.", crumb: ["PSE", "Dashboard"], html: `
+    ${firstRun}
+    <div class="panel-dark hero-dark">
+      <div>
+        <div class="greet">${greet}${name} 👋</div>
+        <h2>Build the professional version of yourself.</h2>
+        <p>${s.profile.targetRole ? "You are working towards <b style=\"color:#fff\">" + esc(s.profile.targetRole) + "</b>. " : ""}You are on stage ${stage.n} — ${esc(stage.title)}.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-act="go" data-route="${ns.route}">${esc(ns.cta)} ${ic("arrow")}</button>
+          <button class="btn" data-act="go" data-route="#/careers">Explore careers</button>
+          <button class="btn" data-act="go" data-route="#/goals">Set a goal</button>
+        </div>
+      </div>
+      <div style="text-align:center">${ring(R.total, 132, "of 100")}<div style="font-size:12px;color:var(--dark-ink-2);margin-top:8px">Career readiness</div></div>
+    </div>
+
+    <div class="nextstep">
+      <div class="ic">${ic("spark")}</div>
+      <div style="flex:1">
+        <h3>Your next step — ${esc(ns.title)}</h3>
+        <p>${esc(ns.why)}</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" data-act="go" data-route="${ns.route}">${esc(ns.cta)}</button>
+        <button class="btn" data-act="jmap">Show me on the map</button>
+      </div>
+    </div>
+
+    <div class="grid g4">
+      <div class="card stat"><div class="k">Career readiness</div><div class="v">${R.total}<span style="font-size:14px;color:var(--ink-400)">/100</span></div><div class="d">${Object.values(R.parts).filter(p=>p.earned>0).length} of 7 areas started</div></div>
+      <div class="card stat"><div class="k">CW1 research</div><div class="v">${c1.pct}%</div><div class="d">${c1.done}/${c1.total} requirements</div></div>
+      <div class="card stat"><div class="k">LinkedIn profile</div><div class="v">${c2.pct}%</div><div class="d">${c2.done}/${c2.total} sections</div></div>
+      <div class="card stat"><div class="k">Active goals</div><div class="v">${s.goals.length}</div><div class="d">${s.goals.filter(g=>(g.progress||0)>=100).length} complete</div></div>
+    </div>
+
+    <div class="split">
+      <div class="grid" style="gap:16px">
+        <div class="card">
+          <div class="card-h"><div><h3>My goals</h3><p class="sub">SMART goals you are actively working on.</p></div>
+            <button class="btn btn-sm" data-act="go" data-route="#/goals">${ic("plus")} New goal</button></div>
+          ${s.goals.length ? `<div class="list">${goals}</div>` :
+            `<div class="empty"><h4>No goals yet</h4><p>Your skill gaps become goals here. Start with the biggest one.</p>
+             <button class="btn btn-primary" data-act="go" data-route="#/goals">Build a SMART goal</button></div>`}
+        </div>
+
+        <div class="card">
+          <div class="card-h"><div><h3>Recent reflections</h3><p class="sub">Evidence of professional growth for CW2.</p></div>
+            <button class="btn btn-sm" data-act="go" data-route="#/reflections">${ic("plus")} New</button></div>
+          ${s.reflections.length ? `<div class="list">${refl}</div>` :
+            `<div class="empty"><h4>Nothing written yet</h4><p>Guest lectures, the mock interview and the Zakovat quiz all count.</p>
+             <button class="btn btn-primary" data-act="go" data-route="#/reflections">Write a reflection</button></div>`}
+        </div>
+      </div>
+
+      <div class="grid" style="gap:16px">
+        <div class="card">
+          <div class="card-h"><h3>What builds your score</h3></div>
+          <div class="card-b" style="display:grid;gap:13px">
+            ${PSE.readinessParts.map(p => { const got = R.parts[p.id];
+              return `<div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px">
+                <span>${esc(p.label)}</span><b style="font-variant-numeric:tabular-nums">${got.earned}/${got.max}</b></div>
+                ${bar(got.earned / got.max * 100)}
+                <div style="font-size:11.5px;color:var(--ink-400);margin-top:4px">${esc(got.detail)}</div></div>`; }).join("")}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Achievements</h3></div>
+          <div class="card-b" style="display:grid;gap:9px">
+            ${Store.achievements().map(a => `<div style="display:flex;gap:10px;align-items:center;opacity:${a.earned?1:.5}">
+              <span style="width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;background:${a.earned?"var(--ok-bg)":"var(--surface-2)"};color:${a.earned?"var(--ok)":"var(--ink-300)"}">${ic(a.earned?"check":"badge")}</span>
+              <div><div style="font-size:13px;font-weight:550">${esc(a.label)}</div><div style="font-size:11.5px;color:var(--ink-400)">${esc(a.need)}</div></div></div>`).join("")}
+          </div>
+        </div>
+      </div>
+    </div>` };
+};
+
+/* ============================ ROADMAP ==================================== */
+/* Shared: the state of each roadmap stage, derived from the student's data. */
+function stageList() {
+  const s = Store.get(), c1 = Store.cw1Progress(), c2 = Store.cw2Progress();
+  const rated = Store.skillRows().filter(x => x.current && x.target).length;
+  const viewed = new Set(s.viewed).size, refl = Store.reflectionsInRange();
+  const done = {
+    meet: true, understand: true, explore: viewed >= 3, skills: rated >= PSE.skills.length,
+    goals: s.goals.length > 0, cw1: c1.pct === 100, cw2: c2.pct === 100, reflect: refl >= 3
+  };
+  const live = {
+    meet: "Module briefing complete", understand: "Assessment structure understood",
+    explore: viewed + " of 3 careers explored", skills: rated + " of " + PSE.skills.length + " skills rated",
+    goals: s.goals.length + " SMART goal" + (s.goals.length === 1 ? "" : "s") + (s.goals.length ? ", avg " + Math.round(s.goals.reduce((a, g) => a + (g.progress || 0), 0) / s.goals.length) + "% progress" : ""),
+    cw1: c1.done + "/" + c1.total + " requirements · " + s.cw1.sources.length + " sources",
+    cw2: c2.pct + "% of the profile complete", reflect: refl + " reflection" + (refl === 1 ? "" : "s") + " in range"
+  };
+  let nowSeen = false;
+  return PSE.roadmap.map(r => {
+    let state = done[r.id] ? "done" : "todo";
+    if (state === "todo" && !nowSeen) { state = "now"; nowSeen = true; }
+    return { ...r, state, live: live[r.id] };
+  });
+}
+
+/* ============================ ROADMAP — the journey canvas ================ */
+V.roadmap = function (intent) {
+  const list = stageList(), doneN = list.filter(x => x.state === "done").length;
+  const now = list.find(x => x.state === "now");
+  return { title: "Module roadmap", sub: "One canvas, eight stages. The camera opens where you are; the path fills as far as you have come.", crumb: ["PSE", "Roadmap"],
+    mount: () => Journey.mount(document.getElementById("journey"), list, intent),
+    html: `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="pill acc">${doneN} of 8 complete</span>
+        ${now ? `<span class="pill dot warn">You are at ${esc(now.n)} — ${esc(now.title)}</span>` : '<span class="pill ok">Journey complete</span>'}
+      </div>
+      <button class="btn btn-sm" data-act="jlist">Show as list</button>
+    </div>
+    <div class="journey" id="journey" tabindex="0" aria-label="Module journey canvas. Use the list below for a text version."></div>
+    <div class="card" id="jlist" hidden>
+      <div class="card-h"><div><h3>The eight stages</h3><p class="sub">The same journey as a list — every stage opens the work it requires.</p></div></div>
+      <div class="road">
+        ${list.map(r => `<div class="road-item ${r.state}" data-act="go" data-route="${r.route}">
+          <div class="road-n">${r.state === "done" ? ic("check") : r.n}</div>
+          <div><div class="t">${esc(r.title)}</div><div class="s">${esc(r.blurb)}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">${r.activities.map(a => `<span class="pill">${esc(a)}</span>`).join("")}</div></div>
+          <div>${r.state === "done" ? '<span class="pill ok">Done</span>' : r.state === "now" ? '<span class="pill acc">You are here</span>' : '<span class="pill">Not started</span>'}</div>
+        </div>`).join("")}
+      </div>
+    </div>` };
+};
+
+/* ============================ CAREER EXPLORER ============================= */
+let careerFilter = { q: "", industry: "", demand: "", ai: "", major: "" };
+V.careers = function () {
+  const s = Store.get(), f = careerFilter;
+  const industries = [...new Set(PSE.careers.map(c => c.industry))];
+  const majors = [...new Set(PSE.careers.flatMap(c => c.majors))].sort();
+  const list = PSE.careers.filter(c =>
+    (!f.q || (c.title + " " + c.overview + " " + c.industry).toLowerCase().includes(f.q.toLowerCase())) &&
+    (!f.industry || c.industry === f.industry) && (!f.demand || c.demand === f.demand) &&
+    (!f.ai || c.ai === f.ai) && (!f.major || c.majors.includes(f.major)));
+
+  return { title: "Career Explorer", sub: "Research occupations properly. Open three before you commit to one.", crumb: ["PSE", "My Career", "Explorer"], html: `
+    <div class="card"><div class="card-b" style="display:grid;gap:12px">
+      <input type="text" id="cq" placeholder="Search careers, industries or keywords…" value="${esc(f.q)}" data-act="cfilter" data-k="q">
+      <div class="chipbar">
+        <span style="font-size:12px;color:var(--ink-400)">Industry</span>
+        <button class="chip ${!f.industry?"on":""}" data-act="cset" data-k="industry" data-v="">All</button>
+        ${industries.map(i => `<button class="chip ${f.industry===i?"on":""}" data-act="cset" data-k="industry" data-v="${esc(i)}">${esc(i)}</button>`).join("")}
+      </div>
+      <div class="chipbar">
+        <span style="font-size:12px;color:var(--ink-400)">Demand</span>
+        <button class="chip ${!f.demand?"on":""}" data-act="cset" data-k="demand" data-v="">Any</button>
+        ${["Very high","High","Moderate"].map(d => `<button class="chip ${f.demand===d?"on":""}" data-act="cset" data-k="demand" data-v="${d}">${d}</button>`).join("")}
+        <span style="font-size:12px;color:var(--ink-400);margin-left:10px">AI impact</span>
+        ${["Augmented","Transformed"].map(a => `<button class="chip ${f.ai===a?"on":""}" data-act="cset" data-k="ai" data-v="${a}">${a}</button>`).join("")}
+        <span style="font-size:12px;color:var(--ink-400);margin-left:10px">Major</span>
+        <select style="width:auto;padding:4px 9px;font-size:12.5px" data-act="cfilter" data-k="major">
+          <option value="">Any major</option>${majors.map(m => `<option ${f.major===m?"selected":""}>${esc(m)}</option>`).join("")}</select>
+      </div>
+    </div></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--ink-500)">${list.length} career${list.length===1?"":"s"}${new Set(s.viewed).size ? " · you have explored " + new Set(s.viewed).size : ""}</div>
+      ${s.shortlist.length ? `<span class="pill acc">${s.shortlist.length} shortlisted</span>` : ""}
+    </div>
+
+    ${list.length ? `<div class="grid g3">${list.map(c => `
+      <div class="career-card" data-act="go" data-route="#/career/${c.id}">
+        <div><h3>${esc(c.title)}</h3><div class="ind">${esc(c.industry)} · ${esc(c.level)}</div></div>
+        <div class="ov">${esc(c.overview)}</div>
+        <div class="tags">${demandPill(c.demand)}${aiPill(c.ai)}<span class="pill">${esc(c.growth)} growth</span></div>
+        <div class="foot">
+          <span style="font-size:12.5px;color:var(--ink-400)">${s.viewed.includes(c.id) ? "Explored" : "Not yet explored"}</span>
+          <span style="display:flex;gap:6px">
+            <button class="btn btn-sm ${s.shortlist.includes(c.id)?"btn-primary":""}" data-act="shortlist" data-id="${c.id}" data-stop="1">${s.shortlist.includes(c.id)?"Shortlisted":"Shortlist"}</button>
+            <button class="btn btn-sm btn-primary" data-act="go" data-route="#/career/${c.id}">Explore</button>
+          </span></div>
+      </div>`).join("")}</div>` :
+      `<div class="card"><div class="empty"><h4>No careers match those filters</h4><p>Try clearing a filter or searching a different term.</p>
+        <button class="btn" data-act="cclear">Clear filters</button></div></div>`}` };
+};
+
+/* ============================ CAREER DETAIL =============================== */
+V.career = function (id) {
+  const c = PSE.careers.find(x => x.id === id);
+  if (!c) return { title: "Career not found", crumb: ["PSE", "Careers"], html: `<div class="card"><div class="empty"><h4>That career is not in the library</h4><button class="btn btn-primary" data-act="go" data-route="#/careers">Back to explorer</button></div></div>` };
+  const s = Store.get();
+  const skills = c.skillIds.map(i => PSE.skills.find(x => x.id === i)).filter(Boolean);
+  const srcs = c.sources.map(i => PSE.resources.find(r => r.id === i)).filter(Boolean);
+  const sec = (label, body) => `<div class="detail-sec"><h4>${esc(label)}</h4>${body}</div>`;
+
+  return { title: c.title, sub: c.industry + " · " + c.level, crumb: ["PSE", "Careers", c.title], html: `
+    <div class="split">
+      <div class="card">
+        ${sec("Career overview", `<p>${esc(c.overview)}</p>`)}
+        ${sec("Responsibilities", `<ul class="bullets">${c.responsibilities.map(r => `<li><span>${esc(r)}</span></li>`).join("")}</ul>`)}
+        ${sec("Work environment", `<p>${esc(c.environment)}</p>`)}
+        ${sec("Typical career progression", `<div class="steps-flow">${c.progression.map((p, i) => `${i ? '<span class="ar">' + ic("arrow") + '</span>' : ""}<span class="st">${esc(p)}</span>`).join("")}</div>`)}
+        ${sec("Required skills and abilities", `<div style="display:grid;gap:9px">${skills.map(k => `
+          <div style="display:grid;grid-template-columns:150px 1fr;gap:12px;font-size:13.5px">
+            <b style="font-weight:570">${esc(k.name)}</b><span style="color:var(--ink-500)">${esc(k.hint)}</span></div>`).join("")}</div>`)}
+        ${sec("Education and training", `<p>${esc(c.education)}</p>`)}
+        ${sec("Current job-market demand", `<p>${esc(c.demandNote)}</p>`)}
+        ${sec("AI, automation and global trends", `<p>${esc(c.aiDetail)}</p>`)}
+        ${sec("Projected growth", `<p><b>${esc(c.growth)}</b> — ${esc(c.growthNote)}. ${esc(c.outlook)}</p>`)}
+        ${sec("Salary information", `<p style="font-size:22px;font-weight:640;letter-spacing:-.03em">${money(c.salary)}</p>
+          <p style="font-size:12.5px;color:var(--ink-400);margin-top:4px">${esc(c.salaryNote)}. Local ranges differ substantially — research Uzbekistan figures on UzJobs or HeadHunter and cite those separately.</p>`)}
+        ${sec("How to develop these skills", `<ul class="bullets">${c.develop.map(d => `<li><span>${esc(d)}</span></li>`).join("")}</ul>`)}
+        ${sec("Research sources", `<div style="display:grid;gap:8px">${srcs.map(r => `
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+            <div><div style="font-size:13.5px;font-weight:550">${esc(r.name)}</div><div style="font-size:12px;color:var(--ink-400)">${esc(r.org)} · ${esc(r.best)}</div></div>
+            <span style="display:flex;gap:6px"><a class="btn btn-sm" href="${esc(r.url)}" target="_blank" rel="noopener">Open</a>
+            <button class="btn btn-sm" data-act="addsource" data-res="${r.id}">Add to CW1</button></span></div>`).join("")}</div>`)}
+      </div>
+
+      <div class="grid" style="gap:16px">
+        <div class="card"><div class="card-b" style="display:grid;gap:11px">
+          <div style="display:flex;gap:7px;flex-wrap:wrap">${demandPill(c.demand)}${aiPill(c.ai)}</div>
+          <div style="display:grid;gap:9px">
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ink-400)">Projected growth</span><b>${esc(c.growth)}</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ink-400)">Median salary</span><b>${money(c.salary)}</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--ink-400)">Entry level</span><b>${esc(c.level)}</b></div>
+          </div>
+          <button class="btn ${s.shortlist.includes(c.id)?"btn-primary":""}" data-act="shortlist" data-id="${c.id}">${s.shortlist.includes(c.id)?"On your shortlist":"Add to shortlist"}</button>
+          <button class="btn btn-primary" data-act="setcw1career" data-id="${c.id}">Use as my CW1 career</button>
+          ${s.cw1.career === c.id ? '<div style="font-size:12px;color:var(--ok);text-align:center">This is your CW1 career</div>' : ""}
+        </div></div>
+
+        <div class="panel-dark">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--dark-line)"><h3 style="font-size:14px">Today → Future</h3>
+            <p class="sub" style="font-size:12px;margin-top:3px">How work in this field is shifting.</p></div>
+          <div class="shift">${PSE.aiShift.slice(0, 4).map(r => `<div class="shift-row">
+            <span class="a">${esc(r.today)}</span><span class="ar">${ic("arrow")}</span><span class="b">${esc(r.future)}</span></div>`).join("")}</div>
+        </div>
+
+        <div class="card"><div class="card-h"><h3>Human skills that gain value</h3></div>
+          <div class="card-b" style="display:grid;gap:10px">${PSE.aiSkills.map(a => `
+            <div><div style="font-size:13px;font-weight:560">${esc(a.skill)}</div>
+            <div style="font-size:12px;color:var(--ink-400)">${esc(a.why)}</div></div>`).join("")}</div></div>
+      </div>
+    </div>` };
+};
+
+/* ============================ SKILLS ====================================== */
+V.skills = function () {
+  const rows = Store.skillRows();
+  const rated = rows.filter(r => r.current && r.target);
+  const gaps = rows.filter(r => r.gap > 0).sort((a, b) => b.gap - a.gap);
+  const top = gaps[0];
+  const strengths = rows.filter(r => r.current >= 7).sort((a, b) => b.current - a.current).slice(0, 3);
+
+  return { title: "My Skills", sub: "Rate where you are now and where you need to be. The gap is the syllabus for your goals.", crumb: ["PSE", "Skills"], html: `
+    <div class="grid g3">
+      <div class="card stat"><div class="k">Skills rated</div><div class="v">${rated.length}<span style="font-size:14px;color:var(--ink-400)">/${rows.length}</span></div><div class="d">Both current and target set</div></div>
+      <div class="card stat"><div class="k">Biggest opportunity</div><div class="v" style="font-size:19px">${top ? esc(top.name) : "—"}</div><div class="d">${top ? top.current + "/10 → " + top.target + "/10, a gap of " + top.gap : "Rate your skills to see this"}</div></div>
+      <div class="card stat"><div class="k">Strengths</div><div class="v" style="font-size:19px">${strengths.length ? esc(strengths.map(s=>s.name).join(", ")) : "—"}</div><div class="d">Rated 7 or above</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><div><h3>Self-assessment</h3><p class="sub">Be honest — an inflated rating produces a useless goal. Say why you chose each number.</p></div></div>
+      <div class="list">
+        ${rows.map(r => `<div class="skill-row">
+          <div class="skill-top"><div><span class="nm">${esc(r.name)}</span> <span class="pill">${esc(r.group)}</span>
+            <div class="hint">${esc(r.hint)}</div></div>
+            ${r.gap > 0 ? `<span class="pill warn">Gap of ${r.gap}</span>` : r.current ? '<span class="pill ok">At target</span>' : '<span class="pill">Not rated</span>'}</div>
+          <div class="gapbar"><span class="cur" id="gb-${r.id}-cur" style="width:${(r.current/10)*100}%"></span><span class="tgt" id="gb-${r.id}-tgt" style="left:calc(${(r.target/10)*100}% - 1px);${r.target?"":"display:none"}"></span></div>
+          <div class="skill-scale"><span class="lab">Current</span>
+            <input type="range" min="0" max="10" step="1" value="${r.current}" data-set="skills.${r.id}.current">
+            <span class="val" id="sv-${r.id}-current">${r.current}/10</span></div>
+          <div class="skill-scale"><span class="lab">Target</span>
+            <input type="range" min="0" max="10" step="1" value="${r.target}" data-set="skills.${r.id}.target">
+            <span class="val" id="sv-${r.id}-target">${r.target}/10</span></div>
+          <input type="text" placeholder="Why did you choose this rating?" value="${esc(r.why)}" data-set="skills.${r.id}.why" data-quiet="1">
+        </div>`).join("")}
+      </div>
+    </div>
+
+    ${gaps.length ? `<div class="card">
+      <div class="card-h"><div><h3>Gap analysis</h3><p class="sub">Concrete actions for the gaps you rated largest.</p></div>
+        <button class="btn btn-sm btn-primary" data-act="go" data-route="#/goals">Turn a gap into a goal</button></div>
+      <div class="list">${gaps.slice(0, 5).map(g => `<div class="row">
+        <div class="grow"><div class="t">${esc(g.name)} · ${g.current}/10 → ${g.target}/10</div>
+          <ul class="bullets" style="margin-top:7px">${g.actions.map(a => `<li><span>${esc(a)}</span></li>`).join("")}</ul></div>
+        <span class="pill warn">Gap ${g.gap}</span></div>`).join("")}</div>
+    </div>` : ""}` };
+};
+
+/* ============================ GOALS ======================================= */
+let goalDraft = null, goalStep = 0;
+const GOAL_STEPS = [
+  { k: "Goal",        fields: [["title","My goal","What do you want to achieve?","text"],["why","Why I want this","Why does this matter to you personally?","area"]] },
+  { k: "Specific",    fields: [["specific","Specific","What exactly will you accomplish? Name the outcome, not the intention.","area"],["measurable","Measurable","How will you know you succeeded? Include a number.","area"]] },
+  { k: "Achievable",  fields: [["achievable","Achievable","What resources, skills or support make this realistic?","area"],["relevant","Relevant","Why does this matter for your target career?","area"]] },
+  { k: "Time-bound",  fields: [["deadline","Deadline","","date"],["actions","What I need to do","Modules, courses, practice — one action per line.","area"]] },
+  { k: "Obstacles",   fields: [] },
+  { k: "Review",      fields: [] }
+];
+const OBSTACLES = ["Lack of time","Lack of experience","Lack of knowledge","Lack of confidence","Financial limitations","Other"];
+
+V.goals = function () {
+  const s = Store.get();
+  if (goalDraft) return goalWizard();
+
+  return { title: "Goals", sub: "SMART goals turn a skill gap into something with a deadline.", crumb: ["PSE", "Goals"], html: `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:13px;color:var(--ink-500)">${s.goals.length} goal${s.goals.length===1?"":"s"} · ${s.goals.filter(g=>(g.progress||0)>=100).length} complete</div>
+      <button class="btn btn-primary" data-act="newgoal">${ic("plus")} New SMART goal</button>
+    </div>
+    ${s.goals.length ? s.goals.map(g => {
+      const checks = Store.checkGoal(g), pass = checks.filter(c => c.ok).length;
+      return `<div class="card">
+        <div class="card-h"><div><h3>${esc(g.title || "Untitled goal")}</h3>
+          <p class="sub">${esc(g.relevant || g.why || "")}</p></div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <span class="pill ${pass===checks.length?"ok":pass>=6?"warn":"bad"}">${pass}/${checks.length} SMART</span>
+            <button class="btn btn-sm" data-act="editgoal" data-id="${g.id}">Edit</button>
+            <button class="btn btn-sm btn-danger" data-act="delgoal" data-id="${g.id}">${ic("trash")}</button></div></div>
+        <div class="card-b" style="display:grid;gap:14px">
+          <div class="grid g2" style="gap:12px">
+            <div><div style="font-size:11.5px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:4px">Specific</div>
+              <div style="font-size:13.5px">${esc(g.specific || "—")}</div></div>
+            <div><div style="font-size:11.5px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:4px">Measurable</div>
+              <div style="font-size:13.5px">${esc(g.measurable || "—")}</div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+              <span>Progress</span><b>${g.progress || 0}%${g.deadline ? " · target " + esc(g.deadline) : ""}</b></div>
+            ${bar(g.progress || 0, (g.progress||0) >= 100 ? "ok" : "")}
+            <input type="range" min="0" max="100" step="5" value="${g.progress || 0}" data-act="goalprogress" data-id="${g.id}" style="margin-top:9px">
+          </div>
+          ${(g.obstacles || []).filter(o => o.type).length ? `<div>
+            <div style="font-size:11.5px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:6px">Obstacles and plans</div>
+            <div style="display:grid;gap:6px">${g.obstacles.filter(o => o.type).map(o => `
+              <div style="display:grid;grid-template-columns:160px 1fr;gap:10px;font-size:13px">
+                <span class="pill warn" style="justify-self:start">${esc(o.type)}</span>
+                <span style="color:var(--ink-700)">${esc(o.solution || "No plan yet")}</span></div>`).join("")}</div></div>` : ""}
+          ${pass < checks.length ? `<div style="border-top:1px solid var(--line);padding-top:12px">
+            <div style="font-size:11.5px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:8px">Coach — what would strengthen this goal</div>
+            <div class="coach">${checks.filter(c => !c.ok).map(c => `<div class="coach-item no">
+              <span class="ic">!</span><div><div class="t">${esc(c.label)}</div>${c.fix ? `<div class="fix">${esc(c.fix)}</div>` : ""}</div></div>`).join("")}</div></div>` : ""}
+        </div></div>`; }).join("") :
+      `<div class="card"><div class="empty"><h4>No goals yet</h4>
+        <p>Open Skills first, find your biggest gap, then turn it into a goal with a date attached.</p>
+        <button class="btn btn-primary" data-act="newgoal">Build your first SMART goal</button></div></div>`}` };
+};
+
+function goalWizard() {
+  const g = goalDraft, step = GOAL_STEPS[goalStep];
+  const filled = f => (g[f] || "").toString().trim().length > 0;
+  const body = goalStep === 4 ? `
+      <p style="font-size:13px;color:var(--ink-500);margin-bottom:14px">What could stop you? Naming a barrier without a plan does not help — add how you will get around each one.</p>
+      <div style="display:grid;gap:10px">${OBSTACLES.map((o, i) => {
+        const cur = (g.obstacles || []).find(x => x.type === o) || {};
+        return `<div style="display:grid;grid-template-columns:170px 1fr 140px;gap:10px;align-items:center">
+          <label style="display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer">
+            <input type="checkbox" ${cur.type?"checked":""} data-act="obs-toggle" data-o="${esc(o)}"> ${esc(o)}</label>
+          <input type="text" placeholder="How will you overcome it?" value="${esc(cur.solution||"")}" data-act="obs-sol" data-o="${esc(o)}" ${cur.type?"":"disabled"}>
+          <input type="date" value="${esc(cur.date||"")}" data-act="obs-date" data-o="${esc(o)}" ${cur.type?"":"disabled"}>
+        </div>`; }).join("")}</div>`
+    : goalStep === 5 ? (() => {
+        const checks = Store.checkGoal(g);
+        return `<div style="display:grid;gap:16px">
+          <div style="background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:16px">
+            <div style="font-size:17px;font-weight:620;margin-bottom:10px">${esc(g.title || "Untitled goal")}</div>
+            ${[["Specific","specific"],["Measurable","measurable"],["Achievable","achievable"],["Relevant","relevant"]].map(([l,k]) =>
+              `<div style="display:grid;grid-template-columns:110px 1fr;gap:12px;font-size:13.5px;padding:5px 0">
+                <b style="color:var(--ink-400);font-weight:600">${l}</b><span>${esc(g[k] || "—")}</span></div>`).join("")}
+            <div style="display:grid;grid-template-columns:110px 1fr;gap:12px;font-size:13.5px;padding:5px 0">
+              <b style="color:var(--ink-400);font-weight:600">Time-bound</b><span>${esc(g.deadline || "No deadline")}</span></div>
+          </div>
+          <div><div style="font-size:11.5px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:8px">Coach check</div>
+            <div class="coach">${checks.map(c => `<div class="coach-item ${c.ok?"yes":"no"}">
+              <span class="ic">${c.ok ? ic("check") : "!"}</span>
+              <div><div class="t">${esc(c.label)}</div>${!c.ok && c.fix ? `<div class="fix">${esc(c.fix)}</div>` : ""}</div></div>`).join("")}</div></div>
+        </div>`; })()
+    : `<div style="display:grid;gap:16px">${step.fields.map(([k, label, hint, type]) => `
+        <div class="field"><label>${esc(label)}</label>
+          ${type === "area" ? `<textarea placeholder="${esc(hint)}" data-act="gd" data-k="${k}">${esc(g[k]||"")}</textarea>`
+            : type === "date" ? `<input type="date" value="${esc(g[k]||"")}" data-act="gd" data-k="${k}">`
+            : `<input type="text" placeholder="${esc(hint)}" value="${esc(g[k]||"")}" data-act="gd" data-k="${k}">`}
+          ${hint && type !== "text" ? `<div class="help">${esc(hint)}</div>` : ""}</div>`).join("")}</div>`;
+
+  return { title: g.id ? "Edit goal" : "New SMART goal", sub: "Step " + (goalStep+1) + " of " + GOAL_STEPS.length + " — " + step.k, crumb: ["PSE","Goals","Builder"], html: `
+    <div class="card" style="max-width:820px">
+      <div class="wiz-steps">${GOAL_STEPS.map((st, i) => `<button class="wiz-step ${i===goalStep?"on":""} ${i<goalStep?"ok":""}" data-act="gstep" data-i="${i}">
+        <b>${i < goalStep ? "✓" : i+1}</b>${esc(st.k)}</button>`).join("")}</div>
+      <div class="card-b">${body}</div>
+      <div class="card-f" style="display:flex;justify-content:space-between;gap:10px;background:var(--surface)">
+        <button class="btn" data-act="gstep" data-i="${goalStep-1}" ${goalStep===0?"disabled":""}>Back</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" data-act="gcancel">Cancel</button>
+          ${goalStep < GOAL_STEPS.length-1
+            ? `<button class="btn btn-primary" data-act="gstep" data-i="${goalStep+1}" ${goalStep===0&&!filled("title")?"disabled":""}>Continue ${ic("arrow")}</button>`
+            : `<button class="btn btn-primary" data-act="gsave">Save goal</button>`}
+        </div></div>
+    </div>` };
+}
+
+/* ============================ CW1 ========================================= */
+let cw1Tab = "checklist";
+V.cw1 = function () {
+  const s = Store.get(), p = Store.cw1Progress();
+  const career = PSE.careers.find(c => c.id === s.cw1.career);
+  const tabs = [["checklist","Research checklist"],["slides","Slide planner"],["sources","Source library"],["practice","Practice"]];
+  let body = "";
+
+  if (cw1Tab === "checklist") {
+    const groups = [...new Set(PSE.cw1Checklist.map(i => i.group))];
+    body = `<div class="card"><div class="card-h"><div><h3>Assignment requirements</h3>
+        <p class="sub">Every item below is assessed. Tick them as your group completes them.</p></div>
+        <span class="pill ${p.pct===100?"ok":"acc"}">${p.done}/${p.total}</span></div>
+      ${groups.map(gr => `<div style="border-top:1px solid var(--line)">
+        <div style="padding:11px 18px 3px;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-400);font-weight:620">${esc(gr)}</div>
+        ${PSE.cw1Checklist.filter(i => i.group === gr).map(i => `
+          <div class="check-row ${s.cw1.checklist[i.id]?"on":""}" data-act="cw1check" data-id="${i.id}">
+            <span class="box">${ic("check")}</span>
+            <div><div class="t" style="font-size:13.5px;font-weight:550">${esc(i.label)}</div>
+              <div style="font-size:12.5px;color:var(--ink-400)">${esc(i.help)}</div></div></div>`).join("")}
+      </div>`).join("")}</div>
+      <div class="card"><div class="card-h"><h3>Coach — what is still missing</h3></div>
+        <div class="card-b"><div class="coach">${Store.checkCW1().map(c => `<div class="coach-item ${c.ok?"yes":"no"}">
+          <span class="ic">${c.ok?ic("check"):"!"}</span><div><div class="t">${esc(c.label)}</div>
+          ${c.fix?`<div class="fix">${esc(c.fix)}</div>`:""}</div></div>`).join("")}</div></div></div>`;
+  }
+
+  if (cw1Tab === "slides") {
+    body = `<div class="card"><div class="card-h"><div><h3>Ten-slide plan</h3>
+      <p class="sub">Plan what each slide must answer before you design anything. A slide counts as planned once it has real notes.</p></div>
+      <span class="pill ${Store.slidesDone()===10?"ok":"acc"}">${Store.slidesDone()}/10 planned</span></div>
+      ${PSE.cw1Slides.map(sl => { const v = s.cw1.slides[sl.n] || {}; const ok = (v.notes||"").trim().length > 20;
+        return `<div style="border-top:1px solid var(--line);padding:15px 18px">
+          <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+            <div><div style="font-size:13.5px;font-weight:570">Slide ${sl.n} — ${esc(sl.title)}</div>
+              <div style="font-size:12.5px;color:var(--ink-400)">${esc(sl.purpose)}</div></div>
+            <span class="pill ${ok?"ok":""}">${ok?"Planned":"Empty"}</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin:9px 0">${sl.ask.map(q => `<span class="pill">${esc(q)}</span>`).join("")}</div>
+          <textarea placeholder="Research notes for this slide — what will you actually say?" data-set="cw1.slides.${sl.n}.notes" data-quiet="1">${esc(v.notes||"")}</textarea>
+          <input type="text" style="margin-top:8px" placeholder="Sources supporting this slide" value="${esc(v.sources||"")}" data-set="cw1.slides.${sl.n}.sources" data-quiet="1">
+        </div>`; }).join("")}</div>`;
+  }
+
+  if (cw1Tab === "sources") {
+    body = `<div class="split">
+      <div class="card"><div class="card-h"><div><h3>Reference library</h3>
+        <p class="sub">Westminster Harvard format is generated for you. Add sources as you research, not the night before.</p></div>
+        <span class="pill ${s.cw1.sources.length>=5?"ok":"warn"}">${s.cw1.sources.length} source${s.cw1.sources.length===1?"":"s"}</span></div>
+        ${s.cw1.sources.length ? s.cw1.sources.map(src => `<div style="border-top:1px solid var(--line);padding:14px 18px">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+            <div style="min-width:0"><div style="font-size:13.5px;font-weight:560">${esc(src.title||"Untitled")}</div>
+              <div style="font-size:12px;color:var(--ink-400)">${esc(src.author||"No author")} · ${esc(src.year||"n.d.")}</div></div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sm" data-act="copyref" data-id="${src.id}">Copy</button>
+              <button class="btn btn-sm btn-danger" data-act="delsource" data-id="${src.id}">${ic("trash")}</button></div></div>
+          <div class="ref-out" style="margin-top:9px">${esc(Store.harvard(src))}</div>
+          <div style="font-size:12px;color:var(--ink-400);margin-top:6px">In-text: <code>${esc(Store.citation(src))}</code></div>
+        </div>`).join("") : `<div class="empty"><h4>No sources saved</h4><p>Add the sources you actually used. Five or more shows real research.</p></div>`}
+      </div>
+      <div class="card"><div class="card-h"><h3>Add a source</h3></div>
+        <div class="card-b" style="display:grid;gap:11px">
+          <div class="field"><label>Title</label><input type="text" id="sr-title" placeholder="Occupational Outlook Handbook: Data Scientists"></div>
+          <div class="field"><label>Author or organisation</label><input type="text" id="sr-author" placeholder="US Bureau of Labor Statistics"></div>
+          <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+            <div class="field"><label>Year</label><input type="text" id="sr-year" placeholder="2024"></div>
+            <div class="field"><label>Accessed</label><input type="date" id="sr-accessed" value="${new Date().toISOString().slice(0,10)}"></div></div>
+          <div class="field"><label>URL</label><input type="url" id="sr-url" placeholder="https://www.bls.gov/ooh/"></div>
+          <button class="btn btn-primary" data-act="savesource">${ic("plus")} Add to library</button>
+          <div style="border-top:1px solid var(--line);padding-top:11px">
+            <div style="font-size:12px;color:var(--ink-400);margin-bottom:7px">Or add a recommended resource:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">${PSE.resources.slice(0,6).map(r => `
+              <button class="chip" data-act="addsource" data-res="${r.id}">${esc(r.name)}</button>`).join("")}</div></div>
+        </div></div></div>`;
+  }
+
+  if (cw1Tab === "practice") {
+    const runs = s.cw1.practice;
+    body = `<div class="split">
+      <div class="grid" style="gap:16px">
+        <div class="card"><div class="card-h"><div><h3>Presentation timer</h3>
+          <p class="sub">Your individual share is 5–7 minutes. The clock turns green inside the window and red past it.</p></div></div>
+          <div class="card-b" style="text-align:center;padding:30px">
+            <div class="timer-face" id="tface">00:00</div>
+            <div class="timer-band">Target window: 5:00 – 7:00</div>
+            <div style="display:flex;gap:9px;justify-content:center;margin-top:20px">
+              <button class="btn btn-primary" data-act="tstart" id="tbtn">${ic("play")} Start</button>
+              <button class="btn" data-act="treset">Reset</button></div>
+          </div></div>
+        <div class="card"><div class="card-h"><div><h3>Self-evaluation</h3>
+          <p class="sub">Score yourself out of 5 immediately after the run, while it is fresh.</p></div></div>
+          <div class="card-b" style="display:grid;gap:12px">
+            ${PSE.practiceCriteria.map(c => `<div>
+              <div style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(c.label)}
+                <span style="color:var(--ink-400);font-size:12px">— ${esc(c.hint)}</span></span>
+                <b id="pv-${c.id}" style="font-variant-numeric:tabular-nums">3</b></div>
+              <input type="range" min="1" max="5" step="1" value="3" data-act="pscore" data-id="${c.id}"></div>`).join("")}
+            <div class="field"><label>One thing to improve next time</label>
+              <input type="text" id="p-improve" placeholder="Slow down on the job-market slide"></div>
+            <button class="btn btn-primary" data-act="savepractice">Save this practice run</button>
+          </div></div>
+      </div>
+      <div class="card"><div class="card-h"><div><h3>Practice history</h3><p class="sub">${runs.length} run${runs.length===1?"":"s"} recorded.</p></div></div>
+        ${runs.length ? runs.slice().reverse().map(r => `<div class="row">
+          <div class="grow"><div class="t">${Math.floor(r.seconds/60)}:${String(r.seconds%60).padStart(2,"0")}
+            <span class="pill ${r.seconds>=300&&r.seconds<=420?"ok":"warn"}" style="margin-left:6px">${r.seconds>=300&&r.seconds<=420?"In window":"Out of window"}</span></div>
+            <div class="s">${esc(r.date)} · average ${r.avg}/5${r.improvement?" · "+esc(r.improvement):""}</div></div></div>`).join("")
+          : `<div class="empty"><h4>No runs yet</h4><p>Rehearsing to a timer is the single highest-value thing you can do before CW1.</p></div>`}
+      </div></div>`;
+  }
+
+  return { title: "CW1 — Group Presentation", sub: career ? "Researching " + career.title : "Choose a career from the explorer to begin.", crumb: ["PSE","CW1"], html: `
+    <div class="grid g4">
+      <div class="card stat"><div class="k">Research</div><div class="v">${p.pct}%</div><div class="d">${p.done}/${p.total} requirements</div></div>
+      <div class="card stat"><div class="k">Slides planned</div><div class="v">${Store.slidesDone()}<span style="font-size:14px;color:var(--ink-400)">/10</span></div><div class="d">Notes written</div></div>
+      <div class="card stat"><div class="k">References</div><div class="v">${s.cw1.sources.length}</div><div class="d">Harvard formatted</div></div>
+      <div class="card stat"><div class="k">Practice runs</div><div class="v">${s.cw1.practice.length}</div><div class="d">Timed rehearsals</div></div>
+    </div>
+    ${!career ? `<div class="nextstep"><div class="ic">${ic("compass")}</div><div style="flex:1">
+      <h3>Pick your CW1 career first</h3><p>Everything in this workspace hangs off the occupation your group is researching.</p></div>
+      <button class="btn btn-primary" data-act="go" data-route="#/careers">Open Career Explorer</button></div>` : ""}
+    <div class="chipbar">${tabs.map(([k,l]) => `<button class="chip ${cw1Tab===k?"on":""}" data-act="cw1tab" data-k="${k}">${esc(l)}</button>`).join("")}</div>
+    ${body}` };
+};
+
+/* ============================ CW2 / LINKEDIN ============================== */
+V.cw2 = function () {
+  const s = Store.get(), p = Store.cw2Progress();
+  const val = id => (s.cw2.sections[id] || {}).value || "";
+  const done = id => !!(s.cw2.sections[id] || {}).done;
+  const hp = PSE.headlineParts;
+  const pick = (k, i) => hp[k][i % hp[k].length];
+  const suggestions = [0,1,2].map(i => `${pick("status",i)} | ${pick("target",i)} | ${pick("strength",i)}`);
+
+  return { title: "CW2 — LinkedIn", sub: "Build the profile section by section. The preview on the right updates as you type.", crumb: ["PSE","CW2"], html: `
+    <div class="grid g3">
+      <div class="card stat"><div class="k">Profile completion</div><div class="v">${p.pct}%</div><div class="d">${p.done}/${p.total} sections</div></div>
+      <div class="card stat"><div class="k">Headline</div><div class="v" style="font-size:16px">${val("headline") ? esc(val("headline").slice(0,34)) + (val("headline").length>34?"…":"") : "Not written"}</div><div class="d">${val("headline").length}/220 characters</div></div>
+      <div class="card stat"><div class="k">AI Literacy certificate</div><div class="v" style="font-size:18px">${done("ai")?"Added":"Not added"}</div><div class="d">Required for CW2</div></div>
+    </div>
+
+    <div class="split">
+      <div class="grid" style="gap:16px">
+        <div class="card"><div class="card-h"><div><h3>Headline builder</h3>
+          <p class="sub">Combine your status, your target profession and your strongest skill. Edit any suggestion — do not just paste it.</p></div></div>
+          <div class="card-b" style="display:grid;gap:10px">
+            ${suggestions.map(sug => `<div style="display:flex;gap:9px;align-items:center;justify-content:space-between;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px">
+              <span style="font-size:13px">${esc(sug)}</span>
+              <button class="btn btn-sm" data-act="usehead" data-v="${esc(sug)}">Use</button></div>`).join("")}
+            <div class="field"><label>Your headline</label>
+              <input type="text" maxlength="220" placeholder="Undergraduate Student | Aspiring Data Analyst | SQL & Python" value="${esc(val("headline"))}" data-set="cw2.sections.headline.value" data-quiet="1">
+              <div class="help">${val("headline").length}/220 characters. LinkedIn shows roughly the first 120 in search results.</div></div>
+          </div></div>
+
+        <div class="card"><div class="card-h"><div><h3>Profile sections</h3>
+          <p class="sub">Each section is weighted towards your completion score.</p></div>
+          <span class="pill ${p.pct===100?"ok":"acc"}">${p.pct}%</span></div>
+          ${PSE.linkedinSections.filter(x => x.id !== "headline").map(sec => {
+            const v = s.cw2.sections[sec.id] || {};
+            const ok = sec.type === "check" ? !!v.done : !!(v.value && v.value.trim().length >= (sec.min || 20));
+            return `<div style="border-top:1px solid var(--line);padding:15px 18px">
+              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+                <div><div style="font-size:13.5px;font-weight:560">${esc(sec.label)}</div>
+                  <div style="font-size:12.5px;color:var(--ink-400);max-width:62ch">${esc(sec.help)}</div></div>
+                <span class="pill ${ok?"ok":""}">${ok?"Complete":sec.weight+" pts"}</span></div>
+              ${sec.type === "check"
+                ? `<label style="display:flex;gap:9px;align-items:center;margin-top:10px;font-size:13.5px;cursor:pointer">
+                    <input type="checkbox" ${v.done?"checked":""} data-act="cw2check" data-id="${sec.id}"> Done — added to my profile</label>`
+                : `<textarea style="margin-top:10px" placeholder="Write this section…" data-set="cw2.sections.${sec.id}.value" data-quiet="1">${esc(v.value||"")}</textarea>`}
+            </div>`; }).join("")}
+        </div>
+      </div>
+
+      <div class="li-prev">
+        <div class="li-cover"></div>
+        <div class="li-body">
+          <div class="li-avatar">${done("photo") ? ic("check") : (s.profile.name ? esc(s.profile.name.trim()[0].toUpperCase()) : "?")}</div>
+          <div class="li-name">${esc(s.profile.name || "Your name")}</div>
+          <div class="li-head" id="li-headline">${esc(val("headline") || "Your headline will appear here")}</div>
+          <div class="li-meta">${esc(PSE.meta.institution)}${s.profile.major ? " · " + esc(s.profile.major) : ""}</div>
+          ${["about","education","experience","skills"].map(id => {
+            const sec = PSE.linkedinSections.find(x => x.id === id), v = val(id);
+            return `<div class="li-sec ${v?"":"missing"}"><h5>${esc(sec.label)}</h5>
+              <p id="li-${id}">${v ? esc(v.slice(0,260)) + (v.length>260?"…":"") : "Not written yet"}</p></div>`; }).join("")}
+        </div>
+      </div>
+    </div>` };
+};
+
+/* ============================ REFLECTIONS ================================= */
+let reflDraft = null;
+V.reflections = function () {
+  const s = Store.get();
+  if (reflDraft) {
+    const r = reflDraft;
+    const words = Store.wordCount([r.what,r.learn,r.skills,r.career,r.next].join(" "));
+    const cls = words >= 70 && words <= 100 ? "ok" : words > 100 ? "warn" : "";
+    const checks = Store.checkReflection(r);
+    return { title: r.id ? "Edit reflection" : "New reflection", sub: "Structured reflection — the five prompts are what makes it assessable.", crumb: ["PSE","Reflections","Write"], html: `
+      <div class="split">
+        <div class="card">
+          <div class="card-b" style="display:grid;gap:14px">
+            <div class="grid" style="grid-template-columns:1fr 220px;gap:12px">
+              <div class="field"><label>Title</label>
+                <input type="text" placeholder="Guest lecture with a data team lead" value="${esc(r.title||"")}" data-act="rd" data-k="title"></div>
+              <div class="field"><label>Type</label><select data-act="rd" data-k="type">
+                ${PSE.reflectionTypes.map(t => `<option value="${t.id}" ${r.type===t.id?"selected":""}>${esc(t.label)}</option>`).join("")}</select></div>
+            </div>
+            ${PSE.reflectionPrompts.map(p => `<div class="field"><label>${esc(p.label)}</label>
+              <textarea placeholder="${esc(p.hint)}" data-act="rd" data-k="${p.key}">${esc(r[p.key]||"")}</textarea></div>`).join("")}
+          </div>
+          <div class="card-f" style="display:flex;justify-content:space-between;align-items:center;background:var(--surface)">
+            <span class="wordcount ${cls}" id="rwords">${words} / 70–100 words${words<70?" — keep going":words>100?" — tighten it":" — in range"}</span>
+            <span style="display:flex;gap:8px"><button class="btn btn-ghost" data-act="rcancel">Cancel</button>
+            <button class="btn btn-primary" data-act="rsave">Save reflection</button></span></div>
+        </div>
+        <div class="card"><div class="card-h"><div><h3>Coach</h3><p class="sub">Checks the structure. It will not write it for you.</p></div></div>
+          <div class="card-b"><div class="coach" id="rcoach">${checks.map(c => `<div class="coach-item ${c.ok?"yes":"no"}">
+            <span class="ic">${c.ok?ic("check"):"!"}</span><div><div class="t">${esc(c.label)}</div>
+            ${!c.ok&&c.fix?`<div class="fix">${esc(c.fix)}</div>`:""}</div></div>`).join("")}</div></div></div>
+      </div>` };
+  }
+
+  return { title: "Reflections", sub: "Turn experiences into evidence. Each LinkedIn reflection should land between 70 and 100 words.", crumb: ["PSE","Reflections"], html: `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:13px;color:var(--ink-500)">${s.reflections.length} written · ${Store.reflectionsInRange()} with enough depth</div>
+      <button class="btn btn-primary" data-act="newrefl">${ic("plus")} New reflection</button></div>
+    <div class="grid g2">
+      ${PSE.reflectionTypes.map(t => { const have = s.reflections.filter(r => r.type === t.id).length;
+        return `<div class="card" style="cursor:pointer" data-act="newrefl" data-type="${t.id}"><div class="card-b" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div><div style="font-size:13.5px;font-weight:560">${esc(t.label)}</div>
+            <div style="font-size:12px;color:var(--ink-400)">${have ? have + " written" : "Not written yet"}</div></div>
+          <span class="pill ${have?"ok":""}">${have?ic("check"):ic("plus")}</span></div></div>`; }).join("")}
+    </div>
+    ${s.reflections.length ? `<div class="card"><div class="card-h"><h3>Your reflections</h3></div><div class="list">
+      ${s.reflections.map(r => { const w = Store.wordCount([r.what,r.learn,r.skills,r.career,r.next].join(" "));
+        return `<div class="row"><div class="grow"><div class="t">${esc(r.title||"Untitled")}</div>
+          <div class="s">${esc((PSE.reflectionTypes.find(t=>t.id===r.type)||{}).label||"")} · ${esc(r.date||"")}</div></div>
+          <span class="wordcount ${w>=70&&w<=100?"ok":"warn"}">${w} words</span>
+          <button class="btn btn-sm" data-act="editrefl" data-id="${r.id}">Edit</button>
+          <button class="btn btn-sm btn-danger" data-act="delrefl" data-id="${r.id}">${ic("trash")}</button></div>`; }).join("")}
+    </div></div>` : ""}` };
+};
+
+/* ============================ RESOURCES =================================== */
+V.resources = function () {
+  return { title: "Resources", sub: "The career research sources from the seminar. Cite these, not a search engine summary.", crumb: ["PSE","Resources"], html: `
+    <div class="grid g2">${PSE.resources.map(r => `<div class="card"><div class="card-b" style="display:grid;gap:10px">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div><h3 style="font-size:15px;font-weight:620">${esc(r.name)}</h3>
+          <div style="font-size:12px;color:var(--ink-400)">${esc(r.org)}</div></div>
+        <span class="pill">${esc(r.region)}</span></div>
+      <p style="font-size:13px;color:var(--ink-500)">${esc(r.what)}</p>
+      <div style="font-size:12px;color:var(--ink-400)"><b style="color:var(--ink-700)">Best for:</b> ${esc(r.best)}</div>
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <a class="btn btn-sm btn-primary" href="${esc(r.url)}" target="_blank" rel="noopener">Open ${ic("arrow")}</a>
+        <button class="btn btn-sm" data-act="addsource" data-res="${r.id}">Add to CW1 references</button></div>
+    </div></div>`).join("")}</div>
+
+    <div class="panel-dark">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--dark-line)"><h3 style="font-size:15px">AI and the future of work</h3>
+        <p class="sub" style="font-size:12.5px;margin-top:3px">What is changing, and which human skills gain value as a result.</p></div>
+      <div class="shift">${PSE.aiShift.map(r => `<div class="shift-row">
+        <span class="a">${esc(r.today)}</span><span class="ar">${ic("arrow")}</span><span class="b">${esc(r.future)}</span>
+        <span class="note">${esc(r.note)}</span></div>`).join("")}</div>
+    </div>` };
+};
+
+/* ============================ PROFILE ===================================== */
+V.profile = function () {
+  const s = Store.get(), R = Store.readiness(), rows = Store.skillRows();
+  const strengths = rows.filter(r => r.current >= 7).sort((a,b) => b.current-a.current).slice(0,4);
+  const gaps = rows.filter(r => r.gap > 0).sort((a,b) => b.gap-a.gap).slice(0,4);
+  const short = s.shortlist.map(id => PSE.careers.find(c => c.id === id)).filter(Boolean);
+
+  return { title: "My Career", sub: "Everything you have built, in one place.", crumb: ["PSE","Profile"], html: `
+    <div class="split">
+      <div class="grid" style="gap:16px">
+        <div class="card"><div class="card-h"><h3>About you</h3></div>
+          <div class="card-b grid g2" style="gap:12px">
+            <div class="field"><label>Name</label><input type="text" placeholder="Your full name" value="${esc(s.profile.name)}" data-set="profile.name" data-quiet="1"></div>
+            <div class="field"><label>Major</label><input type="text" placeholder="BSc Business Management" value="${esc(s.profile.major)}" data-set="profile.major" data-quiet="1"></div>
+            <div class="field"><label>Target entry-level role</label><input type="text" placeholder="Junior Data Analyst" value="${esc(s.profile.targetRole)}" data-set="profile.targetRole" data-quiet="1"></div>
+            <div class="field"><label>Career interests</label><input type="text" placeholder="Fintech, analytics, consulting" value="${esc(s.profile.interests)}" data-set="profile.interests" data-quiet="1"></div>
+          </div></div>
+
+        <div class="card"><div class="card-h"><h3>Shortlisted careers</h3></div>
+          ${short.length ? `<div class="list">${short.map(c => `<div class="row">
+            <div class="grow"><div class="t">${esc(c.title)}</div><div class="s">${esc(c.industry)} · ${esc(c.growth)} growth · ${money(c.salary)}</div></div>
+            <button class="btn btn-sm" data-act="go" data-route="#/career/${c.id}">Open</button></div>`).join("")}</div>`
+            : `<div class="empty"><h4>Nothing shortlisted</h4><p>Shortlist careers from the explorer to compare them here.</p>
+              <button class="btn btn-primary" data-act="go" data-route="#/careers">Explore careers</button></div>`}</div>
+
+        <div class="card"><div class="card-h"><h3>Your data</h3></div>
+          <div class="card-b" style="display:grid;gap:11px">
+            <p style="font-size:13px;color:var(--ink-500)">Everything you enter is saved in this browser only — no account, no server. Export a backup before switching computers.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" data-act="export">Export backup</button>
+              <button class="btn" data-act="importopen">Import backup</button>
+              <button class="btn btn-danger" data-act="resetall">Reset everything</button></div>
+            <textarea id="importbox" hidden placeholder="Paste an exported backup here, then press Import"></textarea>
+            <button class="btn btn-primary" id="importgo" hidden data-act="importgo">Import</button>
+          </div></div>
+      </div>
+
+      <div class="grid" style="gap:16px">
+        <div class="card"><div class="card-b" style="text-align:center;padding:22px">
+          ${ring(R.total, 128, "of 100")}
+          <div style="font-size:13px;font-weight:560;margin-top:10px">Career readiness</div>
+          <div style="font-size:12px;color:var(--ink-400)">${esc(s.profile.targetRole || "Set a target role to sharpen this")}</div></div></div>
+        <div class="card"><div class="card-h"><h3>Top strengths</h3></div><div class="card-b" style="display:grid;gap:8px">
+          ${strengths.length ? strengths.map(x => `<div style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(x.name)}</span><b>${x.current}/10</b></div>`).join("")
+            : '<div style="font-size:13px;color:var(--ink-400)">Rate your skills to see this.</div>'}</div></div>
+        <div class="card"><div class="card-h"><h3>Skills to improve</h3></div><div class="card-b" style="display:grid;gap:8px">
+          ${gaps.length ? gaps.map(x => `<div style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(x.name)}</span><span class="pill warn">gap ${x.gap}</span></div>`).join("")
+            : '<div style="font-size:13px;color:var(--ink-400)">No gaps recorded yet.</div>'}</div></div>
+      </div>
+    </div>` };
+};
+
+</script>
+<script>
+/* =============================================================================
+   app.js — router, delegated events, and the shell.
+   ========================================================================== */
+(function () {
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
+
+  const NAV = [
+    { g: "Workspace" },
+    { r: "#/",            i: "home",    l: "Dashboard" },
+    { r: "#/roadmap",     i: "compass", l: "Roadmap" },
+    { r: "#/careers",     i: "compass", l: "Career Explorer" },
+    { g: "Development" },
+    { r: "#/skills",      i: "spark",   l: "Skills" },
+    { r: "#/goals",       i: "target",  l: "Goals",       c: () => Store.get().goals.length },
+    { g: "Coursework" },
+    { r: "#/cw1",         i: "deck",    l: "CW1 — Presentation", c: () => Store.cw1Progress().pct + "%" },
+    { r: "#/cw2",         i: "badge",   l: "CW2 — LinkedIn",     c: () => Store.cw2Progress().pct + "%" },
+    { r: "#/reflections", i: "book",    l: "Reflections", c: () => Store.get().reflections.length },
+    { g: "Reference" },
+    { r: "#/resources",   i: "lib",     l: "Resources" },
+    { r: "#/profile",     i: "user",    l: "My Career" }
+  ];
+
+  function renderRail(route) {
+    const R = Store.readiness();
+    $("#nav").innerHTML = NAV.map(n => {
+      if (n.g) return `<div class="nav-label">${n.g}</div>`;
+      const on = route === n.r || (n.r === "#/careers" && route.startsWith("#/career/"));
+      const c = n.c ? n.c() : null;
+      return `<a href="${n.r}" class="${on ? "on" : ""}" data-act="go" data-route="${n.r}">
+        ${ic(n.i)}<span>${n.l}</span>${c ? `<span class="count">${c}</span>` : ""}</a>`;
+    }).join("");
+    $("#railscore").innerHTML = `<div class="k">Career readiness</div><div class="v">${R.total}<small>/100</small></div>
+      <div class="bar" style="margin-top:7px;background:#1E2B45"><i style="width:${R.total}%"></i></div>`;
+  }
+
+  function route() {
+    const h = location.hash || "#/";
+    if (h.startsWith("#/career/")) return V.career(h.slice(9));
+    if (h === "#/roadmap") { const i = journeyIntent; journeyIntent = null; return V.roadmap(i); }
+    const map = { "#/": V.dashboard, "#/roadmap": V.roadmap, "#/careers": V.careers, "#/skills": V.skills,
+      "#/goals": V.goals, "#/cw1": V.cw1, "#/cw2": V.cw2, "#/reflections": V.reflections,
+      "#/resources": V.resources, "#/profile": V.profile };
+    return (map[h] || V.dashboard)();
+  }
+
+  let lastHash = null, journeyIntent = null;
+  function render(scroll) {
+    if (window.Journey) Journey.destroy();
+    const page = route();
+    document.title = page.title + " · PSE";
+    $("#crumb").innerHTML = (page.crumb || []).map(c => `<span>${esc(c)}</span>`).join("");
+    $("#ptitle").textContent = page.title;
+    $("#psub").textContent = page.sub || "";
+    $("#psub").hidden = !page.sub;
+    $("#page").innerHTML = page.html;
+    if (page.mount) page.mount();
+    renderRail(location.hash || "#/");
+    if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
+    $("#rail").classList.remove("open");
+    const sc = $(".scrim"); if (sc) sc.remove();
+  }
+
+  /* --- generic path setter for data-set inputs ---------------------------- */
+  function setPath(obj, path, value) {
+    const parts = path.split("."); let cur = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (cur[parts[i]] == null || typeof cur[parts[i]] !== "object") cur[parts[i]] = {};
+      cur = cur[parts[i]];
+    }
+    cur[parts[parts.length - 1]] = value;
+  }
+  function quietSet(path, value) {
+    const s = Store.get(); setPath(s, path, value);
+    Store.update(() => {});           /* persists + updates the rail score */
+  }
+
+  let toastT;
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  /* --- practice timer ------------------------------------------------------ */
+  let timerId = null, seconds = 0, pScores = {};
+  function paintTimer() {
+    const f = $("#tface"); if (!f) return;
+    f.textContent = String(Math.floor(seconds / 60)).padStart(2, "0") + ":" + String(seconds % 60).padStart(2, "0");
+    f.className = "timer-face" + (seconds >= 300 && seconds <= 420 ? " in" : seconds > 420 ? " over" : "");
+  }
+  function stopTimer() { clearInterval(timerId); timerId = null; const b = $("#tbtn"); if (b) b.innerHTML = ic("play") + " Start"; }
+
+  /* --- click actions -------------------------------------------------------- */
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-act]");
+    if (!t) return;
+    const a = t.getAttribute("data-act"), s = Store.get();
+
+    if (t.hasAttribute("data-stop")) e.stopPropagation();
+
+    switch (a) {
+      case "go": { e.preventDefault(); const r = t.getAttribute("data-route");
+        if (location.hash === r) render(true); else location.hash = r; return; }
+
+      case "railtoggle": {
+        const rail = $("#rail"); rail.classList.toggle("open");
+        if (rail.classList.contains("open")) {
+          const sc = document.createElement("div"); sc.className = "scrim";
+          sc.addEventListener("click", () => { rail.classList.remove("open"); sc.remove(); });
+          document.body.appendChild(sc);
+        } else { const sc = $(".scrim"); if (sc) sc.remove(); }
+        return; }
+
+      /* career explorer */
+      case "jout":  Journey.overview(); return;
+      case "jstep": Journey.step(+t.getAttribute("data-d")); return;
+      case "jnext": Journey.flyNext(); toast("Your next step lives here"); return;
+      case "jmap":  { journeyIntent = "next"; if (location.hash === "#/roadmap") render(true); else location.hash = "#/roadmap"; return; }
+      case "jlist": { const l = $("#jlist"); l.hidden = !l.hidden; t.textContent = l.hidden ? "Show as list" : "Hide list"; return; }
+      case "cset": careerFilter[t.getAttribute("data-k")] = t.getAttribute("data-v"); render(); return;
+      case "cclear": careerFilter = { q: "", industry: "", demand: "", ai: "", major: "" }; render(); return;
+      case "shortlist": {
+        const id = t.getAttribute("data-id");
+        Store.update(st => { const i = st.shortlist.indexOf(id); i >= 0 ? st.shortlist.splice(i, 1) : st.shortlist.push(id); });
+        toast(s.shortlist.includes(id) ? "Added to shortlist" : "Removed from shortlist"); render(); return; }
+      case "setcw1career": {
+        Store.update(st => { st.cw1.career = t.getAttribute("data-id"); st.cw1.checklist.career = true; });
+        toast("Set as your CW1 career"); render(); return; }
+      case "addsource": {
+        const r = PSE.resources.find(x => x.id === t.getAttribute("data-res"));
+        if (!r) return;
+        if (s.cw1.sources.some(x => x.url === r.url)) { toast("Already in your library"); return; }
+        Store.update(st => st.cw1.sources.push({ id: Store.uid(), title: r.name, author: r.org, year: String(new Date().getFullYear()), url: r.url, accessed: new Date().toISOString().slice(0, 10) }));
+        toast("Added to CW1 references"); render(); return; }
+
+      /* goals */
+      case "newgoal": goalDraft = { obstacles: [] }; goalStep = 0; render(true); return;
+      case "editgoal": goalDraft = JSON.parse(JSON.stringify(s.goals.find(g => g.id === t.getAttribute("data-id")))); goalStep = 0; render(true); return;
+      case "gcancel": goalDraft = null; render(true); return;
+      case "gstep": { const i = +t.getAttribute("data-i"); if (i >= 0 && i < GOAL_STEPS.length) { goalStep = i; render(true); } return; }
+      case "gsave": {
+        const g = goalDraft;
+        if (!(g.title || "").trim()) { toast("Give the goal a title first"); goalStep = 0; render(); return; }
+        Store.update(st => {
+          if (g.id) { const i = st.goals.findIndex(x => x.id === g.id); st.goals[i] = g; }
+          else { g.id = Store.uid(); g.progress = 0; st.goals.push(g); }
+        });
+        goalDraft = null; toast("Goal saved"); render(true); return; }
+      case "delgoal": {
+        if (!confirm("Delete this goal?")) return;
+        Store.update(st => st.goals = st.goals.filter(g => g.id !== t.getAttribute("data-id")));
+        toast("Goal deleted"); render(); return; }
+      case "obs-toggle": {
+        const o = t.getAttribute("data-o"); goalDraft.obstacles = goalDraft.obstacles || [];
+        const i = goalDraft.obstacles.findIndex(x => x.type === o);
+        i >= 0 ? goalDraft.obstacles.splice(i, 1) : goalDraft.obstacles.push({ type: o, solution: "", date: "" });
+        render(); return; }
+
+      /* CW1 */
+      case "cw1tab": cw1Tab = t.getAttribute("data-k"); stopTimer(); render(true); return;
+      case "cw1check": { const id = t.getAttribute("data-id");
+        Store.update(st => st.cw1.checklist[id] = !st.cw1.checklist[id]); render(); return; }
+      case "savesource": {
+        const v = id => ($("#" + id) || {}).value || "";
+        if (!v("sr-title").trim()) { toast("A source needs a title"); return; }
+        Store.update(st => st.cw1.sources.push({ id: Store.uid(), title: v("sr-title"), author: v("sr-author"), year: v("sr-year"), url: v("sr-url"), accessed: v("sr-accessed") }));
+        toast("Source added"); render(); return; }
+      case "delsource": Store.update(st => st.cw1.sources = st.cw1.sources.filter(x => x.id !== t.getAttribute("data-id"))); render(); return;
+      case "copyref": {
+        const src = s.cw1.sources.find(x => x.id === t.getAttribute("data-id"));
+        const text = Store.harvard(src);
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+          .then(() => toast("Reference copied")).catch(() => { window.prompt("Copy this reference:", text); });
+        return; }
+      case "tstart": {
+        if (timerId) { stopTimer(); return; }
+        timerId = setInterval(() => { seconds++; paintTimer(); }, 1000);
+        t.innerHTML = ic("pause") + " Pause"; return; }
+      case "treset": stopTimer(); seconds = 0; paintTimer(); return;
+      case "savepractice": {
+        if (!seconds) { toast("Run the timer first"); return; }
+        const vals = PSE.practiceCriteria.map(c => pScores[c.id] || 3);
+        const avg = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+        const improve = ($("#p-improve") || {}).value || "";
+        Store.update(st => st.cw1.practice.push({ id: Store.uid(), seconds, avg, improvement: improve, date: new Date().toISOString().slice(0, 10), scores: Object.assign({}, pScores) }));
+        stopTimer(); seconds = 0; pScores = {}; toast("Practice run saved"); render(); return; }
+
+      /* CW2 */
+      case "cw2check": { const id = t.getAttribute("data-id");
+        Store.update(st => { st.cw2.sections[id] = st.cw2.sections[id] || {}; st.cw2.sections[id].done = !st.cw2.sections[id].done; });
+        render(); return; }
+      case "usehead": quietSet("cw2.sections.headline.value", t.getAttribute("data-v")); render(); return;
+
+      /* reflections */
+      case "newrefl": reflDraft = { type: t.getAttribute("data-type") || PSE.reflectionTypes[0].id }; render(true); return;
+      case "editrefl": reflDraft = JSON.parse(JSON.stringify(s.reflections.find(r => r.id === t.getAttribute("data-id")))); render(true); return;
+      case "rcancel": reflDraft = null; render(true); return;
+      case "rsave": {
+        const r = reflDraft;
+        if (!(r.title || "").trim()) { toast("Give the reflection a title"); return; }
+        r.date = r.date || new Date().toISOString().slice(0, 10);
+        Store.update(st => {
+          if (r.id) { const i = st.reflections.findIndex(x => x.id === r.id); st.reflections[i] = r; }
+          else { r.id = Store.uid(); st.reflections.unshift(r); }
+        });
+        reflDraft = null; toast("Reflection saved"); render(true); return; }
+      case "delrefl": {
+        if (!confirm("Delete this reflection?")) return;
+        Store.update(st => st.reflections = st.reflections.filter(x => x.id !== t.getAttribute("data-id")));
+        render(); return; }
+
+      /* data */
+      case "export": {
+        const text = Store.exportJSON();
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+          .then(() => toast("Backup copied to clipboard")).catch(() => window.prompt("Copy your backup:", text));
+        return; }
+      case "importopen": $("#importbox").hidden = false; $("#importgo").hidden = false; $("#importbox").focus(); return;
+      case "importgo": {
+        try { Store.importJSON($("#importbox").value); toast("Backup restored"); render(true); }
+        catch (err) { toast("That does not look like a valid backup"); }
+        return; }
+      case "loadsample": Store.loadSample(); toast("Sample workspace loaded"); render(true); return;
+      case "resetall": {
+        if (!confirm("Delete everything you have entered? This cannot be undone.")) return;
+        Store.reset(); toast("Workspace reset"); render(true); return; }
+    }
+  });
+
+  /* --- input / change ------------------------------------------------------- */
+  document.addEventListener("input", e => {
+    const el = e.target, act = el.getAttribute("data-act"), path = el.getAttribute("data-set");
+
+    if (path) {
+      const num = el.type === "range" || el.type === "number";
+      quietSet(path, num ? +el.value : el.value);
+      /* targeted repaints so typing never loses focus */
+      const m = path.match(/^skills\.([^.]+)\.(current|target)$/);
+      if (m) {
+        const row = Store.skillRows().find(r => r.id === m[1]);
+        const v = $("#sv-" + m[1] + "-" + m[2]); if (v) v.textContent = el.value + "/10";
+        const cur = $("#gb-" + m[1] + "-cur"), tgt = $("#gb-" + m[1] + "-tgt");
+        if (cur) cur.style.width = (row.current / 10) * 100 + "%";
+        if (tgt) { tgt.style.left = "calc(" + (row.target / 10) * 100 + "% - 1px)"; tgt.style.display = row.target ? "" : "none"; }
+      }
+      const c2 = path.match(/^cw2\.sections\.([^.]+)\.value$/);
+      if (c2) { const p = $("#li-" + c2[1]); if (p) { p.textContent = el.value.slice(0, 260) + (el.value.length > 260 ? "…" : "") || "Not written yet"; p.parentElement.classList.toggle("missing", !el.value); } }
+      return;
+    }
+
+    if (act === "cfilter") { careerFilter[el.getAttribute("data-k")] = el.value; clearTimeout(toastT); debounceRender(); return; }
+    if (act === "gd") { goalDraft[el.getAttribute("data-k")] = el.value; return; }
+    if (act === "obs-sol" || act === "obs-date") {
+      const o = goalDraft.obstacles.find(x => x.type === el.getAttribute("data-o"));
+      if (o) o[act === "obs-sol" ? "solution" : "date"] = el.value; return; }
+    if (act === "rd") {
+      reflDraft[el.getAttribute("data-k")] = el.value;
+      const w = Store.wordCount([reflDraft.what, reflDraft.learn, reflDraft.skills, reflDraft.career, reflDraft.next].join(" "));
+      const wc = $("#rwords");
+      if (wc) { wc.textContent = w + " / 70–100 words" + (w < 70 ? " — keep going" : w > 100 ? " — tighten it" : " — in range");
+        wc.className = "wordcount " + (w >= 70 && w <= 100 ? "ok" : w > 100 ? "warn" : ""); }
+      const co = $("#rcoach");
+      if (co) co.innerHTML = Store.checkReflection(reflDraft).map(c => `<div class="coach-item ${c.ok ? "yes" : "no"}">
+        <span class="ic">${c.ok ? ic("check") : "!"}</span><div><div class="t">${esc(c.label)}</div>
+        ${!c.ok && c.fix ? `<div class="fix">${esc(c.fix)}</div>` : ""}</div></div>`).join("");
+      return; }
+    if (act === "goalprogress") {
+      const id = el.getAttribute("data-id");
+      Store.update(st => { const g = st.goals.find(x => x.id === id); if (g) g.progress = +el.value; });
+      const wrap = el.closest(".card-b"); if (wrap) { const b = wrap.querySelector(".bar > i"); if (b) b.style.width = el.value + "%"; }
+      return; }
+    if (act === "pscore") { pScores[el.getAttribute("data-id")] = +el.value;
+      const o = $("#pv-" + el.getAttribute("data-id")); if (o) o.textContent = el.value; return; }
+  });
+
+  let dT; function debounceRender() { clearTimeout(dT); dT = setTimeout(() => render(), 220); }
+
+  document.addEventListener("change", e => {
+    const act = e.target.getAttribute("data-act");
+    if (act === "gd" || act === "rd") render();     /* re-run coach checks on blur */
+  });
+
+  /* keyboard on the journey canvas */
+  document.addEventListener("keydown", e => {
+    if (!window.Journey || !Journey.active()) return;
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return;
+    if (e.key === "ArrowRight") { Journey.step(1); e.preventDefault(); }
+    else if (e.key === "ArrowLeft") { Journey.step(-1); e.preventDefault(); }
+    else if (e.key === "Enter") { Journey.deeper(); e.preventDefault(); }
+    else if (e.key === "Escape") { Journey.overview(); }
+    else if (e.key === "n" || e.key === "N") { Journey.flyNext(); }
+  });
+
+  window.addEventListener("hashchange", () => {
+    if (location.hash !== lastHash) { goalDraft = null; reflDraft = null; }
+    lastHash = location.hash; stopTimer(); render(true);
+  });
+
+  /* --- boot ----------------------------------------------------------------- */
+  Store.load();
+  Store.subscribe(() => renderRail(location.hash || "#/"));
+  lastHash = location.hash;
+  render(false);
+})();
+
+</script>
+</body>
+</html>

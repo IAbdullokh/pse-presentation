@@ -1,0 +1,2894 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uzbekistan Inflation Dashboard</title>
+<meta name="description" content="An interactive dashboard on inflation, purchasing power and the cost of living in Uzbekistan, 2016–2025, with a tested forecast model and a regional comparison.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Spectral:wght@500;600&display=swap">
+<style>
+/* =============================================================================
+   Uzbekistan Inflation Dashboard — stylesheet
+   Dark-first. The bare :root block holds the complete dark palette; the light
+   palette is redefined for a light OS preference and for an explicit toggle.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+  --bg: #0e1216;  --bg-deep: #0a0e11;
+  --surface: #141a20;  --surface-2: #1a2128;
+  --ink: #eef2f5;  --ink-2: #a5b2bc;  --ink-3: #7a8892;
+  --rule: #232c34;  --rule-soft: #1b232a;
+  --accent: #3987e5;  --accent-ink: #8fbdf2;  --accent-wash: rgba(57,135,229,0.13);
+  --s1: #3987e5;  --s2: #d95926;  --s3: #199e70;  --s4: #c98500;  --s8: #e66767;
+  --good: #0ca30c;  --warning: #fab219;  --serious: #ec835a;  --critical: #d03b3b;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Spectral", Georgia, "Times New Roman", serif;
+  --measure: 68ch;  --rail: 250px;
+}
+@media (prefers-color-scheme: light) {
+  :root:where(:not([data-theme="dark"])) {
+    color-scheme: light;
+    --bg: #f6f7f5;  --bg-deep: #eceee9;
+    --surface: #ffffff;  --surface-2: #f1f3ef;
+    --ink: #101619;  --ink-2: #4c5560;  --ink-3: #6f7d87;
+    --rule: #e2e5e0;  --rule-soft: #ecefe9;
+    --accent: #2a78d6;  --accent-ink: #1c5cab;  --accent-wash: rgba(42,120,214,0.09);
+    --s1: #2a78d6;  --s2: #eb6834;  --s3: #1baf7a;  --s4: #eda100;  --s8: #e34948;
+  }
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f7f5;  --bg-deep: #eceee9;
+  --surface: #ffffff;  --surface-2: #f1f3ef;
+  --ink: #101619;  --ink-2: #4c5560;  --ink-3: #6f7d87;
+  --rule: #e2e5e0;  --rule-soft: #ecefe9;
+  --accent: #2a78d6;  --accent-ink: #1c5cab;  --accent-wash: rgba(42,120,214,0.09);
+  --s1: #2a78d6;  --s2: #eb6834;  --s3: #1baf7a;  --s4: #eda100;  --s8: #e34948;
+}
+
+/* --- base ------------------------------------------------------------------ */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+kbd {
+  font-family: var(--sans); font-size: 11px; padding: 1px 6px; border-radius: 4px;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink-2); box-shadow: 0 1px 0 var(--rule);
+}
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+/* --- shell ----------------------------------------------------------------- */
+.shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
+
+.rail {
+  position: sticky; top: 0; height: 100vh; padding: 26px 20px;
+  border-right: 1px solid var(--rule); background: var(--bg-deep);
+  display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
+}
+.rail-brand { display: flex; flex-direction: column; gap: 3px; }
+.rail-brand strong { font-family: var(--serif); font-size: 17px; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+.rail-brand span { font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.rail-nav { display: flex; flex-direction: column; gap: 1px; }
+.rail-nav a {
+  display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: baseline;
+  padding: 7px 9px; border-radius: 6px; color: var(--ink-2); text-decoration: none;
+  font-size: 13.5px; line-height: 1.35; transition: background .14s, color .14s;
+}
+.rail-nav a .n { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+.rail-nav a:hover { background: var(--surface-2); color: var(--ink); }
+.rail-nav a.is-current { background: var(--accent-wash); color: var(--ink); }
+.rail-nav a.is-current .n { color: var(--accent-ink); }
+
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.rail-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  padding: 8px 11px; background: var(--surface); border: 1px solid var(--rule); border-radius: 7px;
+  color: var(--ink-2); font: inherit; font-size: 12.5px; cursor: pointer; text-align: left;
+}
+.rail-btn:hover { color: var(--ink); border-color: var(--ink-3); }
+.rail-btn.primary { background: var(--accent-wash); border-color: var(--accent); color: var(--ink); }
+.rail-note { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; margin: 0; }
+
+/* --- main ------------------------------------------------------------------ */
+main { padding: 0 0 80px; min-width: 0; }
+.section { padding: 62px 56px; border-bottom: 1px solid var(--rule-soft); max-width: 1180px; }
+.section:last-of-type { border-bottom: 0; }
+
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3);
+  margin: 0 0 12px; display: flex; align-items: center; gap: 9px;
+}
+.eyebrow::before { content: ""; width: 18px; height: 1px; background: var(--accent); flex: none; }
+.section h2 {
+  font-family: var(--serif); font-size: clamp(26px, 3vw, 35px); font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 14px;
+}
+.section h3.sub-h {
+  font-family: var(--serif); font-size: 21px; font-weight: 600; margin: 38px 0 10px; letter-spacing: -0.01em;
+}
+.lede { font-size: 17.5px; color: var(--ink-2); max-width: var(--measure); margin: 0 0 8px; }
+.section p { max-width: var(--measure); color: var(--ink-2); }
+.section p strong { color: var(--ink); font-weight: 600; }
+.formula {
+  font-family: var(--sans); background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+  padding: 13px 17px; font-size: 15px; color: var(--ink); display: inline-block; margin: 6px 0 10px;
+}
+
+/* --- hero ------------------------------------------------------------------ */
+.hero { padding: 74px 56px 52px; max-width: 1180px; }
+.hero h1 {
+  font-family: var(--serif); font-size: clamp(36px, 5.2vw, 60px); font-weight: 600;
+  letter-spacing: -0.028em; line-height: 1.04; margin-bottom: 18px; max-width: 17ch;
+}
+.hero .lede { font-size: 19px; max-width: 62ch; }
+
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr); gap: 22px; margin-top: 34px; align-items: stretch; }
+.hero-figure { padding: 26px 28px; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; }
+.hero-figure .label { font-size: 13px; color: var(--ink-3); }
+.hero-figure .value {
+  font-size: clamp(48px, 6vw, 68px); font-weight: 600; line-height: 1; letter-spacing: -0.035em;
+  margin: 8px 0 6px; color: var(--ink);
+}
+.hero-figure .caption { font-size: 14px; color: var(--ink-2); margin: 0; max-width: 46ch; }
+
+/* the hundred squares */
+.pp-card { padding: 22px 24px; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; display: flex; flex-direction: column; gap: 12px; }
+.pp-card .label { font-size: 13px; color: var(--ink-3); }
+.pp-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; }
+.pp-cell { aspect-ratio: 1; border-radius: 2px; background: var(--accent); transition: background .5s ease, border-color .5s ease; border: 1px solid transparent; }
+.pp-cell.lost { background: transparent; border-color: var(--rule); }
+.pp-legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+.pp-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.pp-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.pp-legend i.kept { background: var(--accent); }
+.pp-legend i.gone { border: 1px solid var(--rule); }
+
+.stat-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; margin: 22px 0 0;
+}
+.stat { padding: 18px 20px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 5px; }
+.stat .k { font-size: 12.5px; color: var(--ink-3); line-height: 1.3; }
+.stat .v { font-size: 27px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.stat .d { font-size: 12px; color: var(--ink-3); }
+.stat .d.up { color: var(--good); }
+.stat .d.down { color: var(--serious); }
+
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.chip { font-size: 12px; padding: 4px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--ink-3); background: var(--surface); }
+
+/* --- presenter note -------------------------------------------------------- */
+.note {
+  border-left: 2px solid var(--accent); background: var(--accent-wash);
+  padding: 15px 20px; margin: 24px 0; max-width: var(--measure); border-radius: 0 7px 7px 0;
+}
+.note .eyebrow { margin-bottom: 7px; }
+.note .eyebrow::before { display: none; }
+.note p { margin: 0; color: var(--ink); font-size: 15.5px; }
+.note p + p { margin-top: 9px; }
+
+/* --- chart card ------------------------------------------------------------ */
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; margin: 26px 0; overflow: hidden; }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 18px 22px 14px; }
+.card-head h3 { font-size: 15.5px; font-weight: 600; letter-spacing: -0.005em; display: flex; gap: 10px; align-items: baseline; }
+.card-head h3 .fig { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; white-space: nowrap; }
+.card-head .sub { font-size: 13px; color: var(--ink-3); margin: 4px 0 0; max-width: 64ch; }
+.card-tools { display: flex; gap: 7px; align-items: center; }
+.btn {
+  font: inherit; font-size: 12px; padding: 5px 11px; background: transparent;
+  border: 1px solid var(--rule); border-radius: 6px; color: var(--ink-2); cursor: pointer;
+}
+.btn:hover { color: var(--ink); border-color: var(--ink-3); }
+.btn[aria-pressed="true"] { background: var(--accent-wash); border-color: var(--accent); color: var(--ink); }
+.btn.small { font-size: 11.5px; padding: 4px 9px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 0 22px 12px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+.legend-key { width: 14px; height: 3px; border-radius: 2px; flex: none; }
+.legend-key.dashed { background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 7px); height: 2px; }
+.legend-key.hollow { width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor; background: transparent; }
+
+.chart-host { position: relative; padding: 0 14px 12px; }
+.chart-plot { position: relative; }
+.chart-plot svg { display: block; overflow: visible; }
+.c-tick { font-family: var(--sans); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.c-endlabel { font-family: var(--sans); font-size: 12px; font-weight: 600; }
+.c-projlabel { font-family: var(--sans); font-size: 11.5px; font-style: italic; }
+.c-annot { font-family: var(--sans); font-size: 11px; }
+
+.chart-tip {
+  position: absolute; min-width: 160px; background: var(--surface-2); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 9px 11px; font-size: 12.5px; pointer-events: none;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.28); z-index: 5;
+}
+.tip-head { font-weight: 600; margin-bottom: 6px; color: var(--ink); }
+.tip-row { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; padding: 2px 0; }
+.tip-key { width: 10px; height: 3px; border-radius: 2px; }
+.tip-name { color: var(--ink-2); }
+.tip-val { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip-extra { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--rule); color: var(--ink-3); font-size: 11.5px; max-width: 220px; }
+
+.chart-table { display: none; padding: 0 8px 12px; overflow-x: auto; }
+.card.show-table .chart-table { display: block; }
+.card.show-table .chart-plot { display: none; }
+.chart-table table { border-collapse: collapse; width: 100%; font-size: 13px; }
+.chart-table th, .chart-table td { text-align: right; padding: 7px 12px; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
+.chart-table thead th { color: var(--ink-3); font-weight: 500; font-size: 12px; white-space: nowrap; }
+.chart-table tbody th { text-align: left; color: var(--ink-2); font-weight: 500; }
+.chart-table td { color: var(--ink); }
+.table-note { font-size: 11.5px; color: var(--ink-3); margin: 8px 12px 0; }
+
+.card-foot { padding: 11px 22px; border-top: 1px solid var(--rule-soft); font-size: 11.5px; color: var(--ink-3); }
+.card-foot a { color: inherit; }
+
+/* draw-in, once, respecting motion preferences */
+@media (prefers-reduced-motion: no-preference) {
+  .chart-plot.enter path.series-line { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: draw 1s ease-out forwards; }
+  .chart-plot.enter .col { opacity: 0; animation: rise .5s ease-out forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .barlist.enter .fill { animation: grow .8s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+
+/* --- controls ---------------------------------------------------------------- */
+.controls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
+  padding: 16px 22px 18px; border-top: 1px solid var(--rule-soft); background: var(--surface-2);
+}
+.control label { display: block; font-size: 12.5px; color: var(--ink-2); margin-bottom: 7px; }
+.control label b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.control input[type="range"] { width: 100%; accent-color: var(--accent); }
+.control .hint { font-size: 11.5px; color: var(--ink-3); margin: 5px 0 0; max-width: none; }
+.control-actions { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+
+.calc { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; align-items: end; padding: 20px 22px; background: var(--surface-2); border-top: 1px solid var(--rule-soft); }
+.calc label { display: block; font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; }
+.calc input, .calc select {
+  width: 100%; padding: 9px 11px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 7px; font: inherit; font-size: 14.5px; font-variant-numeric: tabular-nums;
+}
+.calc-out { padding: 20px 22px; border-top: 1px solid var(--rule-soft); }
+.calc-out .v { font-size: clamp(28px, 4vw, 38px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+.calc-out .c { font-size: 14px; color: var(--ink-2); margin: 7px 0 0; max-width: 62ch; }
+
+/* --- backtest panel ---------------------------------------------------------- */
+.bt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 0.7fr); gap: 0; border-top: 1px solid var(--rule-soft); }
+.bt-side { padding: 18px 22px; border-left: 1px solid var(--rule-soft); display: flex; flex-direction: column; gap: 14px; background: var(--surface-2); }
+.bt-metric { display: flex; flex-direction: column; gap: 3px; }
+.bt-metric .k { font-size: 12px; color: var(--ink-3); }
+.bt-metric .v { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.bt-metric .v small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 6px; }
+.bt-metric .d { font-size: 12px; color: var(--ink-2); }
+.bt-fit { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 12.5px; color: var(--ink-2); }
+.bt-fit b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* --- horizontal bar list (tariff shock) -------------------------------------- */
+.barlist { display: grid; gap: 10px; padding: 18px 22px 20px; }
+.barlist-row { display: grid; grid-template-columns: 170px 1fr 64px; gap: 12px; align-items: center; font-size: 13px; }
+.barlist-row .name { color: var(--ink-2); }
+.barlist-row .track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.barlist-row .fill { height: 100%; background: var(--s1); border-radius: 5px; transform-origin: left center; }
+.barlist-row .val { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* --- fuel steps ------------------------------------------------------------- */
+.steps { display: grid; gap: 0; padding: 8px 22px 14px; }
+.step { display: grid; grid-template-columns: 110px 90px 1fr; gap: 14px; padding: 9px 0; border-top: 1px solid var(--rule-soft); font-size: 13px; align-items: baseline; }
+.step:first-child { border-top: 0; }
+.step .when { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.step .price { font-weight: 600; font-variant-numeric: tabular-nums; }
+.step .why { color: var(--ink-2); }
+
+/* --- impact grid ------------------------------------------------------------- */
+.impact { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; margin: 26px 0; }
+.impact-item { padding: 20px 22px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 8px; }
+.impact-item h3 { font-size: 15px; font-weight: 600; }
+.impact-item p { font-size: 13.5px; color: var(--ink-2); margin: 0; max-width: none; }
+.impact-item p b { color: var(--ink); font-weight: 600; }
+.tag { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.tag.loses { color: var(--critical); } .tag.gains { color: var(--good); } .tag.mixed { color: var(--warning); }
+.tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+
+/* --- sources ------------------------------------------------------------------ */
+.sources { display: grid; margin: 24px 0; max-width: 900px; border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.source-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 4px 18px; padding: 14px 20px; border-bottom: 1px solid var(--rule-soft); font-size: 13.5px; }
+.source-row:last-child { border-bottom: 0; }
+.source-row .who { color: var(--ink); font-weight: 500; }
+.source-row .what { color: var(--ink-2); font-size: 13px; }
+.source-row .meta { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-3); word-break: break-all; }
+.source-row .meta a { color: inherit; }
+
+.caveat { border: 1px solid var(--rule); background: var(--surface); border-radius: 10px; padding: 16px 20px; margin: 24px 0; max-width: 900px; }
+.caveat h3 { font-size: 14px; margin-bottom: 7px; }
+.caveat p { font-size: 13.5px; margin: 0; max-width: none; }
+
+.takeaways { counter-reset: t; list-style: none; padding: 0; margin: 22px 0; max-width: var(--measure); }
+.takeaways li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: 14px; padding: 15px 0; border-top: 1px solid var(--rule-soft); color: var(--ink-2); font-size: 15.5px; }
+.takeaways li::before { content: counter(t, decimal-leading-zero); font-size: 12px; color: var(--accent-ink); font-variant-numeric: tabular-nums; padding-top: 4px; }
+.takeaways li > .t { grid-column: 2; }
+.takeaways li b { color: var(--ink); font-weight: 600; }
+
+.footer { padding: 30px 56px; color: var(--ink-3); font-size: 12.5px; border-top: 1px solid var(--rule); max-width: 1180px; }
+
+/* --- presentation mode -------------------------------------------------------- */
+body.presenting .rail { display: none; }
+body.presenting .shell { grid-template-columns: 1fr; }
+body.presenting .note { display: none; }
+body.presenting.show-notes .note { display: block; }
+body.presenting .section, body.presenting .hero { max-width: none; padding: 64px clamp(40px, 8vw, 140px); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+body.presenting .section > *, body.presenting .hero > * { width: 100%; max-width: 1240px; margin-left: auto; margin-right: auto; }
+body.presenting .lede, body.presenting .section p { max-width: 74ch; }
+body.presenting { font-size: 17.5px; }
+body.presenting .footer { display: none; }
+body.presenting .section { scroll-snap-align: start; }
+html.snap { scroll-snap-type: y proximity; }
+
+.present-bar {
+  position: fixed; right: 18px; bottom: 18px; z-index: 20; display: none; align-items: center; gap: 10px;
+  padding: 8px 12px; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px;
+  font-size: 12px; color: var(--ink-2); box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+}
+body.presenting .present-bar { display: flex; }
+.present-bar .count { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.present-bar .sep { width: 1px; height: 16px; background: var(--rule); }
+.present-bar button { font: inherit; font-size: 12px; background: transparent; border: 0; color: var(--ink-2); cursor: pointer; padding: 2px 4px; }
+.present-bar button:hover { color: var(--ink); }
+
+/* --- responsive ---------------------------------------------------------------- */
+@media (max-width: 1000px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .impact { grid-template-columns: repeat(2, 1fr); }
+  .bt { grid-template-columns: 1fr; }
+  .bt-side { border-left: 0; border-top: 1px solid var(--rule-soft); }
+}
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .rail-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .rail-nav a { grid-template-columns: auto auto; padding: 5px 9px; font-size: 12.5px; }
+  .rail-foot { margin: 0; flex-direction: row; }
+  .rail-note { display: none; }
+  .section, .hero, .footer { padding-left: 22px; padding-right: 22px; }
+  .section { padding-top: 44px; padding-bottom: 44px; }
+  .barlist-row { grid-template-columns: 120px 1fr 56px; }
+  .impact { grid-template-columns: 1fr; }
+  .step { grid-template-columns: 90px 80px 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto !important; }
+}
+@media print {
+  .rail, .card-tools, .controls, .present-bar { display: none !important; }
+  .shell { display: block; }
+  .card, .stat-strip, .impact, .note { break-inside: avoid; }
+  body { background: #fff; color: #000; }
+}
+
+/* --- interactive legends ---------------------------------------------------- */
+.legend-item.is-toggle { cursor: pointer; user-select: none; border-radius: 4px; padding: 2px 5px; margin: -2px -5px; }
+.legend-item.is-toggle:hover { color: var(--ink); background: var(--surface-2); }
+.legend-item.is-dim { opacity: 0.35; }
+.legend-hint { font-size: 11px; color: var(--ink-3); font-style: italic; align-self: center; }
+
+/* --- calculator result strips ----------------------------------------------- */
+.result-strip {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  border-top: 1px solid var(--rule-soft); background: var(--surface-2);
+}
+.result {
+  padding: 16px 20px; border-right: 1px solid var(--rule-soft);
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+}
+.result .k { font-size: 12.5px; color: var(--ink-3); line-height: 1.3; }
+.result .v { font-size: 25px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.result .v.good, .result .d.good { color: var(--good); }
+.result .v.bad,  .result .d.bad  { color: var(--serious); }
+.result .d { font-size: 12px; color: var(--ink-3); }
+.result.is-winner { background: var(--accent-wash); }
+.result .tag { margin-top: 4px; }
+.result-strip .verdict {
+  grid-column: 1 / -1; margin: 0; padding: 14px 20px; max-width: none;
+  border-top: 1px solid var(--rule-soft); font-size: 13.5px; color: var(--ink-2);
+}
+.result-strip .verdict b { color: var(--ink); font-weight: 600; }
+
+#budget-presets { display: contents; }
+.card-foot b { color: var(--ink-2); font-weight: 600; }
+
+/* --- making the interactive parts findable ---------------------------------- */
+.rail-tools { display: flex; flex-direction: column; gap: 1px; }
+.rail-label {
+  font-size: 10.5px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--ink-3); margin: 0 0 6px 9px;
+}
+.rail-tools a {
+  display: flex; align-items: baseline; gap: 8px; padding: 6px 9px; border-radius: 6px;
+  color: var(--ink-2); text-decoration: none; font-size: 13px; line-height: 1.35;
+}
+.rail-tools a::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); flex: none; transform: translateY(-2px);
+}
+.rail-tools a:hover { background: var(--surface-2); color: var(--ink); }
+
+.hero-jump { margin: 14px 0 0; font-size: 14px; color: var(--ink-3); max-width: none; }
+.hero-jump a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.hero-jump a:hover { color: var(--ink); }
+
+.tool-pill {
+  font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent-wash); border: 1px solid var(--accent);
+  border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+}
+.card[data-tool] { border-color: var(--accent); }
+.card[data-tool] .card-head { background: var(--accent-wash); }
+.card { scroll-margin-top: 18px; }
+
+@media (max-width: 900px) {
+  .rail-tools { flex-direction: row; flex-wrap: wrap; }
+  .rail-label { display: none; }
+}
+
+/* =============================================================================
+   The time machine — the hero showpiece
+   ========================================================================== */
+.timemachine {
+  margin: 34px 0 0; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 14px; overflow: hidden;
+}
+.tm-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  padding: 18px 24px; border-bottom: 1px solid var(--rule-soft);
+}
+.tm-yearwrap { display: flex; align-items: baseline; gap: 10px; }
+.tm-label { font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-3); }
+.tm-year {
+  font-size: clamp(34px, 4.4vw, 48px); font-weight: 600; letter-spacing: -0.03em;
+  line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+.tm-controls { display: flex; align-items: center; gap: 16px; flex: 1 1 320px; min-width: 260px; }
+.tm-play {
+  display: inline-flex; align-items: center; gap: 9px; flex: none;
+  padding: 9px 18px 9px 15px; border-radius: 999px; cursor: pointer;
+  background: var(--accent); border: 1px solid var(--accent); color: #fff;
+  font: inherit; font-size: 13.5px; font-weight: 600;
+}
+.tm-play:hover { filter: brightness(1.08); }
+.tm-icon {
+  width: 0; height: 0; flex: none;
+  border-left: 10px solid currentColor; border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+}
+.tm-icon.playing {
+  width: 9px; height: 12px; border: 0;
+  border-left: 3px solid currentColor; border-right: 3px solid currentColor;
+  background: transparent; box-sizing: border-box;
+}
+#tm-scrub { flex: 1; accent-color: var(--accent); min-width: 140px; }
+
+.tm-body { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(250px, 0.95fr); }
+.tm-left { padding: 22px 24px; border-right: 1px solid var(--rule-soft); }
+.tm-right { padding: 22px 24px; display: flex; flex-direction: column; gap: 4px; }
+.tm-cap { font-size: 12.5px; color: var(--ink-3); margin: 0 0 12px; max-width: none; }
+
+.tm-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; max-width: 292px; }
+.tm-cell {
+  aspect-ratio: 1; border-radius: 2px; background: var(--accent);
+  border: 1px solid transparent; transition: background-color .45s ease, border-color .45s ease;
+}
+.tm-cell.is-lost { background: transparent; border-color: var(--rule); }
+
+.tm-legend { display: flex; flex-wrap: wrap; gap: 18px; margin: 14px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.tm-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.tm-legend b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.tm-legend i { width: 11px; height: 11px; border-radius: 2px; flex: none; }
+.tm-legend i.kept { background: var(--accent); }
+.tm-legend i.gone { border: 1px solid var(--rule); }
+
+.tm-value {
+  font-size: clamp(40px, 5.6vw, 60px); font-weight: 600; letter-spacing: -0.035em;
+  line-height: 1.02; color: var(--ink); margin: 2px 0 16px; font-variant-numeric: tabular-nums;
+}
+.tm-mini { display: grid; gap: 0; margin-top: 20px; }
+.tm-mini > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 9px 0; border-top: 1px solid var(--rule-soft); font-size: 13px;
+}
+.tm-mini .k { color: var(--ink-3); }
+.tm-mini .v { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.tm-event {
+  margin: 0; padding: 15px 24px; border-top: 1px solid var(--rule-soft);
+  font-size: 13.5px; color: var(--ink-2); max-width: none; background: var(--bg-deep);
+}
+.tm-event b { color: var(--ink); font-weight: 600; }
+.tm-event.is-event { border-left: 2px solid var(--accent); background: var(--accent-wash); }
+
+/* --- purchasing power, drawn to scale --------------------------------------- */
+.pp-compare { display: grid; gap: 14px; margin-bottom: 16px; }
+.pp-row { display: grid; grid-template-columns: 190px minmax(0, 1fr) 130px; gap: 16px; align-items: center; }
+.pp-k { font-size: 12.5px; color: var(--ink-3); }
+.pp-track { position: relative; height: 34px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.pp-fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; transition: width .55s cubic-bezier(.2,.7,.2,1); }
+.pp-fill.nominal { background: var(--ink-3); opacity: 0.45; }
+.pp-fill.real { background: var(--accent); }
+.pp-gone {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.03em;
+}
+.pp-v { text-align: right; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* --- speaker notes, collapsed by default ------------------------------------ */
+.note { padding: 0; background: transparent; border-left: 0; border-radius: 0; }
+.note-toggle {
+  display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+  padding: 7px 14px 7px 11px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--rule); color: var(--ink-2);
+  font: inherit; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 600;
+}
+.note-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.note-chev {
+  width: 0; height: 0; flex: none; transition: transform .18s ease;
+  border-left: 6px solid currentColor; border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+}
+.note.is-open .note-chev { transform: rotate(90deg); }
+.note.is-open .note-toggle { background: var(--accent-wash); border-color: var(--accent); color: var(--ink); }
+.note-body {
+  border-left: 2px solid var(--accent); background: var(--accent-wash);
+  padding: 15px 20px; margin-top: 10px; border-radius: 0 7px 7px 0;
+}
+.note.is-collapsed .note-body { display: none; }
+body.show-notes .note .note-body { display: block; }
+
+@media (max-width: 1000px) {
+  .tm-body { grid-template-columns: 1fr; }
+  .tm-left { border-right: 0; border-bottom: 1px solid var(--rule-soft); }
+  .pp-row { grid-template-columns: 140px minmax(0, 1fr) 110px; gap: 12px; }
+}
+@media (max-width: 640px) {
+  .pp-row { grid-template-columns: 1fr; gap: 6px; }
+  .pp-v { text-align: left; }
+}
+
+/* =============================================================================
+   Tabs — only the active panel is in the layout
+   ========================================================================== */
+[hidden] { display: none !important; }
+
+.section { border-bottom: 0; }
+.section, .hero { animation: tabin .26s ease-out; }
+@keyframes tabin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .section, .hero { animation: none; } }
+
+.rail-nav a { cursor: pointer; }
+
+/* the tab strip on narrow screens scrolls sideways rather than wrapping tall */
+@media (max-width: 900px) {
+  .rail-nav { flex-wrap: nowrap; overflow-x: auto; gap: 2px; padding-bottom: 4px; }
+  .rail-nav a { white-space: nowrap; flex: none; }
+  .rail-nav a .n { display: none; }
+}
+
+/* Presenting: the tab already fills the screen, so just clear the furniture. */
+body.presenting .section, body.presenting .hero { min-height: auto; }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- The rail doubles as the running order of the talk. -->
+  <aside class="rail">
+    <div class="rail-brand">
+      <strong>Uzbekistan Inflation Dashboard</strong>
+      <span>Economics &amp; Data Science</span>
+    </div>
+
+    <nav class="rail-nav" aria-label="Sections">
+      <a href="#top" data-tab="overview"><span class="n">01</span><span>Overview</span></a>
+      <a href="#intro" data-tab="basics"><span class="n">02</span><span>The basics</span></a>
+      <a href="#cpi" data-tab="prices"><span class="n">03</span><span>Consumer prices</span></a>
+      <a href="#food" data-tab="changed"><span class="n">04</span><span>What changed</span></a>
+      <a href="#fuel" data-tab="energy"><span class="n">05</span><span>Energy &amp; the dollar</span></a>
+      <a href="#compare" data-tab="picture"><span class="n">06</span><span>One picture</span></a>
+      <a href="#forecast" data-tab="forecast"><span class="n">07</span><span>Forecast</span></a>
+      <a href="#impact" data-tab="impact"><span class="n">08</span><span>Who paid</span></a>
+      <a href="#conclusion" data-tab="end"><span class="n">09</span><span>Conclusion &amp; sources</span></a>
+    </nav>
+
+    <div class="rail-tools">
+      <p class="rail-label">Interactive</p>
+      <a href="#card-calc">Purchasing power</a>
+      <a href="#card-personal">Your own inflation rate</a>
+      <a href="#card-race">Savings race</a>
+    </div>
+
+    <div class="rail-foot">
+      <button class="rail-btn primary" id="present-btn" type="button">
+        <span>Present</span><kbd>P</kbd>
+      </button>
+      <button class="rail-btn" id="theme-toggle" type="button">
+        <span>Appearance</span><span id="theme-label">Dark</span>
+      </button>
+      <p class="rail-note">Arrow keys move between tabs. Presenting hides this rail and the speaker notes.</p>
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ================= HERO ================= -->
+    <header class="hero" id="top" data-tab="overview">
+      <p class="eyebrow">Uzbekistan · 2016–2025</p>
+      <h1>What happened to the value of the soum?</h1>
+      <p class="lede">
+        Since 2017 consumer prices in Uzbekistan have more than doubled. This dashboard follows
+        that change through the shopping basket, food, energy and the dollar — then asks who paid
+        for it, who gained, and what happens next.
+      </p>
+
+      <!-- The showpiece: scrub or play through 2017-2025 and watch a million
+           soum lose its buying power one square at a time. -->
+      <div class="timemachine" id="tm">
+        <div class="tm-top">
+          <div class="tm-yearwrap">
+            <span class="tm-label">End of</span>
+            <span class="tm-year" id="tm-year">2025</span>
+          </div>
+          <div class="tm-controls">
+            <button class="tm-play" id="tm-play" type="button">
+              <span class="tm-icon" id="tm-icon"></span><span id="tm-playlabel">Play</span>
+            </button>
+            <input type="range" id="tm-scrub" min="0" max="8" value="8" aria-label="Choose a year">
+          </div>
+        </div>
+
+        <div class="tm-body">
+          <div class="tm-left">
+            <p class="tm-cap">One million soum from 2017, drawn as 100 squares of buying power</p>
+            <div class="tm-grid" id="tm-grid" aria-hidden="true"></div>
+            <p class="tm-legend">
+              <span><i class="kept"></i><b id="tm-kept">43</b>&nbsp;still buy what they did</span>
+              <span><i class="gone"></i><b id="tm-lost">57</b>&nbsp;lost to inflation</span>
+            </p>
+          </div>
+          <div class="tm-right">
+            <p class="tm-cap">That million now buys what this bought in 2017</p>
+            <div class="tm-value" id="tm-value">431,702</div>
+            <div class="tm-mini">
+              <div><span class="k">Prices since 2017</span><span class="v" id="tm-prices">+132%</span></div>
+              <div><span class="k">One US dollar</span><span class="v" id="tm-fx">12,025</span></div>
+              <div><span class="k">Inflation that year</span><span class="v" id="tm-infl">7.3%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="tm-event" id="tm-event"></p>
+      </div>
+
+      <div class="stat-strip" id="hero-stats"></div>
+
+      <div class="hero-meta">
+        <span class="chip">Official data, every series cited</span>
+        <span class="chip">Three live calculators</span>
+        <span class="chip">Every chart has a data table</span>
+        <span class="chip">Works offline</span>
+      </div>
+
+      <p class="hero-jump">Try it —
+        <a href="#card-calc">what your money is worth</a> ·
+        <a href="#card-personal">your own inflation rate</a> ·
+        <a href="#card-race">where to keep your savings</a>
+      </p>
+    </header>
+
+    <!-- ================= 01 INTRO ================= -->
+    <section class="section" id="intro" data-tab="basics">
+      <p class="eyebrow">Introduction</p>
+      <h2>Inflation is a fall in the value of money, not a rise in prices</h2>
+      <p class="lede">Those two sentences describe the same event from opposite ends. It is worth starting with the second one, because it is the one people feel.</p>
+      <p>
+        <strong>Inflation</strong> is the rate at which the general level of prices rises over a period,
+        usually a year. If inflation is 10%, a basket of goods that cost 100,000 soum last December
+        costs 110,000 soum this December.
+      </p>
+      <p>
+        <strong>Purchasing power</strong> is the other side of the same coin: how much a fixed amount of
+        money actually buys. If prices rise 10% and your salary does not, the number on your payslip is
+        unchanged but it commands about 9% fewer goods. The payslip number is <em>nominal</em>. What it
+        buys is <em>real</em>. Almost every argument in economics about inflation comes down to keeping
+        those two apart.
+      </p>
+      <p>
+        Statisticians measure this with the <strong>Consumer Price Index (CPI)</strong>: fix a basket of
+        what a typical household buys — bread, rice, meat, rent, transport, gas, electricity — price the
+        same basket every month, and report how much the total has moved. The headline figure quoted
+        in this dashboard is the December-on-December change, the measure the Central Bank of
+        Uzbekistan targets.
+      </p>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “Inflation does not make things better or worse in themselves. It shrinks the ruler we measure value with. A million soum in 2017 and a million soum in 2025 are the same number and not the same thing — the calculator below shows you exactly how different.”</p>
+      </div>
+
+      <figure class="card" id="card-calc" data-tool>
+        <div class="card-head">
+          <div>
+            <h3>Purchasing power calculator</h3>
+            <p class="sub">Pick an amount and two years. The result uses the Central Bank's official inflation series.</p>
+          </div>
+        </div>
+        <div class="calc">
+          <div><label for="calc-amount">Amount in soum</label><input type="number" id="calc-amount" value="1000000" min="1" step="10000"></div>
+          <div><label for="calc-from">Held from the end of</label><select id="calc-from"></select></div>
+          <div><label for="calc-to">Spent at the end of</label><select id="calc-to"></select></div>
+        </div>
+        <div class="calc-out">
+          <div class="pp-compare" id="pp-compare"></div>
+          <p class="c" id="calc-caption"></p>
+        </div>
+        <figcaption class="card-foot">Method: amount × (price level in the earlier year ÷ price level in the later year). Price level compounds the Dec/Dec rates from end-2016 = 100.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ================= 02 CPI ================= -->
+    <section class="section" id="cpi" data-tab="prices">
+      <p class="eyebrow">Consumer prices</p>
+      <h2>Headline inflation, year by year</h2>
+      <p class="lede">This is the most quoted number in Uzbek economic news: how much the whole consumer basket rose over twelve months.</p>
+      <p>
+        Three things stand out. The spike to <strong><span data-fill="cpi2017"></span> in 2017</strong>, the year the
+        soum was floated and imported goods repriced. The long, uneven decline since 2019. And
+        <strong><span data-fill="cpi2025"></span> in 2025</strong> — the lowest reading in nine years, though still
+        above the Central Bank's 5% target.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Annual consumer price inflation</h3>
+            <p class="sub">Percentage change, December on December. The dashed line is the Central Bank's 5% target; vertical markers are events discussed in the text.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="chart-host" id="chart-cpi"></div>
+        <figcaption class="card-foot" data-source="cpi"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “Every bar is one year, not a running total. Even the shortest bar means prices went up. Inflation falling from 15% to 7% does not mean things got cheaper — it means they got more expensive, more slowly.”</p>
+        <p>If asked about 2017: the Statistics Agency originally published 14.4%. The Central Bank and the IMF now carry 18.8%, which fully counts the pass-through from the float. This dashboard uses the revised figure and says so in the sources.</p>
+      </div>
+
+      <h3 class="sub-h">Is 7% high? Compared with the neighbours</h3>
+      <p>
+        A number is only high relative to something. Against the 5% target, <span data-fill="cpi2025"></span> is
+        still too high. Against the region it looks different: in 2025 Uzbekistan's inflation was
+        <strong>below Kazakhstan's and Kyrgyzstan's</strong>, and it has followed the same broad shape as its neighbours — a 2022 spike after the invasion of
+        Ukraine, then disinflation. Uzbekistan's problem was never a unique one; it was a higher starting
+        level after 2017.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Inflation in Uzbekistan and its neighbours</h3>
+            <p class="sub">December on December, per cent. One source and one definition for all four countries.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-peers"></div>
+        <div class="chart-host" id="chart-peers"></div>
+        <figcaption class="card-foot" data-source="peers"></figcaption>
+      </figure>
+    </section>
+
+    <!-- ================= 03 COMPONENTS ================= -->
+    <section class="section" id="food" data-tab="changed">
+      <p class="eyebrow">Food, goods and services</p>
+      <h2>The kind of inflation changed, not just the amount</h2>
+      <p class="lede">The headline number hides <em>what</em> is getting more expensive. Splitting the basket into food, other goods and services tells a different story for each year.</p>
+      <p>
+        In 2022 <strong>food led</strong>: <span data-fill="food2022"></span> against a headline of 12.3%, the
+        post-invasion spike in grain, oil and fertiliser. By 2024 the picture had inverted. Food rose
+        only <strong><span data-fill="food2024"></span></strong> — a good harvest and falling vegetable prices —
+        while <strong>services rose <span data-fill="services2024"></span></strong>, driven by the energy-tariff
+        reform in the next section. That is the same headline range, from a completely different cause.
+      </p>
+      <p>
+        Why it matters: food is a much larger share of a poor household's budget than a rich one's, so
+        food-led inflation is regressive. Tariff-led inflation hits everyone who heats a home, which is
+        everyone — but its weight in the official basket is smaller than its weight in a winter bill.
+      </p>
+      <p>
+        So whose inflation is the headline figure? Nobody's in particular — it is the average household's.
+        The weights it uses are not published beside the group figures, but four years of both sides is
+        enough to <strong>recover them by least squares</strong>, and the fit below reproduces every published
+        headline to within 0.02 points. Once you have the weights you can replace them with your own.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Inflation by group</h3>
+            <p class="sub">December on December, per cent, for the years where the Statistics Agency's group breakdown could be verified.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-comp"></div>
+        <div class="chart-host" id="chart-comp"></div>
+        <figcaption class="card-foot" data-source="components"></figcaption>
+      </figure>
+
+      <figure class="card" data-card data-fig data-tool id="card-personal">
+        <div class="card-head">
+          <div>
+            <h3>Your own inflation rate</h3>
+            <p class="sub">The official rate is a weighted average of the three groups above. Change the weights to match a household and the rate changes with it — this is exactly how a personal inflation rate is computed.</p>
+          </div>
+          <div class="card-tools">
+            <span id="budget-presets"></span>
+            <button class="btn" data-table type="button" aria-pressed="false">Table</button>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="control">
+            <label for="w-food">Food — <b id="w-food-v">43%</b></label>
+            <input type="range" id="w-food" min="0" max="100" step="1" value="43">
+          </div>
+          <div class="control">
+            <label for="w-nonfood">Non-food goods — <b id="w-nonfood-v">34%</b></label>
+            <input type="range" id="w-nonfood" min="0" max="100" step="1" value="34">
+          </div>
+          <div class="control">
+            <label for="w-services">Services — <b id="w-services-v">23%</b></label>
+            <input type="range" id="w-services" min="0" max="100" step="1" value="23">
+          </div>
+        </div>
+        <div class="result-strip" id="personal-out"></div>
+        <div class="legend" id="legend-personal"></div>
+        <div class="chart-host" id="chart-personal"></div>
+        <figcaption class="card-foot" id="fit-foot"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “There is no single inflation rate. There is one for each household, depending on what it buys. In 2022 the people hurt most were those who spend most on food. In 2024 it was anyone paying a gas bill. Same headline, different victims.”</p>
+      </div>
+    </section>
+
+    <!-- ================= 04 FUEL & ENERGY ================= -->
+    <section class="section" id="fuel" data-tab="energy">
+      <p class="eyebrow">Fuel and energy</p>
+      <h2>Energy is the price that moves every other price</h2>
+      <p class="lede">Petrol, gas and electricity matter far beyond the bill. Everything in the shop arrived on a lorry and was made in a heated building.</p>
+      <p>
+        Economists call this a <strong>cost-push</strong> effect: energy is an input to almost every good,
+        so a rise passes through into food, fares and construction with a lag of a few months. For
+        decades Uzbekistan held energy prices below cost by decree. Removing those subsidies is
+        economically sound — and is the single clearest driver of the 2024 services number.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>The 2024 tariff shock</h3>
+            <p class="sub">Increase in regulated household tariffs over 2024, per cent. These sit inside the “services” line of Figure 3.</p>
+          </div>
+        </div>
+        <div class="barlist" id="tariff-list"></div>
+        <figcaption class="card-foot" data-source="components"></figcaption>
+      </figure>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Petrol AI-80: the administered price at each documented change</h3>
+            <p class="sub">Soum per litre. AI-80 was the mass-market grade until it was withdrawn in December 2025; its price was set by decision, not by market, so it moves in steps.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="chart-host" id="chart-fuel"></div>
+        <div class="steps" id="fuel-steps"></div>
+        <figcaption class="card-foot" data-source="fuelAI80"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “Cheap energy was never free. It was paid for out of the budget, by everyone, invisibly. Raising tariffs made the cost visible and put it on the people who use the most. That is fairer — and it is also why 2024 inflation was almost entirely a services story.”</p>
+        <p>If asked why petrol is shown as steps rather than a line: the price was administered, so a line between decisions would imply movement that never happened. Only documented changes are plotted.</p>
+      </div>
+    </section>
+
+    <!-- ================= 05 FX ================= -->
+    <section class="section" id="fx" data-tab="energy">
+      <p class="eyebrow">Exchange rate</p>
+      <h2>The soum against the dollar</h2>
+      <p class="lede">On 5 September 2017 Uzbekistan floated its currency. The official rate went from <span data-fill="fxBefore"></span> to <span data-fill="fxAfter"></span> soum per dollar overnight.</p>
+      <p>
+        Before the float there were two rates: an official one and a much weaker parallel-market one.
+        The reform did not destroy value — it <strong>revealed</strong> a weakness that was already there,
+        and let trade and investment run on honest numbers. For an economy that imports machinery,
+        cars, medicine and much of its manufactured goods, a weaker soum feeds directly into shop
+        prices: <strong>imported inflation</strong>. That is most of the 2017 spike.
+      </p>
+      <p>
+        Then something rarely mentioned: <strong>in 2025 the soum strengthened</strong>, from
+        <span data-fill="fx2024"></span> to <span data-fill="fx2025"></span> per dollar — the first annual
+        appreciation since the float. Record gold prices, strong remittances and a positive real interest
+        rate (section 08) pulled in the same direction.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Official exchange rate, soum per US dollar</h3>
+            <p class="sub">Last published rate of each year. The marked year is the float.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="chart-host" id="chart-fx"></div>
+        <figcaption class="card-foot" data-source="fx"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “2017 is not a crash. It is a correction. The old rate was a price the government set, not one the market would pay. And notice the last point — in 2025 the line turns down for the first time. A currency that strengthens is a currency people want to hold, and that is the best evidence that disinflation is real.”</p>
+      </div>
+    </section>
+
+    <!-- ================= 06 COMPARE ================= -->
+    <section class="section" id="compare" data-tab="picture">
+      <p class="eyebrow">Comparison</p>
+      <h2>All of it in one picture</h2>
+      <p class="lede">Prices and exchange rates are measured in different units. You cannot put them on one chart as they are — and you must never put them on two vertical axes.</p>
+      <p>
+        The honest fix is <strong>indexing</strong>: set every series to 100 in the same base year — here
+        2017, the float year — and plot how far each has travelled since. Now they share one scale and one
+        axis, and the only thing being compared is <em>relative change</em>. A value of 200 means “twice
+        its 2017 level”. Both series below are end-of-year values, so their timing matches too.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Consumer prices and the dollar, 2017 = 100</h3>
+            <p class="sub">The price level compounds Dec/Dec inflation; the dollar is the year-end official rate. Where the price line pulls away from the dollar line, domestic inflation is outrunning depreciation.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-cmp1"></div>
+        <div class="chart-host" id="chart-compare"></div>
+        <figcaption class="card-foot">Derived from Figures 1 and 7. 2017 = 100 for both.</figcaption>
+      </figure>
+
+      <p>
+        The same trick answers the regional question properly. Annual rates (Figure 2) show who had the
+        worst <em>year</em>; compounding them shows who has had the worst <em>decade</em>.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Cumulative price level since 2017 across the region</h3>
+            <p class="sub">2017 = 100, compounding each country's December-on-December inflation. The gap to Kazakhstan opened in 2018–19, in the aftermath of the float, not in recent years.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-cmp2"></div>
+        <div class="chart-host" id="chart-region"></div>
+        <figcaption class="card-foot" data-source="peers"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “This is the one methodological rule in the whole talk. Two different units on two different axes produce a correlation that is an accident of where you put the scales. Index to a common base instead, and the comparison becomes real — and the timing has to match, which is why both lines here are end-of-year values.”</p>
+      </div>
+    </section>
+
+    <!-- ================= 07 FORECAST ================= -->
+    <section class="section" id="forecast" data-tab="forecast">
+      <p class="eyebrow">Forecast</p>
+      <h2>A simple forecast, tested against its own past</h2>
+      <p class="lede">A forecast is an assumption made visible. This section states the assumption in one line, lets you move it, and then checks how well it would have done.</p>
+      <p>The model has one idea: inflation is persistent, but it is pulled back towards an anchor each year, closing a fixed fraction of the remaining gap:</p>
+      <p class="formula">next year = anchor + persistence × (this year − anchor)</p>
+      <p>
+        <strong>Persistence</strong> is how sticky inflation is: at 0 it snaps to the anchor immediately, at
+        1 it never converges. The dashed grey line is the <strong>IMF's own projection</strong> from the
+        World Economic Outlook, so the toy model can be judged against a professional one. The shaded
+        band is not a guess — its width is the model's measured error from the backtest below.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Inflation: history, model projection and the IMF's projection</h3>
+            <p class="sub">Solid line is recorded data. Dashed blue is this model; dashed grey is the IMF WEO. Hollow markers are projected values.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-forecast"></div>
+        <div class="chart-host" id="chart-forecast"></div>
+        <div class="controls">
+          <div class="control">
+            <label for="f-target">Anchor — <b id="f-target-v">5.0%</b></label>
+            <input type="range" id="f-target" min="3" max="14" step="0.5" value="5">
+            <p class="hint">The Central Bank's stated target is 5%.</p>
+          </div>
+          <div class="control">
+            <label for="f-persist">Persistence — <b id="f-persist-v">0.70</b></label>
+            <input type="range" id="f-persist" min="0.1" max="0.95" step="0.05" value="0.7">
+            <p class="hint">Share of last year's gap to the anchor that survives into this year.</p>
+          </div>
+          <div class="control">
+            <label for="f-horizon">Years ahead — <b id="f-horizon-v">4</b></label>
+            <input type="range" id="f-horizon" min="1" max="6" step="1" value="4">
+            <p class="hint">Confidence falls quickly beyond three years.</p>
+          </div>
+          <div class="control control-actions">
+            <button class="btn small" id="f-fit5" type="button">Best fit, anchor at 5%</button>
+            <button class="btn small" id="f-fitfree" type="button">Best fit, anchor free</button>
+          </div>
+        </div>
+        <figcaption class="card-foot">
+          Model: conditional mean of an AR(1) process around a fixed anchor. Not an official forecast. IMF values: World Economic Outlook database, end-of-period CPI, Uzbekistan.
+        </figcaption>
+      </figure>
+
+      <h3 class="sub-h">Does it work? Backtesting the model</h3>
+      <p>
+        Any forecast should be asked how it would have done. Here the model stands in each year from
+        2017 to 2024, is given only that year's actual inflation, and predicts the next. Its
+        <strong>mean absolute error</strong> is compared with the simplest possible benchmark — “next year
+        equals this year”. The panel updates as you move the sliders above, so you can search for the
+        best parameters by hand, or press one of the buttons to let a grid search do it.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>One-step-ahead forecasts against what actually happened</h3>
+            <p class="sub">Post-float regime, 2018–2025. Each model point uses only the previous year's actual value.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-backtest"></div>
+        <div class="bt">
+          <div class="chart-host" id="chart-backtest"></div>
+          <div class="bt-side">
+            <div class="bt-metric"><span class="k">Model error (mean absolute)</span><span class="v" id="bt-mae-model">—</span><span class="d">with the current sliders</span></div>
+            <div class="bt-metric"><span class="k">Naive benchmark error</span><span class="v" id="bt-mae-naive">—</span><span class="d">“next year = this year”</span></div>
+            <div class="bt-fit" id="bt-fit-text"></div>
+          </div>
+        </div>
+        <figcaption class="card-foot">Error is in percentage points of inflation. 2017 is excluded as a target because no mean-reversion model anticipates a regime change like the float.</figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “I am not claiming to know 2029 inflation. Two dials fully determine that line. What I can show is that this one-line model beats the naive guess on the last eight years — <span data-fill="fitMae5"></span> points of error against <span data-fill="naiveMae"></span> — and that the IMF's path and mine broadly agree.”</p>
+        <p>Then the finding: “When you let the data choose the anchor, it does not pick 5%. It picks about <span data-fill="fitFreeTarget"></span>. For eight years the economy behaved as if its real anchor were around <span data-fill="fitFreeTarget"></span>. 2025's <span data-fill="cpi2025"></span> is the first reading that clearly breaks below it — which is why it matters more than one number should.”</p>
+        <p>If asked “why not machine learning?”: ten annual observations is nothing to train on; a model with more parameters than data points fits the past perfectly and the future not at all. The honest upgrade is monthly data (about 110 observations), which would support seasonality and a proper confidence interval.</p>
+      </div>
+    </section>
+
+    <!-- ================= 08 IMPACT ================= -->
+    <section class="section" id="impact" data-tab="impact">
+      <p class="eyebrow">Economic impact</p>
+      <h2>Inflation moves money between people</h2>
+      <p class="lede">Inflation is not only a cost. It is a transfer — it quietly moves purchasing power from one group to another, without anyone voting on it. The data say who lost and who gained.</p>
+
+      <div class="impact">
+        <div class="impact-item">
+          <span class="tag loses">Lost</span>
+          <h3>Anyone holding cash</h3>
+          <p>A million soum kept under the mattress from 2017 buys <b><span data-fill="retainedPct"></span></b> of what it did. This is the clearest loss in the whole dashboard, and the calculator measures it exactly.</p>
+        </div>
+        <div class="impact-item">
+          <span class="tag loses">Lost</span>
+          <h3>Fixed incomes and pensions</h3>
+          <p>Payments set in nominal soum are revalued by decision, not automatically. Every month between revaluations is a real income cut.</p>
+        </div>
+        <div class="impact-item">
+          <span class="tag loses">Lost</span>
+          <h3>Whoever the year's inflation was aimed at</h3>
+          <p>Food-heavy budgets in 2022; anyone paying a gas bill in 2024. The headline is an average and the average has no victims — the components do.</p>
+        </div>
+        <div class="impact-item">
+          <span class="tag gains">Gained</span>
+          <h3>People earning a wage</h3>
+          <p>This is the surprise. Nominal wages grew faster than prices every year since 2021: real wages are up about <b><span data-fill="realWageCum"></span></b> in four years. Inflation moved value from savers to earners.</p>
+        </div>
+        <div class="impact-item">
+          <span class="tag gains">Gained</span>
+          <h3>Borrowers on fixed rates, exporters</h3>
+          <p>A debt fixed in soum shrank in real terms. Income earned in dollars converted into more soum every year until 2025 — when that stopped.</p>
+        </div>
+        <div class="impact-item">
+          <span class="tag mixed">Mixed</span>
+          <h3>Businesses</h3>
+          <p>Input costs and repricing costs rose and planning got harder; firms that could reprice quickly coped, firms in long contracts absorbed the loss. Disinflation and a stable soum are the relief.</p>
+        </div>
+      </div>
+
+      <p>
+        The grid above says savers lost and earners gained. Both claims can be tested with the data already
+        on this page — the next two figures do exactly that.
+      </p>
+
+      <h3 class="sub-h">Did wages keep up?</h3>
+      <p>
+        The question every inflation story should answer and most do not. Nominal wage growth is deflated
+        by <em>annual-average</em> inflation — the correct deflator for an average wage — using
+        real&nbsp;=&nbsp;(1&nbsp;+&nbsp;nominal)&nbsp;÷&nbsp;(1&nbsp;+&nbsp;inflation)&nbsp;−&nbsp;1, not a simple subtraction.
+        Every year the green bar is positive, the average worker's purchasing power rose.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Nominal wage growth, inflation and real wage growth</h3>
+            <p class="sub">Per cent, year on year. Wages are the January–June average of each year, from the Statistics Agency; inflation is the annual average from the World Bank.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="legend" id="legend-wages"></div>
+        <div class="chart-host" id="chart-wages"></div>
+        <figcaption class="card-foot" data-source="wages"></figcaption>
+      </figure>
+
+      <figure class="card" data-card data-fig data-tool id="card-race">
+        <div class="card-head">
+          <div>
+            <h3>Where should you have put your money?</h3>
+            <p class="sub">One amount, three places to keep it, measured in what it can actually buy. Every value is deflated to the prices of the starting year, so anything above the line genuinely gained ground.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="calc">
+          <div><label for="race-amount">Amount in soum</label><input type="number" id="race-amount" value="1000000" min="1" step="100000"></div>
+          <div><label for="race-start">Saved at the end of</label><select id="race-start"></select></div>
+        </div>
+        <div class="result-strip" id="race-out"></div>
+        <div class="legend" id="legend-race"></div>
+        <div class="chart-host" id="chart-race"></div>
+        <figcaption class="card-foot">Deposit returns track the Central Bank's policy rate, used as a proxy: real deposit rates varied by bank and term, and the policy rate is the only continuous published series. Dollars are bought and valued at year-end official rates. Neither line includes fees or tax.</figcaption>
+      </figure>
+
+      <h3 class="sub-h">The policy response, measured properly</h3>
+      <p>
+        The Central Bank's instrument is the <strong>policy rate</strong>. But a 14% rate means nothing on its
+        own — what matters is the <strong>real rate</strong>: the policy rate minus inflation. Below zero,
+        borrowing is effectively subsidised and saving in soum is a losing bet; the brake is not on.
+        Above zero, it is. The chart shows the brake was off in 2016–17, on from 2018, and pressed
+        hardest in 2025 at <strong><span data-fill="realRate2025"></span></strong> — which is the year inflation
+        fell to its lowest and the soum strengthened. That is not a coincidence.
+      </p>
+
+      <figure class="card" data-card data-fig>
+        <div class="card-head">
+          <div>
+            <h3>Real policy rate</h3>
+            <p class="sub">Policy rate at year-end minus December-on-December inflation, percentage points. Blue is a positive real rate; red is negative.</p>
+          </div>
+          <div class="card-tools"><button class="btn" data-table type="button" aria-pressed="false">Table</button></div>
+        </div>
+        <div class="chart-host" id="chart-realrate"></div>
+        <figcaption class="card-foot" data-source="policyRate"></figcaption>
+      </figure>
+
+      <div class="note">
+        <p class="eyebrow">In plain words</p>
+        <p>Say this: “Two charts, one story. Real wages rose, so the average worker came out ahead — inflation was a transfer from savers to earners, not a pure loss. And the Bank kept real rates positive for seven years, which is why 2025 finally delivered both low inflation and a stronger soum. Tight money is slow, but it works.”</p>
+      </div>
+    </section>
+
+    <!-- ================= 09 CONCLUSION ================= -->
+    <section class="section" id="conclusion" data-tab="end">
+      <p class="eyebrow">Conclusion</p>
+      <h2>What the data supports</h2>
+
+      <ol class="takeaways">
+        <li><span class="t"><b>Inflation is falling and 2025 is the real break.</b> At <span data-fill="cpi2025"></span>, the lowest reading in nine years, inflation is below Kazakhstan's and Kyrgyzstan's and, for the first time, below the <span data-fill="fitFreeTarget"></span> anchor the economy behaved around since 2018.</span></li>
+        <li><span class="t"><b>The 2017 float explains the level, not the persistence.</b> The float caused a one-off repricing to <span data-fill="cpi2017"></span>. What kept inflation in double digits for most of the years that followed was domestic: demand, credit and the slow removal of energy subsidies.</span></li>
+        <li><span class="t"><b>The kind of inflation changed.</b> Food led in 2022 (<span data-fill="food2022"></span>); services led in 2024 (<span data-fill="services2024"></span>) as gas and electricity tariffs were raised towards cost. Same headline range, opposite victims.</span></li>
+        <li><span class="t"><b>Cash lost, wages won.</b> A million soum held from 2017 keeps <span data-fill="retainedPct"></span> of its buying power; the average real wage rose about <span data-fill="realWageCum"></span> over 2021–25. Inflation transferred value from savers to earners.</span></li>
+        <li><span class="t"><b>The bank beat the mattress and the dollar.</b> A million soum left in cash from 2017 kept <span data-fill="retainedPct"></span> of its buying power; the same money in dollars kept about 64%; in a soum deposit tracking the policy rate it finished roughly <b>28% ahead of inflation</b>. Soum prices rose faster than the dollar did, so foreign currency was never the safe haven it is assumed to be.</span></li>
+        <li><span class="t"><b>Positive real rates worked, slowly.</b> The real policy rate has been above zero since 2018 and reached <span data-fill="realRate2025"></span> in 2025 — the year of the lowest inflation and the first appreciation of the soum since the float.</span></li>
+        <li><span class="t"><b>A forecast is an assumption made visible.</b> A one-line model beats the naive guess on the last eight years and broadly agrees with the IMF's path to 5% by 2027 — but two dials fully determine it, and honest forecasting means showing them.</span></li>
+      </ol>
+
+      <div class="note">
+        <p class="eyebrow">Closing line</p>
+        <p>“The soum did not lose value because of one decision in one year. It lost value steadily, for reasons that were visible in the data the whole time — and in 2025, for the first time, the same data show it starting to hold. Measuring it carefully is how you tell the difference.”</p>
+      </div>
+    </section>
+
+    <!-- ================= 10 SOURCES ================= -->
+    <section class="section" id="sources" data-tab="end">
+      <p class="eyebrow">Sources &amp; method</p>
+      <h2>Where every number comes from</h2>
+
+      <div class="caveat">
+        <h3>What is here, and what was left out</h3>
+        <p>
+          Every series on this page was read from the publishing institution or a reputable secondary
+          report on <span data-fill="accessed"></span>; the sources below give the exact series, URL and access
+          date. Nothing is estimated. Where a series could not be verified for every year — the group
+          breakdown before 2022, petrol prices between documented decisions — it has been omitted rather
+          than approximated, and the chart says so. All figures live in one file,
+          <code>assets/js/data.js</code>; every chart, calculation and sentence with a number in it reads from there.
+        </p>
+      </div>
+
+      <div class="sources" id="source-list"></div>
+
+      <h3 class="sub-h">Method notes</h3>
+      <p>
+        <strong>Revisions.</strong> Headline inflation for 2016 and 2017 uses the Central Bank's revised
+        figures (9.7% and 18.8%). The Statistics Agency's original releases showed 5.7% and 14.4% under
+        the pre-reform methodology; the IMF carries 9.8% and 18.8%. Using one institution's series
+        throughout avoids mixing methodologies.
+      </p>
+      <p>
+        <strong>Timing.</strong> Headline, group and regional inflation are December-on-December. Exchange
+        rates and the policy rate are year-end values. Wages are January–June averages and are therefore
+        deflated by annual-average inflation, not the Dec/Dec figure. Series with different timing are
+        never placed on the same axis.
+      </p>
+      <p>
+        <strong>Indexing.</strong> Series in different units are rebased to 2017 = 100 so they can share one
+        axis. Dual vertical axes are avoided throughout because the correlation they display is an
+        artefact of scale placement.
+      </p>
+      <p>
+        <strong>Purchasing power.</strong> The price level compounds Dec/Dec inflation from end-2016 = 100.
+        Real value is the ratio of the two years' price levels. Real wage growth is
+        (1&nbsp;+&nbsp;nominal)&nbsp;÷&nbsp;(1&nbsp;+&nbsp;inflation)&nbsp;−&nbsp;1.
+      </p>
+      <p>
+        <strong>Forecast and backtest.</strong> The model is the conditional mean of a first-order
+        autoregression around a fixed anchor. It is backtested with one-step-ahead forecasts over
+        2018–2025 against a naive benchmark; parameters are fitted by grid search on mean absolute error;
+        the uncertainty band starts at that error and widens by 35% of it per year. It is an illustration,
+        not an econometric forecast.
+      </p>
+      <p>
+        <strong>Accessibility.</strong> Every chart has a data-table alternative, keyboard navigation with
+        the arrow keys, and a palette checked for colour-vision-deficiency separation on both the light
+        and dark surfaces.
+      </p>
+    </section>
+
+    <footer class="footer">
+      <p>Uzbekistan Inflation Dashboard · built for a university presentation on inflation and the cost of living · charts drawn in plain SVG with no external libraries · data read <span data-fill="accessed"></span>.</p>
+    </footer>
+
+  </main>
+</div>
+
+<div class="present-bar" id="present-bar" role="status">
+  <span class="count" id="present-count">1 / 11</span>
+  <span class="sep"></span>
+  <span><kbd>←</kbd> <kbd>→</kbd> move</span>
+  <span class="sep"></span>
+  <button type="button" id="present-notes">Notes <kbd>N</kbd></button>
+  <span class="sep"></span>
+  <button type="button" id="present-exit">Exit <kbd>Esc</kbd></button>
+</div>
+
+<script>
+/* =============================================================================
+   data.js — every figure used by the dashboard, with its source.
+   -----------------------------------------------------------------------------
+   Nothing here is estimated or remembered. Each series names the publishing
+   institution, the exact series, the URL and the date it was read. Anything
+   that could not be verified against a primary or reputable secondary source
+   has been left out rather than approximated.
+
+   Timing conventions (they differ, and the charts respect that):
+     "Dec/Dec"   — December-on-December change, the headline inflation measure
+     "avg"       — annual average, used when comparing with a period-average
+                    quantity such as wages
+     "end"       — value on the last published date of the year
+   ========================================================================== */
+
+const YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+const ACCESSED = "8 September 2026";
+
+const SRC = {
+  cbuInflation: {
+    name: "Central Bank of Uzbekistan",
+    series: "Year-on-year inflation, December of each year",
+    url: "https://cbu.uz/en/monetary-policy/annual-inflation/indicators/",
+    accessed: ACCESSED
+  },
+  cbuFx: {
+    name: "Central Bank of Uzbekistan",
+    series: "Official exchange-rate archive, USD, last published rate of the year",
+    url: "https://cbu.uz/en/arkhiv-kursov-valyut/",
+    accessed: ACCESSED
+  },
+  cbuRate: {
+    name: "Central Bank of Uzbekistan",
+    series: "Policy-rate dynamics (asosiy_stavka.xlsx)",
+    url: "https://cbu.uz/en/monetary-policy/refinancing-rate/",
+    accessed: ACCESSED
+  },
+  worldBank: {
+    name: "World Bank, World Development Indicators",
+    series: "FP.CPI.TOTL.ZG — Inflation, consumer prices (annual %)",
+    url: "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?locations=UZ",
+    accessed: ACCESSED
+  },
+  imf: {
+    name: "IMF World Economic Outlook database",
+    series: "PCPIEPCH — Inflation, end-of-period consumer prices (%), incl. projections",
+    url: "https://www.imf.org/external/datamapper/PCPIEPCH@WEO",
+    accessed: ACCESSED
+  },
+  statWages: {
+    name: "Statistics Agency of Uzbekistan",
+    series: "Average monthly nominal accrued wages, press release of 28 July 2025",
+    url: "https://stat.uz/img/press-relizlar/ish-haqi--eng_p44092.pdf",
+    accessed: ACCESSED
+  },
+  statComponents: {
+    name: "Statistics Agency of Uzbekistan year-end CPI releases, as reported by Gazeta.uz and Kun.uz",
+    series: "CPI by group — food, non-food goods, paid services (Dec/Dec)",
+    url: "https://www.gazeta.uz/en/2026/01/06/prices/",
+    accessed: ACCESSED
+  },
+  fuel: {
+    name: "Government and Uzbekneftegaz price decisions, as reported by Gazeta.uz, Kun.uz and Tashkent Times",
+    series: "Administered retail price of AI-80 petrol at each documented change",
+    url: "https://www.gazeta.uz/en/2024/01/04/ai-80-gasoline-in-uzbekistan/",
+    accessed: ACCESSED
+  }
+};
+
+const DATA = {
+  years: YEARS,
+  accessed: ACCESSED,
+  sources: SRC,
+
+  /* --- Headline inflation, Dec/Dec ------------------------------------------
+     2016 and 2017 are the Central Bank's revised figures. The Statistics
+     Agency originally published 5.7% for 2016 and 14.4% for 2017 under the
+     pre-reform methodology; the IMF WEO carries 9.8% and 18.8%. ------------- */
+  cpi: {
+    label: "Headline inflation", unit: "%", basis: "Dec/Dec", source: SRC.cbuInflation,
+    values: [9.7, 18.8, 14.3, 15.2, 11.1, 10.0, 12.3, 8.8, 9.8, 7.3]
+  },
+
+  /* Annual-average inflation — the right deflator for an annual-average wage. */
+  cpiAverage: {
+    label: "Inflation, annual average", unit: "%", basis: "avg", source: SRC.worldBank,
+    values: [8.1, 13.9, 17.5, 14.5, 12.9, 10.8, 11.4, 10.0, 9.6, 8.8]
+  },
+
+  /* --- Exchange rate, official, last published rate of the year ------------- */
+  fx: {
+    label: "Soum per US dollar", unit: "UZS/USD", basis: "end", source: SRC.cbuFx,
+    values: [3231.48, 8120.07, 8339.55, 9507.56, 10476.92, 10837.66, 11225.46, 12338.77, 12920.48, 12025.33],
+    float: { before: { date: "1 September 2017", rate: 4210.35 },
+             after:  { date: "6 September 2017", rate: 8100.00 } }
+  },
+
+  /* --- Policy rate, end of year, with the full decision history ------------- */
+  policyRate: {
+    label: "Policy rate", unit: "%", basis: "end", source: SRC.cbuRate,
+    values: [9.0, 14.0, 16.0, 16.0, 14.0, 14.0, 15.0, 14.0, 13.5, 14.0],
+    changes: [
+      ["28 Jun 2017", 14], ["25 Sep 2018", 16], ["15 Apr 2020", 15], ["11 Sep 2020", 14],
+      ["18 Mar 2022", 17], ["10 Jun 2022", 16], ["22 Jul 2022", 15], ["17 Mar 2023", 14],
+      ["26 Jul 2024", 13.5], ["24 Mar 2025", 14]
+    ]
+  },
+
+  /* --- Inflation by group, Dec/Dec. Only the years that could be verified. -- */
+  components: {
+    years: [2022, 2023, 2024, 2025], basis: "Dec/Dec", source: SRC.statComponents,
+    headline: [12.3, 8.8, 9.8, 7.3],
+    food:     [15.6, 9.7, 2.4, 5.5],
+    nonFood:  [10.7, 7.7, 7.7, 5.1],
+    services: [8.4, 8.7, 26.7, 13.9]
+  },
+
+  /* Regulated-tariff increases over 2024, the year services inflation hit 26.7%. */
+  tariffShock2024: [
+    { item: "Piped gas", pct: 130 },
+    { item: "Electricity", pct: 70 },
+    { item: "Suburban train fares", pct: 40.1 },
+    { item: "Heating", pct: 36 },
+    { item: "Hot water", pct: 32.1 },
+    { item: "Propane", pct: 30.9 }
+  ],
+
+  /* --- Petrol: the administered AI-80 price at each documented change ------- */
+  fuelAI80: {
+    label: "Petrol AI-80, administered retail price", unit: "UZS/litre", source: SRC.fuel,
+    points: [
+      { label: "Pre-Oct 2017", price: 2075, note: "Regulated price before the currency float" },
+      { label: "Oct 2017",     price: 2800, note: "Raised on 22 October 2017, weeks after the float" },
+      { label: "Apr 2020",     price: 4500, note: "Fixed retail price incl. excise; deregulation announced from 1 May 2020" },
+      { label: "2023",         price: 6050, note: "Uzbekneftegaz network price under an excise exemption" },
+      { label: "Jan 2024",     price: 6800, note: "Excise exemption ended 1 January 2024" },
+      { label: "Feb 2024",     price: 7000, note: "Raised 26 February 2024, citing import costs" },
+      { label: "Oct 2024",     price: 8500, note: "Typical private-station price; Uzbekneftegaz 6,900" }
+    ],
+    endnote: "AI-80 was withdrawn from sale nationwide on 1 December 2025. AI-92 stood at about 9,500 soum per litre in January 2024 and 11,700 in September 2026."
+  },
+
+  /* --- Wages: January–June average of each year, thousand soum ------------- */
+  wages: {
+    label: "Average monthly nominal wage", unit: "thousand UZS", basis: "Jan–Jun average",
+    source: SRC.statWages,
+    years: [2021, 2022, 2023, 2024, 2025],
+    values: [2968.5, 3551.6, 4337.6, 5106.0, 5982.3]
+  },
+
+  /* --- Neighbours, Dec/Dec, same source and basis for all --------------------- */
+  peers: {
+    basis: "Dec/Dec", source: SRC.imf,
+    KAZ: { label: "Kazakhstan", values: [8.4, 7.0, 5.4, 5.4, 7.4, 8.4, 20.4, 9.7, 8.6, 12.3] },
+    KGZ: { label: "Kyrgyzstan", values: [-0.5, 3.7, 0.5, 3.1, 9.7, 11.2, 14.7, 7.3, 6.3, 9.3] },
+    TJK: { label: "Tajikistan", values: [6.1, 6.7, 5.4, 8.0, 9.4, 8.0, 4.2, 3.8, 3.6, 3.5] }
+  },
+
+  /* --- The IMF's own projection for Uzbekistan, to set beside the model ----- */
+  imfProjection: {
+    label: "IMF WEO projection", unit: "%", source: SRC.imf,
+    years: [2026, 2027, 2028, 2029, 2030],
+    values: [6.8, 5.0, 5.0, 5.0, 5.0]
+  },
+
+  /* --- Events drawn onto the charts ------------------------------------------- */
+  events: [
+    { year: 2017, short: "Currency float",
+      detail: "On 5 September 2017 the soum was floated. The official rate went from 4,210 to 8,100 per dollar overnight, closing the gap with the parallel market. Imported goods repriced and inflation reached 18.8% that year." },
+    { year: 2020, short: "Pandemic",
+      detail: "Demand fell and several administered prices were frozen, so measured inflation slowed even as incomes came under pressure." },
+    { year: 2024, short: "Energy tariff reform",
+      detail: "Household gas tariffs rose 130% and electricity 70% over 2024 as subsidies were cut. Services inflation reached 26.7% while food rose only 2.4%." }
+  ]
+};
+
+/* =============================================================================
+   Derived series — computed from the raw data above, never typed in twice.
+   ========================================================================== */
+
+/* A list of annual % rates -> a price-level index with `baseYear` = 100. */
+function indexFromRates(rates, years, baseYear) {
+  const level = [];
+  let v = 100;
+  for (let i = 0; i < rates.length; i++) {
+    if (i > 0) v = v * (1 + rates[i] / 100);
+    level.push(v);
+  }
+  const base = level[years.indexOf(baseYear)];
+  return level.map(x => (x / base) * 100);
+}
+
+function indexFromLevels(levels, years, baseYear) {
+  const base = levels[years.indexOf(baseYear)];
+  return levels.map(x => (x / base) * 100);
+}
+
+const BASE_YEAR = 2017;
+const LAST_YEAR = YEARS[YEARS.length - 1];
+
+DATA.derived = {
+  baseYear: BASE_YEAR,
+  lastYear: LAST_YEAR,
+
+  /* Price level, end-2016 = 100, for the purchasing-power calculator. */
+  priceLevel: indexFromRates(DATA.cpi.values, YEARS, YEARS[0]),
+
+  /* Uzbekistan and its neighbours, price level with 2017 = 100. */
+  cpiIndex: indexFromRates(DATA.cpi.values, YEARS, BASE_YEAR),
+  fxIndex:  indexFromLevels(DATA.fx.values, YEARS, BASE_YEAR),
+  peerIndex: {
+    KAZ: indexFromRates(DATA.peers.KAZ.values, YEARS, BASE_YEAR),
+    KGZ: indexFromRates(DATA.peers.KGZ.values, YEARS, BASE_YEAR),
+    TJK: indexFromRates(DATA.peers.TJK.values, YEARS, BASE_YEAR)
+  },
+
+  /* Real policy rate = policy rate minus Dec/Dec inflation, percentage points. */
+  realRate: DATA.policyRate.values.map((r, i) => r - DATA.cpi.values[i]),
+
+  /* Real wage growth, year on year. Nominal growth is deflated by the
+     annual-average CPI, because the wage is itself a period average:
+         real = (1 + nominal) / (1 + inflation) - 1                        */
+  realWages: (function () {
+    const w = DATA.wages, out = [];
+    for (let i = 1; i < w.years.length; i++) {
+      const nominal = w.values[i] / w.values[i - 1] - 1;
+      const infl = DATA.cpiAverage.values[YEARS.indexOf(w.years[i])] / 100;
+      out.push({
+        year: w.years[i],
+        nominal: nominal * 100,
+        inflation: infl * 100,
+        real: ((1 + nominal) / (1 + infl) - 1) * 100
+      });
+    }
+    return out;
+  })()
+};
+
+DATA.derived.realWageCumulative = DATA.derived.realWages
+  .reduce((acc, r) => acc * (1 + r.real / 100), 1) * 100 - 100;
+
+/* What one soum held from the end of `fromYear` is still worth at the end of
+   `toYear`, as a fraction of its original purchasing power. */
+DATA.realValue = function (fromYear, toYear) {
+  const L = DATA.derived.priceLevel;
+  return L[YEARS.indexOf(fromYear)] / L[YEARS.indexOf(toYear)];
+};
+
+/* =============================================================================
+   Forecast model — a first-order mean-reversion sketch, stated in full:
+
+       next = target + persistence x (current - target)
+
+   It is the conditional expectation of an AR(1) process around a fixed
+   anchor. It is a teaching device, not an econometric forecast; the point is
+   that its output is entirely determined by two visible dials.
+   ========================================================================== */
+
+DATA.forecast = function (opts) {
+  const target = opts.target, phi = opts.persistence, horizon = opts.horizon;
+  let current = DATA.cpi.values[YEARS.length - 1];
+  const out = [];
+  for (let h = 1; h <= horizon; h++) {
+    current = target + phi * (current - target);
+    const band = opts.bandBase + (h - 1) * opts.bandGrowth;   /* widens with horizon */
+    out.push({ year: LAST_YEAR + h, value: current,
+               low: Math.max(0, current - band), high: current + band });
+  }
+  return out;
+};
+
+/* --- Backtest: one-step-ahead forecasts over the post-float regime ----------
+   For each year t from 2017 to 2024 the model is given the actual value in t
+   and asked for t+1; the naive benchmark simply repeats t. Mean absolute
+   error is reported for both. 2017 itself is excluded as a target because no
+   mean-reversion model anticipates a regime change like the float. -------- */
+
+DATA.backtest = function (target, phi) {
+  const start = YEARS.indexOf(2017);
+  const rows = [];
+  let eModel = 0, eNaive = 0;
+  for (let i = start; i < YEARS.length - 1; i++) {
+    const cur = DATA.cpi.values[i], actual = DATA.cpi.values[i + 1];
+    const model = target + phi * (cur - target);
+    rows.push({ year: YEARS[i + 1], actual, model, naive: cur });
+    eModel += Math.abs(model - actual);
+    eNaive += Math.abs(cur - actual);
+  }
+  return { rows, maeModel: eModel / rows.length, maeNaive: eNaive / rows.length };
+};
+
+/* Grid search for the parameters that minimise backtest MAE. `fixedTarget`
+   pins the anchor (e.g. the Bank's 5%) and fits persistence alone. */
+DATA.fitModel = function (fixedTarget) {
+  let best = null;
+  const targets = fixedTarget !== undefined ? [fixedTarget] : range(3, 14, 0.5);
+  targets.forEach(t => range(0.1, 0.95, 0.05).forEach(p => {
+    const mae = DATA.backtest(t, p).maeModel;
+    if (!best || mae < best.mae) best = { target: t, persistence: p, mae };
+  }));
+  return best;
+};
+
+function range(a, b, step) {
+  const out = [];
+  for (let v = a; v <= b + 1e-9; v += step) out.push(Number(v.toFixed(4)));
+  return out;
+}
+
+/* The band width is calibrated from the backtest rather than guessed: it
+   starts at the fitted model's mean absolute error. */
+DATA.defaultForecastOptions = function () {
+  const fit = DATA.fitModel(5);
+  return { target: 5, persistence: fit.persistence, horizon: 4,
+           bandBase: fit.mae, bandGrowth: fit.mae * 0.35 };
+};
+
+/* =============================================================================
+   Interactive models — the two calculators in sections 03 and 08.
+   ========================================================================== */
+
+/* --- Recovering the CPI basket weights -------------------------------------
+   The official headline rate is a weighted average of the group rates:
+
+       headline = w_food x food + w_nonfood x nonfood + w_services x services
+
+   The weights are not published alongside the group figures, but four years of
+   both sides is enough to recover them. This grid-searches the simplex
+   (weights non-negative, summing to one) for the set that minimises squared
+   error against the published headline. ---------------------------------- */
+
+DATA.fitWeights = function () {
+  const c = DATA.components;
+  let best = null;
+  for (let a = 0; a <= 100; a++) {
+    for (let b = 0; a + b <= 100; b++) {
+      const w = { food: a / 100, nonFood: b / 100, services: (100 - a - b) / 100 };
+      let sse = 0;
+      for (let i = 0; i < c.years.length; i++) {
+        const pred = w.food * c.food[i] + w.nonFood * c.nonFood[i] + w.services * c.services[i];
+        sse += (pred - c.headline[i]) * (pred - c.headline[i]);
+      }
+      if (!best || sse < best.sse) { best = w; best.sse = sse; }
+    }
+  }
+  best.rmse = Math.sqrt(best.sse / c.years.length);
+  return best;
+};
+
+/* A household's own inflation rate: the same group rates, re-weighted. */
+DATA.personalInflation = function (w) {
+  const c = DATA.components;
+  const total = w.food + w.nonFood + w.services;
+  const n = { food: w.food / total, nonFood: w.nonFood / total, services: w.services / total };
+  const rows = c.years.map((year, i) => ({
+    year,
+    personal: n.food * c.food[i] + n.nonFood * c.nonFood[i] + n.services * c.services[i],
+    official: c.headline[i]
+  }));
+  const compound = key => rows.reduce((acc, r) => acc * (1 + r[key] / 100), 1) * 100 - 100;
+  return { rows, weights: n, cumulativePersonal: compound("personal"), cumulativeOfficial: compound("official") };
+};
+
+/* Illustrative budget shapes — starting points for the sliders, not survey
+   data. The fitted basket is the only one recovered from published figures. */
+DATA.budgetPresets = [
+  { id: "fitted",  label: "Official basket", note: "recovered from the published group data" },
+  { id: "low",     label: "Food-heavy",  food: 60, nonFood: 20, services: 20, note: "a budget where most money goes on food" },
+  { id: "student", label: "Student",     food: 45, nonFood: 20, services: 35, note: "rent, transport and data weigh more than furniture" },
+  { id: "high",    label: "Service-heavy", food: 25, nonFood: 30, services: 45, note: "a budget with room for services beyond utilities" }
+];
+
+/* --- The savings race -------------------------------------------------------
+   One amount, three places to keep it, measured in what it can actually buy.
+   Every value is deflated to the prices of the starting year, so a result
+   above the starting amount means the money genuinely gained ground.
+
+     Cash      — soum under the mattress, earning nothing.
+     Deposit   — a soum bank account tracking the Central Bank's policy rate.
+                 The policy rate is a PROXY: real deposit rates differed by bank
+                 and term. It is the only rate published as a continuous series.
+     Dollars   — bought at the year-end rate, held, valued at the later rate.
+   ------------------------------------------------------------------------ */
+
+DATA.savingsRace = function (startYear, amount) {
+  const iS = YEARS.indexOf(startYear), iE = YEARS.length - 1;
+  const P = DATA.derived.priceLevel;
+  const years = [], cash = [], deposit = [], dollar = [];
+  let nominalDeposit = amount;
+
+  for (let i = iS; i <= iE; i++) {
+    if (i > iS) nominalDeposit *= (1 + DATA.policyRate.values[i] / 100);
+    const deflate = P[iS] / P[i];                       /* into starting-year prices */
+    years.push(YEARS[i]);
+    cash.push(amount * deflate);
+    deposit.push(nominalDeposit * deflate);
+    dollar.push(amount * (DATA.fx.values[i] / DATA.fx.values[iS]) * deflate);
+  }
+
+  const last = a => a[a.length - 1];
+  const final = { cash: last(cash), deposit: last(deposit), dollar: last(dollar) };
+  const pct = {};
+  Object.keys(final).forEach(k => { pct[k] = (final[k] / amount - 1) * 100; });
+  const winner = Object.keys(final).reduce((a, b) => final[a] >= final[b] ? a : b);
+  return { years, cash, deposit, dollar, final, pct, winner, startYear, amount };
+};
+
+</script>
+<script>
+/* =============================================================================
+   charts.js — a small SVG chart renderer with no external dependencies.
+   -----------------------------------------------------------------------------
+   The dashboard must render from a USB stick in a lecture room with no
+   internet, so nothing is loaded from a CDN. Every chart builds a data-table
+   twin, so no value is reachable only by hovering.
+
+   Supported: line/area (with projected segments and uncertainty bands),
+   single and grouped columns, diverging columns coloured by sign, reference
+   lines, event annotations, crosshair tooltips, keyboard navigation, and a
+   one-time draw-in animation when a chart first scrolls into view.
+   ========================================================================== */
+
+const Chart = (function () {
+
+  const NS = "http://www.w3.org/2000/svg";
+
+  function el(name, attrs) {
+    const node = document.createElementNS(NS, name);
+    for (const k in attrs) if (attrs[k] !== undefined) node.setAttribute(k, attrs[k]);
+    return node;
+  }
+
+  function css(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  const fmt = {
+    pct:    v => v.toFixed(1) + "%",
+    pp:     v => (v > 0 ? "+" : "") + v.toFixed(1) + " pp",
+    soum:   v => Math.round(v).toLocaleString("en-US"),
+    thousand: v => Math.round(v).toLocaleString("en-US") + "k",
+    index:  v => v.toFixed(0),
+    plain:  v => String(v)
+  };
+
+  /* Series colours are stored as token names so they re-resolve on theme change. */
+  function resolveColors(cfg) {
+    cfg.series.forEach(s => { if (s.colorVar) s.color = css(s.colorVar); });
+    if (cfg.band && cfg.band.colorVar) cfg.band.color = css(cfg.band.colorVar);
+    if (cfg.refLine && cfg.refLine.colorVar) cfg.refLine.color = css(cfg.refLine.colorVar);
+    if (cfg.signColors) {
+      cfg.signColors.pos = css(cfg.signColors.posVar);
+      cfg.signColors.neg = css(cfg.signColors.negVar);
+    }
+  }
+
+  /* Choose ~5 round gridline values that comfortably contain the data. */
+  function niceScale(min, max, count) {
+    if (min === max) { min -= 1; max += 1; }
+    const raw = (max - min) / (count - 1);
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const norm = raw / mag;
+    const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+    const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+    const ticks = [];
+    for (let v = lo; v <= hi + step / 1000; v += step) ticks.push(Number(v.toFixed(10)));
+    return { lo, hi, ticks };
+  }
+
+  /* A bar with a 4px rounded data-end and a square base at the baseline.
+     `up` is true when the bar grows upward from the baseline. */
+  function roundedBar(x, yBase, w, h, up, r) {
+    r = Math.min(r, w / 2, Math.abs(h));
+    if (up) {
+      const y = yBase - h;
+      return `M${x},${yBase} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + w - r},${y}` +
+             ` Q${x + w},${y} ${x + w},${y + r} L${x + w},${yBase} Z`;
+    }
+    const y = yBase + h;
+    return `M${x},${yBase} L${x},${y - r} Q${x},${y} ${x + r},${y} L${x + w - r},${y}` +
+           ` Q${x + w},${y} ${x + w},${y - r} L${x + w},${yBase} Z`;
+  }
+
+  /* A dashed swatch plus caption, parked above the top-right of the plot. */
+  function refLineKey(svg, refLine, rightX, topY) {
+    const width = refLine.label.length * 5.8;
+    const textX = Math.max(60, rightX - width);
+    svg.appendChild(el("line", {
+      x1: textX - 24, x2: textX - 7, y1: topY - 11, y2: topY - 11,
+      stroke: refLine.color, "stroke-width": 1.5, "stroke-dasharray": "5 4"
+    }));
+    const t = el("text", { x: textX, y: topY - 7, class: "c-annot", fill: css("--ink-2") });
+    t.textContent = refLine.label;
+    svg.appendChild(t);
+  }
+
+  function drawAnnotations(svg, cfg, X, pad, ih) {
+    (cfg.annotations || []).forEach((a, k) => {
+      const i = cfg.x.indexOf(a.x);
+      if (i < 0) return;
+      svg.appendChild(el("line", {
+        x1: X(i), x2: X(i), y1: pad.t, y2: pad.t + ih,
+        stroke: css("--accent"), "stroke-width": 1, "stroke-opacity": 0.5
+      }));
+      const anchorEnd = X(i) > pad.l + (svg.viewBox.baseVal.width - pad.l) * 0.6;
+      const cap = el("text", {
+        x: X(i) + (anchorEnd ? -6 : 6), y: pad.t + 12 + (a.row || 0) * 14,
+        "text-anchor": anchorEnd ? "end" : "start", class: "c-annot", fill: css("--ink-2")
+      });
+      cap.textContent = a.label;
+      svg.appendChild(cap);
+    });
+  }
+
+  function gridAndTicks(svg, scale, Y, pad, iw, yFormat) {
+    scale.ticks.forEach(t => {
+      svg.appendChild(el("line", {
+        x1: pad.l, x2: pad.l + iw, y1: Y(t), y2: Y(t),
+        stroke: css("--rule"), "stroke-width": 1
+      }));
+      const label = el("text", {
+        x: pad.l - 10, y: Y(t) + 4, "text-anchor": "end", class: "c-tick", fill: css("--ink-3")
+      });
+      label.textContent = (yFormat || fmt.plain)(t);
+      svg.appendChild(label);
+    });
+  }
+
+  /* --- the data-table twin ------------------------------------------------- */
+
+  function buildTable(cfg) {
+    const wrap = document.createElement("div");
+    wrap.className = "chart-table";
+    const table = document.createElement("table");
+    const thead = document.createElement("thead"), hr = document.createElement("tr");
+    hr.appendChild(Object.assign(document.createElement("th"), { textContent: cfg.xTitle || "Year" }));
+    cfg.series.forEach(s => {
+      const th = document.createElement("th");
+      th.textContent = s.label + (s.unit ? ` (${s.unit})` : "");
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr); table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    cfg.x.forEach((xv, i) => {
+      const tr = document.createElement("tr");
+      tr.appendChild(Object.assign(document.createElement("th"), { textContent: xv }));
+      cfg.series.forEach(s => {
+        const td = document.createElement("td");
+        const v = s.values[i];
+        const projected = s.dashedFrom !== undefined && i > s.dashedFrom;
+        td.textContent = (v === null || v === undefined) ? "—" :
+          (s.format || fmt.plain)(v) + (projected || s.projected ? " *" : "");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    if (cfg.series.some(s => s.dashedFrom !== undefined || s.projected)) {
+      const n = document.createElement("p");
+      n.className = "table-note";
+      n.textContent = "* projected value, not recorded data";
+      wrap.appendChild(n);
+    }
+    return wrap;
+  }
+
+  /* --- line / area chart ---------------------------------------------------- */
+
+  function drawLine(root, cfg, width) {
+    resolveColors(cfg);
+    const H = cfg.height || 320;
+    const pad = { t: cfg.refLine ? 32 : 22, r: cfg.endLabels === false ? 20 : 84, b: 34, l: 54 };
+    const iw = Math.max(80, width - pad.l - pad.r), ih = H - pad.t - pad.b;
+
+    let all = [];
+    cfg.series.forEach(s => { all = all.concat(s.values.filter(v => v !== null)); });
+    if (cfg.band) all = all.concat(cfg.band.low.filter(v => v !== null), cfg.band.high.filter(v => v !== null));
+    if (cfg.refLine) all.push(cfg.refLine.value);
+    const scale = niceScale(
+      cfg.yMin !== undefined ? Math.min(cfg.yMin, Math.min.apply(null, all)) : Math.min.apply(null, all),
+      Math.max.apply(null, all), 5);
+
+    const X = i => pad.l + (cfg.x.length === 1 ? iw / 2 : (i / (cfg.x.length - 1)) * iw);
+    const Y = v => pad.t + ih - ((v - scale.lo) / (scale.hi - scale.lo)) * ih;
+
+    const svg = el("svg", {
+      viewBox: `0 0 ${width} ${H}`, width: "100%", height: H,
+      role: "img", "aria-label": cfg.ariaLabel || cfg.title || "Line chart"
+    });
+    const surface = css("--surface");
+
+    gridAndTicks(svg, scale, Y, pad, iw, cfg.yFormat);
+
+    const every = iw / cfg.x.length < 42 ? 2 : 1;
+    cfg.x.forEach((xv, i) => {
+      if (i % every !== 0 && i !== cfg.x.length - 1) return;
+      const label = el("text", { x: X(i), y: H - 12, "text-anchor": "middle", class: "c-tick", fill: css("--ink-3") });
+      label.textContent = xv;
+      svg.appendChild(label);
+    });
+
+    drawAnnotations(svg, cfg, X, pad, ih);
+
+    if (cfg.band) {
+      let d = "";
+      cfg.band.high.forEach((v, i) => { if (v !== null) d += (d ? "L" : "M") + X(i) + "," + Y(v) + " "; });
+      for (let i = cfg.band.low.length - 1; i >= 0; i--) {
+        if (cfg.band.low[i] !== null) d += "L" + X(i) + "," + Y(cfg.band.low[i]) + " ";
+      }
+      svg.appendChild(el("path", { d: d + "Z", fill: cfg.band.color, "fill-opacity": 0.12, stroke: "none" }));
+    }
+
+    if (cfg.refLine) {
+      svg.appendChild(el("line", {
+        x1: pad.l, x2: pad.l + iw, y1: Y(cfg.refLine.value), y2: Y(cfg.refLine.value),
+        stroke: cfg.refLine.color, "stroke-width": 1.5, "stroke-dasharray": "5 4"
+      }));
+      refLineKey(svg, cfg.refLine, pad.l + iw, pad.t);
+    }
+
+    cfg.series.forEach((s, si) => {
+      const dim = cfg.isolate !== null && cfg.isolate !== undefined && cfg.isolate !== si;
+      const op = dim ? 0.15 : 1;
+      const color = s.muted ? css("--ink-3") : s.color;
+      const pts = [];
+      s.values.forEach((v, i) => { if (v !== null) pts.push({ i, x: X(i), y: Y(v) }); });
+      if (!pts.length) return;
+
+      if (s.area) {
+        let d = pts.map((p, k) => (k ? "L" : "M") + p.x + "," + p.y).join(" ");
+        d += ` L${pts[pts.length - 1].x},${Y(scale.lo)} L${pts[0].x},${Y(scale.lo)} Z`;
+        svg.appendChild(el("path", { d, fill: color, "fill-opacity": dim ? 0.03 : 0.1, stroke: "none" }));
+      }
+
+      /* solid up to dashedFrom, dashed after (projected values) */
+      const solid = [], dashed = [];
+      pts.forEach(p => {
+        const projected = s.projected || (s.dashedFrom !== undefined && p.i >= s.dashedFrom);
+        if (projected) dashed.push(p);
+        if (!projected || p.i === s.dashedFrom) solid.push(p);
+      });
+      const toPath = arr => arr.map((p, k) => (k ? "L" : "M") + p.x + "," + p.y).join(" ");
+      if (solid.length > 1) svg.appendChild(el("path", {
+        d: toPath(solid), fill: "none", stroke: color, "stroke-width": 2, pathLength: 1,
+        class: "series-line", "stroke-opacity": op, "stroke-linejoin": "round", "stroke-linecap": "round"
+      }));
+      if (dashed.length > 1) svg.appendChild(el("path", {
+        d: toPath(dashed), fill: "none", stroke: color, "stroke-width": 2, "stroke-opacity": op,
+        "stroke-linejoin": "round", "stroke-linecap": "round", "stroke-dasharray": "6 5"
+      }));
+
+      /* end marker: filled for recorded data, hollow for a projected value */
+      const last = pts[pts.length - 1];
+      const projectedEnd = s.projected || (s.dashedFrom !== undefined && last.i > s.dashedFrom);
+      svg.appendChild(el("circle", {
+        cx: last.x, cy: last.y, r: 4.5,
+        fill: projectedEnd ? surface : color, stroke: projectedEnd ? color : surface,
+        "stroke-width": 2, opacity: op
+      }));
+      /* and the last recorded point, when the line continues as a projection */
+      if (s.dashedFrom !== undefined && last.i > s.dashedFrom) {
+        svg.appendChild(el("circle", {
+          cx: X(s.dashedFrom), cy: Y(s.values[s.dashedFrom]), r: 4.5,
+          fill: color, stroke: surface, "stroke-width": 2
+        }));
+      }
+    });
+
+    /* direct labels: the last recorded value in bold; a projected end in muted italics */
+    if (cfg.endLabels !== false) {
+      const placed = [];
+      const place = (x, y, text, cls) => {
+        while (placed.some(p => Math.abs(p - y) < 14)) y += 14;
+        placed.push(y);
+        const t = el("text", { x, y, class: cls, fill: cls === "c-endlabel" ? css("--ink-2") : css("--ink-3") });
+        t.textContent = text;
+        svg.appendChild(t);
+      };
+      cfg.series.forEach((s, si) => {
+        if (cfg.isolate !== null && cfg.isolate !== undefined && cfg.isolate !== si) return;
+        const f = s.format || fmt.plain;
+        const lastIdx = s.values.reduce((acc, v, i) => v === null ? acc : i, -1);
+        if (lastIdx < 0) return;
+        if (s.dashedFrom !== undefined && lastIdx > s.dashedFrom) {
+          place(X(s.dashedFrom) + 10, Y(s.values[s.dashedFrom]) + 4, f(s.values[s.dashedFrom]), "c-endlabel");
+          place(X(lastIdx) + 10, Y(s.values[lastIdx]) + 4, f(s.values[lastIdx]) + " model", "c-projlabel");
+        } else if (s.projected) {
+          place(X(lastIdx) + 10, Y(s.values[lastIdx]) + 4, f(s.values[lastIdx]) + " " + (s.shortLabel || ""), "c-projlabel");
+        } else {
+          place(X(lastIdx) + 10, Y(s.values[lastIdx]) + 4, f(s.values[lastIdx]), "c-endlabel");
+        }
+      });
+    }
+
+    root.appendChild(svg);
+    attachHover(root, svg, cfg, X, Y, pad, ih);
+  }
+
+  /* --- column chart: single, grouped, or diverging by sign ------------------ */
+
+  function drawColumn(root, cfg, width) {
+    resolveColors(cfg);
+    const H = cfg.height || 320;
+    const pad = { t: cfg.refLine ? 38 : 26, r: 20, b: cfg.xTall ? 48 : 34, l: 54 };
+    const iw = Math.max(80, width - pad.l - pad.r), ih = H - pad.t - pad.b;
+
+    let all = [];
+    cfg.series.forEach(s => { all = all.concat(s.values.filter(v => v !== null)); });
+    if (cfg.refLine) all.push(cfg.refLine.value);
+    const minV = Math.min(0, Math.min.apply(null, all)), maxV = Math.max(0, Math.max.apply(null, all));
+    const scale = niceScale(minV, maxV * (cfg.headroom || 1), 5);   /* headroom leaves room for captions */
+
+    const groups = cfg.x.length, n = cfg.series.length;
+    const band = iw / groups;
+    const gap = 2;                                     /* surface gap between bars */
+    const barW = Math.min(24, Math.max(6, (band - 10 - gap * (n - 1)) / n));
+    const groupW = barW * n + gap * (n - 1);
+    const X = i => pad.l + band * i + band / 2;        /* group centre */
+    const Y = v => pad.t + ih - ((v - scale.lo) / (scale.hi - scale.lo)) * ih;
+    const yZero = Y(Math.max(scale.lo, Math.min(0, scale.hi)));
+
+    const svg = el("svg", {
+      viewBox: `0 0 ${width} ${H}`, width: "100%", height: H,
+      role: "img", "aria-label": cfg.ariaLabel || cfg.title || "Column chart"
+    });
+
+    gridAndTicks(svg, scale, Y, pad, iw, cfg.yFormat);
+
+    /* a firmer zero line when the data crosses it */
+    if (scale.lo < 0 && scale.hi > 0) {
+      svg.appendChild(el("line", { x1: pad.l, x2: pad.l + iw, y1: yZero, y2: yZero, stroke: css("--ink-3"), "stroke-width": 1 }));
+    }
+
+    if (cfg.refLine) {
+      svg.appendChild(el("line", {
+        x1: pad.l, x2: pad.l + iw, y1: Y(cfg.refLine.value), y2: Y(cfg.refLine.value),
+        stroke: cfg.refLine.color, "stroke-width": 1.5, "stroke-dasharray": "5 4"
+      }));
+      refLineKey(svg, cfg.refLine, pad.l + iw, pad.t);
+    }
+
+    drawAnnotations(svg, cfg, X, pad, ih);
+
+    /* Only a single series gets value labels on the caps. With two or more,
+       adjacent labels are closer together than the text is wide, so the legend,
+       tooltip and table view carry the numbers instead. */
+    const labelOK = n === 1 && band > 46;
+
+    cfg.series.forEach((s, si) => {
+      s.values.forEach((v, i) => {
+        if (v === null || v === undefined) return;
+        const x = X(i) - groupW / 2 + si * (barW + gap);
+        const up = v >= 0;
+        const h = Math.abs(Y(v) - yZero);
+        let fill = s.color;
+        if (cfg.signColors) fill = up ? cfg.signColors.pos : cfg.signColors.neg;
+        const highlight = cfg.highlight !== undefined && cfg.x[i] === cfg.highlight;
+        const dim = cfg.isolate !== null && cfg.isolate !== undefined && cfg.isolate !== si;
+        const bar = el("path", {
+          d: roundedBar(x, yZero, barW, h, up, 4), fill, class: "col",
+          "fill-opacity": dim ? 0.14 : ((cfg.highlight !== undefined && !highlight) ? 0.55 : 1)
+        });
+        bar.style.animationDelay = (i * 45 + si * 20) + "ms";
+        svg.appendChild(bar);
+
+        if (labelOK && cfg.valueLabels !== false && !dim) {
+          const t = el("text", {
+            x: x + barW / 2, y: up ? Y(v) - 7 : yZero - 7, "text-anchor": "middle",
+            class: "c-endlabel", fill: css("--ink-2")
+          });
+          t.textContent = (s.format || fmt.plain)(v);
+          svg.appendChild(t);
+        }
+      });
+    });
+
+    /* x labels, wrapping two-word labels onto two lines when asked */
+    cfg.x.forEach((xv, i) => {
+      const parts = cfg.xTall ? String(xv).split(" ") : [String(xv)];
+      parts.forEach((p, k) => {
+        const label = el("text", {
+          x: X(i), y: H - pad.b + 18 + k * 13, "text-anchor": "middle", class: "c-tick", fill: css("--ink-3")
+        });
+        label.textContent = p;
+        svg.appendChild(label);
+      });
+    });
+
+    root.appendChild(svg);
+    attachHover(root, svg, cfg, X, Y, pad, ih);
+  }
+
+  /* --- shared hover layer ---------------------------------------------------- */
+
+  function attachHover(root, svg, cfg, X, Y, pad, ih) {
+    const tip = document.createElement("div");
+    tip.className = "chart-tip";
+    tip.hidden = true;
+    root.appendChild(tip);
+
+    const crosshair = el("line", {
+      y1: pad.t, y2: pad.t + ih, stroke: css("--ink-3"), "stroke-width": 1,
+      "stroke-opacity": 0.5, visibility: "hidden"
+    });
+    svg.appendChild(crosshair);
+
+    const isColumn = cfg.type === "column";
+    const dots = cfg.series.map(s => {
+      const c = el("circle", {
+        r: 5, fill: s.muted ? css("--ink-3") : s.color, stroke: css("--surface"),
+        "stroke-width": 2, visibility: "hidden"
+      });
+      if (!isColumn) svg.appendChild(c);
+      return c;
+    });
+
+    function nearest(clientX) {
+      const box = svg.getBoundingClientRect();
+      const px = ((clientX - box.left) / box.width) * svg.viewBox.baseVal.width;
+      let best = 0, bestD = Infinity;
+      cfg.x.forEach((_, i) => { const d = Math.abs(X(i) - px); if (d < bestD) { bestD = d; best = i; } });
+      return best;
+    }
+
+    function show(i) {
+      crosshair.setAttribute("x1", X(i)); crosshair.setAttribute("x2", X(i));
+      crosshair.setAttribute("visibility", "visible");
+      let rows = "";
+      cfg.series.forEach((s, si) => {
+        const v = s.values[i];
+        if (v === null || v === undefined) { dots[si].setAttribute("visibility", "hidden"); return; }
+        if (!isColumn) {
+          dots[si].setAttribute("cx", X(i)); dots[si].setAttribute("cy", Y(v));
+          dots[si].setAttribute("visibility", "visible");
+        }
+        const projected = s.projected || (s.dashedFrom !== undefined && i > s.dashedFrom);
+        const color = s.muted ? css("--ink-3") : (cfg.signColors ? (v >= 0 ? cfg.signColors.pos : cfg.signColors.neg) : s.color);
+        rows += `<div class="tip-row"><span class="tip-key" style="background:${color}"></span>` +
+                `<span class="tip-name">${s.label}${projected ? " (projected)" : ""}</span>` +
+                `<span class="tip-val">${(s.format || fmt.plain)(v)}</span></div>`;
+      });
+      const extra = cfg.tipExtra ? cfg.tipExtra(i) : "";
+      tip.innerHTML = `<div class="tip-head">${cfg.x[i]}</div>${rows}${extra}`;
+      tip.hidden = false;
+      const box = root.getBoundingClientRect();
+      const rel = (X(i) / svg.viewBox.baseVal.width) * box.width;
+      tip.style.left = Math.min(Math.max(rel + 14, 8), Math.max(8, box.width - tip.offsetWidth - 8)) + "px";
+      tip.style.top = pad.t + "px";
+    }
+
+    function hide() {
+      crosshair.setAttribute("visibility", "hidden");
+      dots.forEach(d => d.setAttribute("visibility", "hidden"));
+      tip.hidden = true;
+    }
+
+    root.addEventListener("pointermove", e => show(nearest(e.clientX)));
+    root.addEventListener("pointerleave", hide);
+    root.tabIndex = 0;
+    let k = 0;
+    root.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") { k = Math.min(cfg.x.length - 1, k + 1); show(k); e.preventDefault(); e.stopPropagation(); }
+      if (e.key === "ArrowLeft")  { k = Math.max(0, k - 1); show(k); e.preventDefault(); e.stopPropagation(); }
+      if (e.key === "Escape") hide();
+    });
+    root.addEventListener("blur", hide);
+  }
+
+  /* --- public API ------------------------------------------------------------ */
+
+  function create(container, cfg) {
+    const plot = document.createElement("div");
+    plot.className = "chart-plot";
+    container.appendChild(plot);
+    container.appendChild(buildTable(cfg));
+
+    let current = cfg, seen = false;
+
+    function render() {
+      const w = Math.max(280, plot.clientWidth || container.clientWidth || 640);
+      plot.innerHTML = "";
+      if (current.type === "column") drawColumn(plot, current, w);
+      else drawLine(plot, current, w);
+    }
+    render();
+
+    /* draw-in once, the first time the chart scrolls into view */
+    const io = new IntersectionObserver(entries => {
+      if (seen || !entries.some(e => e.isIntersecting)) return;
+      seen = true;
+      plot.classList.add("enter");
+      setTimeout(() => plot.classList.remove("enter"), 1400);
+      io.disconnect();
+    }, { threshold: 0.25 });
+    io.observe(plot);
+
+    let t;
+    new ResizeObserver(() => { clearTimeout(t); t = setTimeout(render, 90); }).observe(plot);
+    window.addEventListener("themechange", render);
+
+    return {
+      update(next) {
+        current = Object.assign({}, current, next);
+        const old = container.querySelector(".chart-table");
+        if (old) old.remove();
+        container.appendChild(buildTable(current));
+        render();
+      }
+    };
+  }
+
+  return { create, fmt };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   app.js — wires the data to the page.
+   ========================================================================== */
+
+(function () {
+  "use strict";
+
+  const $  = sel => document.querySelector(sel);
+  const $$ = sel => Array.prototype.slice.call(document.querySelectorAll(sel));
+  const Y  = DATA.years, D = DATA.derived, F = Chart.fmt;
+  const lastYear = D.lastYear, baseYear = D.baseYear;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const soum = n => Math.round(n).toLocaleString("en-US") + " soum";
+  const pct1 = n => n.toFixed(1) + "%";
+
+  /* --- theme -------------------------------------------------------------- */
+  const root = document.documentElement, themeLabel = $("#theme-label");
+  function currentTheme() {
+    return root.getAttribute("data-theme") ||
+      (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  }
+  function applyTheme(mode) {
+    root.setAttribute("data-theme", mode);
+    themeLabel.textContent = mode === "dark" ? "Dark" : "Light";
+    try { localStorage.setItem("uzd-theme", mode); } catch (e) { /* private mode */ }
+    window.dispatchEvent(new Event("themechange"));
+  }
+  try {
+    const saved = localStorage.getItem("uzd-theme");
+    if (saved === "dark" || saved === "light") root.setAttribute("data-theme", saved);
+  } catch (e) { /* fall through */ }
+  themeLabel.textContent = currentTheme() === "dark" ? "Dark" : "Light";
+  $("#theme-toggle").addEventListener("click", () => applyTheme(currentTheme() === "dark" ? "light" : "dark"));
+
+  /* --- numbers the prose quotes, filled from data so text and charts agree -- */
+  const retained = DATA.realValue(baseYear, lastYear);
+  const fit5 = DATA.fitModel(5), fitFree = DATA.fitModel();
+  const bt5 = DATA.backtest(5, fit5.persistence);
+  const ci = DATA.components.years;
+  const fills = {
+    accessed: DATA.accessed,
+    cpi2017: pct1(DATA.cpi.values[Y.indexOf(2017)]),
+    cpi2025: pct1(DATA.cpi.values[Y.indexOf(2025)]),
+    retainedPct: Math.round(retained * 100) + "%",
+    lostPct: Math.round((1 - retained) * 100) + "%",
+    keptSquares: Math.round(retained * 100),
+    lostSquares: 100 - Math.round(retained * 100),
+    food2022: pct1(DATA.components.food[ci.indexOf(2022)]),
+    food2024: pct1(DATA.components.food[ci.indexOf(2024)]),
+    services2024: pct1(DATA.components.services[ci.indexOf(2024)]),
+    fxBefore: F.soum(DATA.fx.float.before.rate),
+    fxAfter: F.soum(DATA.fx.float.after.rate),
+    fx2024: F.soum(DATA.fx.values[Y.indexOf(2024)]),
+    fx2025: F.soum(DATA.fx.values[Y.indexOf(2025)]),
+    realWageCum: Math.round(D.realWageCumulative) + "%",
+    realRate2025: F.pp(D.realRate[Y.indexOf(2025)]),
+    fitMae5: fit5.mae.toFixed(1),
+    naiveMae: bt5.maeNaive.toFixed(1),
+    fitFreeTarget: pct1(fitFree.target),
+    fitFreePhi: fitFree.persistence.toFixed(2)
+  };
+  $$("[data-fill]").forEach(n => { const k = n.getAttribute("data-fill"); if (k in fills) n.textContent = fills[k]; });
+
+  /* --- the time machine ---------------------------------------------------
+     Scrub or play through 2017-2025. A hundred squares stand for the buying
+     power of a million soum; they go out as inflation takes them. ------- */
+
+  const TM_BASE = baseYear;
+  const tmYears = Y.slice(Y.indexOf(TM_BASE));
+  const tmGrid = $("#tm-grid"), tmScrub = $("#tm-scrub");
+  tmScrub.max = String(tmYears.length - 1);
+  tmScrub.value = String(tmYears.length - 1);
+
+  for (let i = 0; i < 100; i++) {
+    const cell = document.createElement("div");
+    cell.className = "tm-cell";
+    cell.style.transitionDelay = (i % 10) * 14 + "ms";
+    tmGrid.appendChild(cell);
+  }
+  const tmCells = $$(".tm-cell");
+
+  let tmIdx = tmYears.length - 1, tmTimer = null, tmShown = null;
+
+  function tmRender(idx) {
+    const year = tmYears[idx], gi = Y.indexOf(year);
+    const kept = DATA.realValue(TM_BASE, year);
+    const keptSquares = Math.round(kept * 100);
+
+    $("#tm-year").textContent = year;
+    $("#tm-value").textContent = soum(1000000 * kept);
+    $("#tm-kept").textContent = keptSquares;
+    $("#tm-lost").textContent = 100 - keptSquares;
+    $("#tm-prices").textContent = "+" + Math.round(D.cpiIndex[gi] - 100) + "%";
+    $("#tm-fx").textContent = F.soum(DATA.fx.values[gi]);
+    $("#tm-infl").textContent = pct1(DATA.cpi.values[gi]);
+    tmCells.forEach((c, i) => c.classList.toggle("is-lost", i >= keptSquares));
+
+    const ev = DATA.events.filter(e => e.year === year)[0];
+    $("#tm-event").innerHTML = ev
+      ? '<b>' + year + " — " + ev.short + ".</b> " + ev.detail
+      : '<b>' + year + '.</b> Consumer prices rose ' + pct1(DATA.cpi.values[gi]) +
+        ' over the year, leaving ' + keptSquares + ' of the original 100 squares.';
+    $("#tm-event").classList.toggle("is-event", !!ev);
+    tmShown = idx;
+  }
+
+  function tmStop() {
+    clearInterval(tmTimer); tmTimer = null;
+    $("#tm-icon").classList.remove("playing");
+    $("#tm-playlabel").textContent = "Play";
+  }
+
+  function tmPlay() {
+    if (tmTimer) { tmStop(); return; }
+    if (tmIdx >= tmYears.length - 1) tmIdx = 0;      /* replay from the start */
+    tmScrub.value = tmIdx; tmRender(tmIdx);
+    $("#tm-icon").classList.add("playing");
+    $("#tm-playlabel").textContent = "Pause";
+    tmTimer = setInterval(() => {
+      if (tmIdx >= tmYears.length - 1) { tmStop(); return; }
+      tmIdx += 1; tmScrub.value = tmIdx; tmRender(tmIdx);
+    }, 850);
+  }
+
+  $("#tm-play").addEventListener("click", tmPlay);
+  tmScrub.addEventListener("input", () => { tmStop(); tmIdx = +tmScrub.value; tmRender(tmIdx); });
+  tmRender(tmIdx);
+
+  /* Play once on first view, so the page shows what it does without being asked. */
+  if (!reduced) {
+    new IntersectionObserver((es, io) => {
+      if (!es.some(e => e.isIntersecting)) return;
+      io.disconnect();
+      setTimeout(() => { tmIdx = 0; tmPlay(); }, 550);
+    }, { threshold: 0.4 }).observe($("#tm"));
+  }
+
+  const cum2017 = D.cpiIndex[Y.length - 1] - 100;
+  const fxChange = (DATA.fx.values[Y.length - 1] / DATA.fx.values[Y.length - 2] - 1) * 100;
+  const stats = [
+    { k: "Inflation, " + lastYear, v: pct1(DATA.cpi.values[Y.length - 1]), d: "Lowest in nine years · target 5%" },
+    { k: "Consumer prices since " + baseYear, v: "+" + Math.round(cum2017) + "%", d: "Cumulative, Dec " + baseYear + " – Dec " + lastYear },
+    { k: "Soum per US dollar, end " + lastYear, v: F.soum(DATA.fx.values[Y.length - 1]), d: (fxChange < 0 ? "Soum strengthened " : "Soum weakened ") + Math.abs(fxChange).toFixed(1) + "% in " + lastYear, cls: fxChange < 0 ? "up" : "down" },
+    { k: "Real wage growth, 2021–" + lastYear, v: "+" + Math.round(D.realWageCumulative) + "%", d: "Wages outpaced prices every year", cls: "up" },
+    { k: "Real policy rate, " + lastYear, v: F.pp(D.realRate[Y.length - 1]), d: "Policy rate " + pct1(DATA.policyRate.values[Y.length - 1]) + " minus inflation" }
+  ];
+  $("#hero-stats").innerHTML = stats.map(s =>
+    `<div class="stat"><span class="k">${s.k}</span><span class="v">${s.v}</span><span class="d ${s.cls || ""}">${s.d}</span></div>`).join("");
+
+  /* --- calculator --------------------------------------------------------- */
+  const fromSel = $("#calc-from"), toSel = $("#calc-to");
+  Y.forEach(y => { fromSel.appendChild(new Option(y, y)); toSel.appendChild(new Option(y, y)); });
+  fromSel.value = String(baseYear); toSel.value = String(lastYear);
+  function runCalc() {
+    const amount = Number($("#calc-amount").value) || 0;
+    const from = Number(fromSel.value), to = Number(toSel.value);
+    function ppBars(ratio) {
+      const keptPct = Math.max(2, ratio * 100);
+      return '<div class="pp-row"><span class="pp-k">What you put away in ' + from + '</span>' +
+        '<span class="pp-track"><span class="pp-fill nominal" style="width:100%"></span></span>' +
+        '<span class="pp-v">' + soum(amount) + '</span></div>' +
+        '<div class="pp-row"><span class="pp-k">What it buys in ' + to + '</span>' +
+        '<span class="pp-track"><span class="pp-fill real" style="width:' + keptPct.toFixed(1) + '%"></span>' +
+        '<span class="pp-gone">' + Math.round((1 - ratio) * 100) + '% gone</span></span>' +
+        '<span class="pp-v">' + soum(amount * ratio) + '</span></div>';
+    }
+    if (from === to) {
+      $("#pp-compare").innerHTML = ppBars(1);
+      $("#calc-caption").textContent = "Same year in and out — nothing to adjust.";
+      return;
+    }
+    if (from > to) {
+      $("#pp-compare").innerHTML = "";
+      $("#calc-caption").textContent = "The saving year is after the spending year. Pick an earlier year to save in.";
+      return;
+    }
+    const ratio = DATA.realValue(from, to);
+    $("#pp-compare").innerHTML = ppBars(ratio);
+    $("#calc-caption").innerHTML =
+      "Held from the end of <b>" + from + "</b> to the end of <b>" + to + "</b>, it lost <b>" +
+      Math.round((1 - ratio) * 100) + "%</b> of its purchasing power. To keep pace you would have needed <b>" +
+      soum(amount / ratio) + "</b> by " + to + ".";
+  }
+  ["#calc-amount", "#calc-from", "#calc-to"].forEach(s => $(s).addEventListener("input", runCalc));
+  runCalc();
+
+  /* --- figure numbers and source footnotes -------------------------------- */
+  $$("[data-fig]").forEach((card, i) => {
+    const h = card.querySelector(".card-head h3");
+    const tag = document.createElement("span");
+    tag.className = "fig"; tag.textContent = "Figure " + (i + 1);
+    h.prepend(tag);
+  });
+  $$("[data-tool]").forEach(card => {
+    const pill = document.createElement("span");
+    pill.className = "tool-pill";
+    pill.textContent = "Interactive";
+    card.querySelector(".card-head h3").appendChild(pill);
+  });
+
+  const srcOf = { cpi: DATA.cpi, fx: DATA.fx, policyRate: DATA.policyRate, components: DATA.components,
+                  fuelAI80: DATA.fuelAI80, wages: DATA.wages, peers: DATA.peers };
+  $$("[data-source]").forEach(node => {
+    const s = srcOf[node.getAttribute("data-source")];
+    if (!s) return;
+    node.innerHTML = `Source: ${s.source.name} — ${s.source.series}. <a href="${s.source.url}" target="_blank" rel="noopener">Link</a>, read ${s.source.accessed}.`;
+  });
+
+  /* Build a legend. Pass a chart handle and each entry becomes a toggle that
+     isolates its series — the standard dashboard gesture, and the fastest way
+     to answer "which line is that one?" in front of an audience. */
+  function legendFor(target, items, chart) {
+    const box = $(target);
+    box.innerHTML = items.map(s => {
+      const cls = s.projected ? "legend-key dashed" : "legend-key";
+      const color = s.muted ? "var(--ink-3)" : `var(${s.colorVar})`;
+      return `<span class="legend-item"><span class="${cls}" style="${s.projected ? "color:" : "background:"}${color}"></span>${s.label}</span>`;
+    }).join("");
+    if (!chart || items.length < 2) return;
+
+    const nodes = $$(target + " .legend-item");
+    let isolated = null;
+    nodes.forEach((item, i) => {
+      item.classList.add("is-toggle");
+      item.setAttribute("role", "button");
+      item.setAttribute("aria-pressed", "false");
+      item.tabIndex = 0;
+      const toggle = () => {
+        isolated = isolated === i ? null : i;
+        chart.update({ isolate: isolated });
+        nodes.forEach((n, k) => {
+          n.classList.toggle("is-dim", isolated !== null && k !== isolated);
+          n.setAttribute("aria-pressed", String(isolated === k));
+        });
+      };
+      item.addEventListener("click", toggle);
+      item.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { toggle(); e.preventDefault(); }
+      });
+    });
+    box.insertAdjacentHTML("beforeend", '<span class="legend-hint">click a name to isolate it</span>');
+  }
+
+  const eventAnnotations = DATA.events.map((e, k) => ({ x: e.year, label: e.short, row: k % 2 }));
+
+  /* --- Figure 1: headline inflation --------------------------------------- */
+  Chart.create($("#chart-cpi"), {
+    type: "column", x: Y, height: 320, headroom: 1.22, yFormat: F.pct,
+    series: [{ label: DATA.cpi.label, colorVar: "--s1", unit: "%", values: DATA.cpi.values, format: F.pct }],
+    refLine: { value: 5, colorVar: "--good", label: "5% target" },
+    annotations: eventAnnotations,
+    tipExtra: i => { const e = DATA.events.find(ev => ev.year === Y[i]); return e ? `<div class="tip-extra">${e.detail}</div>` : ""; },
+    ariaLabel: "Annual consumer price inflation in Uzbekistan"
+  });
+
+  /* --- Figure 2: neighbours ----------------------------------------------- */
+  const peerSeries = [
+    { label: "Uzbekistan", colorVar: "--s1", unit: "%", values: DATA.cpi.values, format: F.pct },
+    { label: DATA.peers.KAZ.label, colorVar: "--s2", unit: "%", values: DATA.peers.KAZ.values, format: F.pct },
+    { label: DATA.peers.KGZ.label, colorVar: "--s3", unit: "%", values: DATA.peers.KGZ.values, format: F.pct },
+    { label: DATA.peers.TJK.label, colorVar: "--s4", unit: "%", values: DATA.peers.TJK.values, format: F.pct }
+  ];
+  legendFor("#legend-peers", peerSeries, Chart.create($("#chart-peers"),
+    { x: Y, height: 320, yFormat: F.pct, series: peerSeries, ariaLabel: "Inflation in Uzbekistan, Kazakhstan, Kyrgyzstan and Tajikistan" }));
+
+  /* --- Figure 3: groups --------------------------------------------------- */
+  const compSeries = [
+    { label: "Headline", colorVar: "--s1", unit: "%", values: DATA.components.headline, format: F.pct },
+    { label: "Food", colorVar: "--s2", unit: "%", values: DATA.components.food, format: F.pct },
+    { label: "Non-food goods", colorVar: "--s3", unit: "%", values: DATA.components.nonFood, format: F.pct },
+    { label: "Services", colorVar: "--s4", unit: "%", values: DATA.components.services, format: F.pct }
+  ];
+  legendFor("#legend-comp", compSeries, Chart.create($("#chart-comp"),
+    { type: "column", x: DATA.components.years, height: 320, yFormat: F.pct, series: compSeries, ariaLabel: "Inflation by group" }));
+
+  /* --- Figure 4: tariff shock (plain HTML bars) --------------------------- */
+  const maxT = Math.max.apply(null, DATA.tariffShock2024.map(t => t.pct));
+  $("#tariff-list").innerHTML = DATA.tariffShock2024.map(t =>
+    `<div class="barlist-row"><span class="name">${t.item}</span><span class="track"><span class="fill" data-w="${(t.pct / maxT * 100).toFixed(1)}"></span></span><span class="val">+${t.pct}%</span></div>`).join("");
+  $$("#tariff-list .fill").forEach(f => { f.style.width = f.getAttribute("data-w") + "%"; });
+  if (!reduced) new IntersectionObserver((es, io) => {
+    if (es.some(e => e.isIntersecting)) { $("#tariff-list").classList.add("enter"); io.disconnect(); }
+  }, { threshold: 0.3 }).observe($("#tariff-list"));
+
+  /* --- Figure 5: petrol steps --------------------------------------------- */
+  const fp = DATA.fuelAI80.points;
+  Chart.create($("#chart-fuel"), {
+    type: "column", x: fp.map(p => p.label), xTitle: "Decision", xTall: true, height: 300, yFormat: F.soum,
+    series: [{ label: "AI-80, UZS per litre", colorVar: "--s3", unit: "UZS/l", values: fp.map(p => p.price), format: F.soum }],
+    tipExtra: i => `<div class="tip-extra">${fp[i].note}</div>`,
+    ariaLabel: "Administered AI-80 petrol price at each documented change"
+  });
+  $("#fuel-steps").innerHTML = fp.map(p =>
+    `<div class="step"><span class="when">${p.label}</span><span class="price">${F.soum(p.price)}</span><span class="why">${p.note}</span></div>`).join("") +
+    `<div class="step"><span class="when">Dec 2025</span><span class="price">—</span><span class="why">${DATA.fuelAI80.endnote}</span></div>`;
+
+  /* --- Figure 6: exchange rate -------------------------------------------- */
+  Chart.create($("#chart-fx"), {
+    x: Y, height: 300, yMin: 0, yFormat: F.soum,
+    series: [{ label: DATA.fx.label, colorVar: "--s4", unit: "UZS/USD", values: DATA.fx.values, format: F.soum }],
+    annotations: [{ x: 2017, label: "Currency float" }],
+    tipExtra: i => Y[i] === 2017 ? `<div class="tip-extra">${DATA.fx.float.before.date}: ${F.soum(DATA.fx.float.before.rate)} → ${DATA.fx.float.after.date}: ${F.soum(DATA.fx.float.after.rate)}</div>` : "",
+    ariaLabel: "Official exchange rate, soum per US dollar"
+  });
+
+  /* --- Figure 7: prices and the dollar, indexed --------------------------- */
+  const cmp1 = [
+    { label: "Consumer price level", colorVar: "--s1", unit: "index", values: D.cpiIndex, format: F.index },
+    { label: "US dollar in soum", colorVar: "--s4", unit: "index", values: D.fxIndex, format: F.index }
+  ];
+  legendFor("#legend-cmp1", cmp1, Chart.create($("#chart-compare"), { x: Y, height: 320, yFormat: F.index, series: cmp1,
+    refLine: { value: 100, colorVar: "--ink-3", label: baseYear + " = 100" }, ariaLabel: "Consumer prices and the dollar indexed to 2017" }));
+
+  /* --- Figure 8: region, indexed ------------------------------------------ */
+  const cmp2 = [
+    { label: "Uzbekistan", colorVar: "--s1", unit: "index", values: D.cpiIndex, format: F.index },
+    { label: "Kazakhstan", colorVar: "--s2", unit: "index", values: D.peerIndex.KAZ, format: F.index },
+    { label: "Kyrgyzstan", colorVar: "--s3", unit: "index", values: D.peerIndex.KGZ, format: F.index },
+    { label: "Tajikistan", colorVar: "--s4", unit: "index", values: D.peerIndex.TJK, format: F.index }
+  ];
+  legendFor("#legend-cmp2", cmp2, Chart.create($("#chart-region"), { x: Y, height: 320, yFormat: F.index, series: cmp2,
+    refLine: { value: 100, colorVar: "--ink-3", label: baseYear + " = 100" }, ariaLabel: "Cumulative price level since 2017 across the region" }));
+
+  /* --- Figures 9 & 10: forecast and backtest ------------------------------ */
+  const defaults = DATA.defaultForecastOptions();
+  const sl = { target: $("#f-target"), persist: $("#f-persist"), horizon: $("#f-horizon") };
+  sl.target.value = defaults.target; sl.persist.value = defaults.persistence; sl.horizon.value = defaults.horizon;
+
+  function params() {
+    return { target: Number(sl.target.value), persistence: Number(sl.persist.value), horizon: Number(sl.horizon.value),
+             bandBase: defaults.bandBase, bandGrowth: defaults.bandGrowth };
+  }
+
+  function forecastConfig() {
+    const p = params();
+    const projected = DATA.forecast(p);
+    const imf = DATA.imfProjection;
+    const ahead = Math.max(p.horizon, imf.years.length);
+    const x = Y.concat(Array.from({ length: ahead }, (_, k) => lastYear + 1 + k));
+    const lastIdx = Y.length - 1;
+
+    const model = DATA.cpi.values.concat(projected.map(q => q.value));
+    while (model.length < x.length) model.push(null);
+
+    const imfVals = x.map(yr => yr === lastYear ? DATA.cpi.values[lastIdx] : (imf.years.indexOf(yr) >= 0 ? imf.values[imf.years.indexOf(yr)] : null));
+
+    const low = x.map(() => null), high = x.map(() => null);
+    low[lastIdx] = high[lastIdx] = DATA.cpi.values[lastIdx];
+    projected.forEach((q, k) => { low[lastIdx + 1 + k] = q.low; high[lastIdx + 1 + k] = q.high; });
+
+    return {
+      x, height: 340, yMin: 0, yFormat: F.pct,
+      series: [
+        { label: "Inflation, recorded then modelled", colorVar: "--s1", unit: "%", values: model, format: F.pct, dashedFrom: lastIdx },
+        { label: imf.label, colorVar: "--ink-3", muted: true, projected: true, shortLabel: "IMF", unit: "%", values: imfVals, format: F.pct }
+      ],
+      band: { low, high, colorVar: "--s1" },
+      refLine: { value: p.target, colorVar: "--good", label: F.pct(p.target) + " anchor" },
+      annotations: [{ x: lastYear, label: "last recorded" }],
+      ariaLabel: "Inflation history with model and IMF projections"
+    };
+  }
+  legendFor("#legend-forecast", [
+    { label: "Recorded", colorVar: "--s1" }, { label: "This model", colorVar: "--s1", projected: true },
+    { label: "IMF WEO projection", colorVar: "--ink-3", muted: true, projected: true }
+  ]);
+  const forecastChart = Chart.create($("#chart-forecast"), forecastConfig());
+
+  function backtestConfig() {
+    const p = params(), bt = DATA.backtest(p.target, p.persistence);
+    return {
+      x: bt.rows.map(r => r.year), height: 280, yFormat: F.pct,
+      series: [
+        { label: "Actual", colorVar: "--s1", unit: "%", values: bt.rows.map(r => r.actual), format: F.pct },
+        { label: "Model, one step ahead", colorVar: "--s2", unit: "%", values: bt.rows.map(r => r.model), format: F.pct },
+        { label: "Naive: next = this", colorVar: "--ink-3", muted: true, unit: "%", values: bt.rows.map(r => r.naive), format: F.pct }
+      ],
+      ariaLabel: "Backtest of one-step-ahead forecasts"
+    };
+  }
+  legendFor("#legend-backtest", [{ label: "Actual", colorVar: "--s1" }, { label: "Model", colorVar: "--s2" }, { label: "Naive benchmark", colorVar: "--ink-3", muted: true }]);
+  const backtestChart = Chart.create($("#chart-backtest"), backtestConfig());
+
+  function refreshForecast() {
+    const p = params();
+    $("#f-target-v").textContent = F.pct(p.target);
+    $("#f-persist-v").textContent = p.persistence.toFixed(2);
+    $("#f-horizon-v").textContent = p.horizon;
+    forecastChart.update(forecastConfig());
+    backtestChart.update(backtestConfig());
+    const bt = DATA.backtest(p.target, p.persistence);
+    $("#bt-mae-model").innerHTML = bt.maeModel.toFixed(2) + "<small>pp</small>";
+    $("#bt-mae-naive").innerHTML = bt.maeNaive.toFixed(2) + "<small>pp</small>";
+    $("#bt-mae-model").style.color = bt.maeModel < bt.maeNaive ? "var(--good)" : "var(--serious)";
+    $("#bt-fit-text").innerHTML =
+      `With the anchor pinned at <b>5%</b>, the best-fitting persistence is <b>${fit5.persistence.toFixed(2)}</b> (error <b>${fit5.mae.toFixed(2)} pp</b>). ` +
+      `Letting the anchor float, the data prefer <b>${F.pct(fitFree.target)}</b> with persistence <b>${fitFree.persistence.toFixed(2)}</b> (error <b>${fitFree.mae.toFixed(2)} pp</b>) — ` +
+      `the economy behaved as if its real anchor were near ${Math.round(fitFree.target)}%, not 5%.`;
+  }
+  Object.values(sl).forEach(s => s.addEventListener("input", refreshForecast));
+  $("#f-fit5").addEventListener("click", () => { sl.target.value = 5; sl.persist.value = fit5.persistence; refreshForecast(); });
+  $("#f-fitfree").addEventListener("click", () => { sl.target.value = fitFree.target; sl.persist.value = fitFree.persistence; refreshForecast(); });
+  refreshForecast();
+
+  /* --- Figure 11: real wages --------------------------------------------- */
+  const rw = D.realWages;
+  const wageSeries = [
+    { label: "Nominal wage growth", colorVar: "--s1", unit: "%", values: rw.map(r => r.nominal), format: F.pct },
+    { label: "Inflation, annual average", colorVar: "--s2", unit: "%", values: rw.map(r => r.inflation), format: F.pct },
+    { label: "Real wage growth", colorVar: "--s3", unit: "%", values: rw.map(r => r.real), format: F.pct }
+  ];
+  legendFor("#legend-wages", wageSeries, Chart.create($("#chart-wages"),
+    { type: "column", x: rw.map(r => r.year), height: 300, yFormat: F.pct, series: wageSeries, ariaLabel: "Nominal wage growth, inflation and real wage growth" }));
+
+  /* --- Figure 12: real policy rate --------------------------------------- */
+  Chart.create($("#chart-realrate"), {
+    type: "column", x: Y, height: 300, yFormat: v => (v > 0 ? "+" : "") + v.toFixed(0),
+    series: [{ label: "Real policy rate", colorVar: "--s1", unit: "pp", values: D.realRate, format: F.pp }],
+    signColors: { posVar: "--s1", negVar: "--s8" },
+    tipExtra: i => `<div class="tip-extra">Policy rate ${pct1(DATA.policyRate.values[i])} − inflation ${pct1(DATA.cpi.values[i])}</div>`,
+    ariaLabel: "Real policy rate, policy rate minus inflation"
+  });
+
+  /* --- Your own inflation rate ------------------------------------------
+     The official rate is a weighted average of the group rates. The weights
+     are not published beside them, so they are recovered by least squares,
+     then handed to the reader to change. -------------------------------- */
+
+  const fitted = DATA.fitWeights();
+  const wIn = { food: $("#w-food"), nonFood: $("#w-nonfood"), services: $("#w-services") };
+  const fittedPct = { food: Math.round(fitted.food * 100), nonFood: Math.round(fitted.nonFood * 100), services: Math.round(fitted.services * 100) };
+
+  $("#fit-foot").innerHTML =
+    "Recovered basket weights: food <b>" + fittedPct.food + "%</b>, non-food goods <b>" + fittedPct.nonFood + "%</b>, " +
+    "services <b>" + fittedPct.services + "%</b> — found by grid search over the simplex, minimising squared error against the " +
+    "published headline rate. Root-mean-square error <b>" + fitted.rmse.toFixed(3) + " pp</b> across " + DATA.components.years.length + " years, " +
+    "so these weights reproduce every published headline to within a rounding step. Group data: " + DATA.components.source.name + ".";
+
+  $("#budget-presets").innerHTML = DATA.budgetPresets.map(function (p) {
+    return '<button class="btn small" type="button" data-preset="' + p.id + '" title="' + p.note + '">' + p.label + '</button>';
+  }).join("");
+
+  function readWeights() {
+    const w = { food: +wIn.food.value, nonFood: +wIn.nonFood.value, services: +wIn.services.value };
+    if (w.food + w.nonFood + w.services === 0) { wIn.food.value = 1; w.food = 1; }   /* never divide by zero */
+    return w;
+  }
+
+  function personalCfg(pi) {
+    return {
+      type: "column", x: pi.rows.map(r => r.year), height: 300, yFormat: F.pct,
+      series: [
+        { label: "Official rate", colorVar: "--s1", unit: "%", values: pi.rows.map(r => r.official), format: F.pct },
+        { label: "This basket", colorVar: "--s2", unit: "%", values: pi.rows.map(r => r.personal), format: F.pct }
+      ],
+      ariaLabel: "A household's own inflation rate against the official rate"
+    };
+  }
+
+  const personalChart = Chart.create($("#chart-personal"), personalCfg(DATA.personalInflation(readWeights())));
+  legendFor("#legend-personal", personalCfg(DATA.personalInflation(readWeights())).series, personalChart);
+
+  function refreshPersonal() {
+    const pi = DATA.personalInflation(readWeights());
+    [["food", "food"], ["nonFood", "nonfood"], ["services", "services"]].forEach(function (pair) {
+      $("#w-" + pair[1] + "-v").textContent = Math.round(pi.weights[pair[0]] * 100) + "%";
+    });
+    personalChart.update(personalCfg(pi));
+
+    const gap = pi.cumulativePersonal - pi.cumulativeOfficial;
+    const verdict = Math.abs(gap) < 0.5
+      ? "These are the recovered weights, so this basket sits on top of the official line — that agreement <b>is</b> the check that the recovery worked. Move a slider, or pick a household above, to watch a real budget pull away from the headline."
+      : gap > 0
+        ? "Prices rose <b>" + Math.abs(gap).toFixed(1) + " points more</b> for this household than the headline says — the official rate understated its cost of living."
+        : "Prices rose <b>" + Math.abs(gap).toFixed(1) + " points less</b> for this household than the headline says. The 2024 tariff shock fell on service-heavy budgets, not food-heavy ones.";
+    const first = DATA.components.years[0], last = DATA.components.years[DATA.components.years.length - 1];
+    $("#personal-out").innerHTML =
+      '<div class="result"><span class="k">This basket, ' + first + '–' + last + '</span>' +
+      '<span class="v">+' + pi.cumulativePersonal.toFixed(1) + '%</span><span class="d">cumulative price rise</span></div>' +
+      '<div class="result"><span class="k">Official basket</span><span class="v">+' + pi.cumulativeOfficial.toFixed(1) + '%</span>' +
+      '<span class="d">what the headline says</span></div>' +
+      '<div class="result"><span class="k">Difference</span><span class="v ' + (gap > 0.5 ? "bad" : gap < -0.5 ? "good" : "") + '">' +
+      (gap > 0 ? "+" : "") + gap.toFixed(1) + ' pp</span><span class="d">over four years</span></div>' +
+      '<p class="verdict">' + verdict + '</p>';
+  }
+  Object.keys(wIn).forEach(k => wIn[k].addEventListener("input", refreshPersonal));
+  $$("#budget-presets [data-preset]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const id = btn.getAttribute("data-preset");
+      const p = id === "fitted" ? fittedPct : DATA.budgetPresets.filter(x => x.id === id)[0];
+      wIn.food.value = p.food; wIn.nonFood.value = p.nonFood; wIn.services.value = p.services;
+      $$("#budget-presets [data-preset]").forEach(b => b.setAttribute("aria-pressed", String(b === btn)));
+      refreshPersonal();
+    });
+  });
+  $$("#budget-presets [data-preset]")[0].setAttribute("aria-pressed", "true");
+  refreshPersonal();
+
+  /* --- The savings race --------------------------------------------------- */
+
+  const raceStart = $("#race-start"), raceAmount = $("#race-amount");
+  Y.slice(0, -1).forEach(y => raceStart.appendChild(new Option(y, y)));
+  raceStart.value = String(baseYear);
+
+  const RACE = {
+    deposit: { label: "Soum bank deposit", colorVar: "--s3" },
+    dollar:  { label: "US dollars", colorVar: "--s2" },
+    cash:    { label: "Cash under the mattress", colorVar: "--s1" }
+  };
+
+  function raceCfg(r) {
+    return {
+      x: r.years, height: 320, yFormat: F.soum,
+      series: [
+        { label: RACE.cash.label, colorVar: RACE.cash.colorVar, unit: "UZS", values: r.cash, format: F.soum },
+        { label: RACE.dollar.label, colorVar: RACE.dollar.colorVar, unit: "UZS", values: r.dollar, format: F.soum },
+        { label: RACE.deposit.label, colorVar: RACE.deposit.colorVar, unit: "UZS", values: r.deposit, format: F.soum }
+      ],
+      refLine: { value: r.amount, colorVar: "--ink-3", label: "what you started with" },
+      ariaLabel: "Real value of savings under three strategies"
+    };
+  }
+
+  let raceChart = null;
+  function refreshRace() {
+    const amount = Math.max(1, Number(raceAmount.value) || 0);
+    const r = DATA.savingsRace(Number(raceStart.value), amount);
+    if (!raceChart) {
+      raceChart = Chart.create($("#chart-race"), raceCfg(r));
+      legendFor("#legend-race", raceCfg(r).series, raceChart);
+    } else raceChart.update(raceCfg(r));
+
+    const rows = ["deposit", "dollar", "cash"].map(function (k) {
+      const win = r.winner === k, up = r.pct[k] >= 0;
+      return '<div class="result' + (win ? " is-winner" : "") + '"><span class="k">' + RACE[k].label + '</span>' +
+        '<span class="v">' + F.soum(r.final[k]) + '</span>' +
+        '<span class="d ' + (up ? "good" : "bad") + '">' + (up ? "+" : "") + r.pct[k].toFixed(1) + '% in real terms</span>' +
+        (win ? '<span class="tag gains">Best</span>' : "") + '</div>';
+    }).join("");
+
+    $("#race-out").innerHTML = rows +
+      '<p class="verdict">' + soum(amount) + " saved at the end of " + r.startYear +
+      ", valued in " + r.startYear + " prices at the end of " + lastYear + ". " +
+      (r.pct.deposit >= 0
+        ? "A soum deposit <b>beat inflation</b> and finished <b>" + Math.round(r.pct.deposit) + "% ahead</b>, while the same money in cash lost <b>" +
+          Math.abs(Math.round(r.pct.cash)) + "%</b>. Dollars beat cash but still lost <b>" + Math.abs(Math.round(r.pct.dollar)) +
+          "%</b> — soum prices rose faster than the dollar did."
+        : "Nothing here kept pace with prices over this window.") + '</p>';
+  }
+  [raceStart, raceAmount].forEach(i => i.addEventListener("input", refreshRace));
+  refreshRace();
+
+  /* --- speaker notes collapse ---------------------------------------------
+     Eight blocks of prose down one page reads as a wall of text. Collapsed by
+     default; presentation mode's N key forces them all open. -------------- */
+
+  $$(".note").forEach(note => {
+    const eyebrow = note.querySelector(".eyebrow");
+    const label = eyebrow ? eyebrow.textContent.trim() : "Speaker note";
+    if (eyebrow) eyebrow.remove();
+
+    const body = document.createElement("div");
+    body.className = "note-body";
+    while (note.firstChild) body.appendChild(note.firstChild);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "note-toggle";
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = '<span class="note-chev" aria-hidden="true"></span><span>' + label + '</span>';
+
+    note.appendChild(btn);
+    note.appendChild(body);
+    note.classList.add("is-collapsed");
+    btn.addEventListener("click", () => {
+      const open = !note.classList.contains("is-open");
+      note.classList.toggle("is-open", open);
+      note.classList.toggle("is-collapsed", !open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+  });
+
+  /* --- table toggles ------------------------------------------------------ */
+  $$("[data-table]").forEach(btn => btn.addEventListener("click", () => {
+    const card = btn.closest("[data-card]"), showing = card.classList.toggle("show-table");
+    btn.setAttribute("aria-pressed", String(showing)); btn.textContent = showing ? "Chart" : "Table";
+  }));
+
+  /* --- sources ----------------------------------------------------------- */
+  $("#source-list").innerHTML = Object.values(DATA.sources).map(s =>
+    `<div class="source-row"><span class="who">${s.name}</span><span class="what">${s.series}</span>` +
+    `<span class="meta"><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a> · read ${s.accessed}</span></div>`).join("");
+
+  /* --- tabs ----------------------------------------------------------------
+     Every block carries data-tab; several sections can share one tab. Only the
+     active tab is in the layout, so no topic ever sits at the end of a long
+     scroll. Arrow keys move between tabs, which doubles as the talk's flow. */
+
+  const body = document.body;
+  const panels = {};
+  $$("[data-tab]").forEach(el => {
+    if (el.closest(".rail-nav")) return;                 /* rail links are controls */
+    const t = el.getAttribute("data-tab");
+    (panels[t] = panels[t] || []).push(el);
+  });
+  const tabIds = Object.keys(panels);
+  const tabLinks = $$(".rail-nav a");
+  let currentTab = tabIds[0];
+
+  /* Which tab holds a given element, so an in-page link can open it. */
+  function tabOf(el) {
+    const holder = el.closest("[data-tab]");
+    return holder ? holder.getAttribute("data-tab") : null;
+  }
+
+  function showTab(id, scrollTo) {
+    if (!panels[id]) return;
+    currentTab = id;
+    tabIds.forEach(t => panels[t].forEach(el => { el.hidden = (t !== id); }));
+    tabLinks.forEach(a => a.classList.toggle("is-current", a.getAttribute("data-tab") === id));
+
+    const i = tabIds.indexOf(id);
+    $("#present-count").textContent = (i + 1) + " / " + tabIds.length;
+
+    if (scrollTo) {
+      scrollTo.scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+    }
+    /* charts were laid out while hidden — let them measure now */
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  function goTab(delta) {
+    const i = tabIds.indexOf(currentTab);
+    showTab(tabIds[Math.max(0, Math.min(tabIds.length - 1, i + delta))]);
+  }
+
+  /* Any internal link opens the tab that holds its target. */
+  document.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href").slice(1);
+    const target = id === "top" ? $("#top") : document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const tab = a.getAttribute("data-tab") || tabOf(target);
+    if (tab) showTab(tab, target.hasAttribute("data-tab") ? null : target);
+  });
+
+  showTab(tabIds[0]);
+
+  /* --- presentation mode -------------------------------------------------- */
+
+  function setPresenting(on) {
+    body.classList.toggle("presenting", on);
+    $("#present-btn").querySelector("span").textContent = on ? "Exit presenting" : "Present";
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+  $("#present-btn").addEventListener("click", () => setPresenting(!body.classList.contains("presenting")));
+  $("#present-exit").addEventListener("click", () => setPresenting(false));
+  $("#present-notes").addEventListener("click", () => body.classList.toggle("show-notes"));
+
+  document.addEventListener("keydown", e => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea" ||
+        tag === "button" || e.target.classList.contains("chart-plot")) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key === "p" || e.key === "P") { setPresenting(!body.classList.contains("presenting")); e.preventDefault(); }
+    else if (e.key === "n" || e.key === "N") { body.classList.toggle("show-notes"); }
+    else if (e.key === "Escape") { setPresenting(false); }
+    else if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { goTab(1); e.preventDefault(); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { goTab(-1); e.preventDefault(); }
+    else if (e.key === "Home") { showTab(tabIds[0]); e.preventDefault(); }
+    else if (e.key === "End") { showTab(tabIds[tabIds.length - 1]); e.preventDefault(); }
+  });
+
+})();
+
+</script>
+</body>
+</html>
