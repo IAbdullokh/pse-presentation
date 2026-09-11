@@ -125,8 +125,15 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 @keyframes blink { to { opacity: 0; } }
 
 .team { display: flex; gap: 12px; flex-wrap: wrap; }
+/* The title chips are the only place the audience sees how the talk is divided,
+   so they carry the theme and the share, not just a list of frame numbers. */
 .chip { font-size: 19px; padding: 9px 16px; border: 1px solid var(--line2); border-radius: 999px; color: var(--ink2); }
 .chip b { color: var(--acc); font-weight: 500; }
+.team .chip { display: grid; grid-template-columns: auto auto; gap: 2px 12px; padding: 12px 20px; border-radius: 18px; align-items: baseline; }
+.team .nm { font-size: 21px; color: var(--ink); font-weight: 500; }
+.team .th { font-size: 16px; color: var(--acc2); font-style: italic; font-family: var(--serif); justify-self: end; }
+.team .fr { font-size: 14px; color: var(--ink3); }
+.team .mn { font-size: 14px; color: var(--acc); justify-self: end; }
 
 .timeline { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
 .tl { border-top: 3px solid var(--line2); padding-top: 18px; display: grid; gap: 8px; font-size: 21px; color: var(--ink2); line-height: 1.35; }
@@ -2008,11 +2015,16 @@ VIS.tokenise = { mount(host, api) {
    carries its source in the References frame; verify before submission.
    ========================================================================== */
 
+/* Roughly ten minutes each, and each speaker owns a coherent stretch of the
+   argument rather than a scattering of frames. */
 const TEAM = [
-  { name: "Abdulloh", frames: "1–2 · 7 · 9–10" },
-  { name: "Asad",     frames: "3–4" },
-  { name: "Yusuf",    frames: "5–6 · 8" }
+  { name: "Abdulloh", frames: "1 · 2 · 7",      theme: "the argument", mins: "~10 min" },
+  { name: "Asad",     frames: "3 · 4 · 5",      theme: "the work",     mins: "~11 min" },
+  { name: "Yusuf",    frames: "6 · 8 · 9 · 10", theme: "the outcome",  mins: "~11 min" }
 ];
+
+/* The clock colours against each speaker's own share, not the whole talk. */
+const SPEAKER_TARGET = { min: 540, max: 660 };   /* 9:00 comfortable, 11:00 over */
 
 const ACCESSED = "10 September 2026";
 
@@ -2035,7 +2047,7 @@ const DECK = {
       ${R(1, `<div class="vis vis-titlegen" data-vis="titlegen"></div>`)}
       ${R(2, `<div class="vis vis-tokenise" data-vis="tokenise"></div>`)}
       ${R(3, `<p class="lede">A career that was born in 2022, peaked in 2023, and by 2026 had dissolved into almost every AI job. Is it a <em>job</em> — or a <em>skill</em> everyone now needs?</p>`)}
-      ${R(4, `<div class="team">${TEAM.map(t => `<span class="chip mono">${t.name} <b>· ${t.frames}</b></span>`).join("")}</div>`)}
+      ${R(4, `<div class="team">${TEAM.map(t => `<span class="chip mono"><b class="nm">${t.name}</b><span class="th">${t.theme}</span><span class="fr">frames ${t.frames}</span><span class="mn">${t.mins}</span></span>`).join("")}</div>`)}
       ${R(5, `<div class="tiny mono dim">→ next &nbsp;·&nbsp; O overview &nbsp;·&nbsp; N notes &nbsp;·&nbsp; T timer</div>`)}` },
 
   /* ───────────────────────── 2 · OVERVIEW ───────────────────────── */
@@ -2110,7 +2122,7 @@ const DECK = {
       ${R(5, `<div class="foot mono dim">Relative importance: our reading of 2025–26 job adverts and the Anthropic, OpenAI and Google prompting guides. Judgement, not a survey.</div>`)}` },
 
   /* ───────────────────────── 5 · EDUCATION ───────────────────────── */
-  { id: "education", label: "Education & training", speaker: 2, enter: "blur", x: 2000, y: 1750, w: 1400, h: 1160,
+  { id: "education", label: "Education & training", speaker: 1, enter: "blur", x: 2000, y: 1750, w: 1400, h: 1160,
     notes: "There is no degree called prompt engineering, and that is the point. Any degree plus a portfolio. Name the three free vendor guides — they are the real syllabus. The Vanderbilt course is the most recognised credential. Then connect to us: the AI Literacy Course on our own module is the first step.",
     html: `
       <div class="kicker mono">05 · EDUCATION AND TRAINING</div>
@@ -2178,7 +2190,7 @@ const DECK = {
       </div>`)}` },
 
   /* ───────────────────────── 9 · CONCLUSION ───────────────────────── */
-  { id: "conclusion", label: "Conclusion", speaker: 0, enter: "slide", x: 3900, y: 3250, w: 1300, h: 800,
+  { id: "conclusion", label: "Conclusion", speaker: 2, enter: "slide", x: 3900, y: 3250, w: 1300, h: 800,
     notes: "Answer the question from frame 2 directly. Learn it as a skill; do not bet a career on the title. Then the three takeaways, slowly. Final line, then stop — do not add anything after it.",
     html: `
       <div class="kicker mono">09 · CONCLUSION</div>
@@ -2191,7 +2203,7 @@ const DECK = {
       ${R(3, `<div class="callout final"><span class="mono acc">OUR VERDICT</span> Every one of us should be a competent prompt engineer by graduation. None of us should plan to be only that.</div>`)}` },
 
   /* ───────────────────────── 10 · REFERENCES ───────────────────────── */
-  { id: "references", label: "References", speaker: 0, enter: "blur", x: 2200, y: 4750, w: 1600, h: 1180,
+  { id: "references", label: "References", speaker: 2, enter: "blur", x: 2200, y: 4750, w: 1600, h: 1180,
     notes: "Leave this frame up for questions. Every number in the talk traces to one of these. If challenged on a figure, point to the line.",
     html: `
       <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
@@ -2234,7 +2246,7 @@ const DECK = {
    engine.js — a zoom-canvas presentation engine.
    One world, ten frames, a camera. Arriving at a frame reveals its content in
    sequence; counters count; bars fill. O zooms out to the whole map, N shows
-   speaker notes, T runs the 5–7 minute clock. No libraries.
+   speaker notes, T runs the per-speaker clock. No libraries.
    ========================================================================== */
 (function () {
   "use strict";
@@ -2358,11 +2370,14 @@ const DECK = {
     $("#rlabel").textContent = (idx + 1) + " / " + F.length + " · " + F[idx].label;
   }
 
-  /* ---------- clock: 5–7 minutes per speaker ---------- */
+  /* ---------- clock: each speaker's own share, defined in deck.js ---------- */
+  const TGT = (typeof SPEAKER_TARGET !== "undefined") ? SPEAKER_TARGET : { min: 540, max: 660 };
   let sec = 0, tid = null;
   function paintClock() {
     clock.textContent = String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
-    clock.className = "mono" + (sec >= 300 && sec <= 420 ? " in" : sec > 420 ? " over" : "");
+    clock.className = "mono" + (sec >= TGT.min && sec <= TGT.max ? " in" : sec > TGT.max ? " over" : "");
+    clock.title = "Target " + Math.round(TGT.min / 60) + "-" + Math.round(TGT.max / 60) +
+                  " minutes for this speaker · T start or pause · R reset";
   }
   function toggleClock() { if (tid) { clearInterval(tid); tid = null; clock.classList.remove("run"); } else { tid = setInterval(() => { sec++; paintClock(); }, 1000); clock.classList.add("run"); } }
   function resetClock() { clearInterval(tid); tid = null; sec = 0; paintClock(); clock.classList.remove("run"); }

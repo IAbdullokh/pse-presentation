@@ -504,6 +504,14 @@ body.presenting .stat .d,
 body.presenting .card-h .sub,
 body.presenting .coach-item .fix { font-size: 13px; }
 
+/* at 132% and above the nav outgrows one screen and the rail starts to scroll.
+   Pin its foot so the readiness score — the live scoreboard of the session —
+   is never the part that scrolls away. */
+body.presenting .rail-foot {
+  position: sticky; bottom: 0; z-index: 1;
+  background: var(--dark); padding-bottom: 2px;
+}
+
 /* saves must not land on the bar the presenter is steering by */
 body.presenting .toast { bottom: 112px; }
 
@@ -2638,7 +2646,9 @@ PSEFX.present = (function () {
     idx = clamp(i);
     const b = ARC[idx];
     if (b.before) safely(b.before);
-    if (matches(b, hash())) repaint(b.r);
+    /* exact route: repaint in place. Different route: let the router run, then
+       re-arm the beat on hashchange, because app.js clears drafts on the way. */
+    if (b.r === hash()) repaint(b.r);
     else { pending = b; location.hash = b.r; }
     paint();
   }
@@ -2660,7 +2670,14 @@ PSEFX.present = (function () {
     const n = document.querySelector(".cv-node.focus");
     return n ? +n.getAttribute("data-i") : -1;
   }
-  const onCanvas = () => !!(window.Journey && Journey.active());
+  /* canvas.js declares `const Journey`, which is a global LEXICAL binding and
+     never a property of window — so the window.Journey test app.js uses for its
+     own canvas keys is permanently false. Reach it by bare identifier, or the
+     camera silently loses the arrow keys it is supposed to own. */
+  const onCanvas = () => {
+    try { return typeof Journey !== "undefined" && Journey.active(); }
+    catch (e) { return false; }
+  };
 
   /* --- personas ------------------------------------------------------------- */
   function ensureBackup() {
