@@ -474,43 +474,152 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 </style>
 <style>
-/* presenter mode — a bar the presenter reads, invisible until P is pressed */
+/* =============================================================================
+   present.css — presenter mode.
+   Two jobs: a bar the presenter reads and the room does not have to, and a set
+   of size corrections that only apply while presenting, so the product a
+   mentor looks at on a projector is the same product, just legible from the
+   back row. Everything here is scoped to body.presenting or to .pm-*.
+   ========================================================================== */
+
+/* --- readability while presenting -----------------------------------------
+   app.css sizes the whole product in px. Scaling .app is therefore the only
+   change that keeps type, rules, charts and spacing in their designed
+   proportion — a parallel set of presenter font sizes would drift from the
+   real thing within a week. Chrome and Safari have always supported this;
+   Firefox does from 126. --------------------------------------------------- */
+body.presenting .app { zoom: var(--pm-zoom, 1.15); }
+
+/* zoom scales lengths but not viewport units, so 100vh inside a zoomed .app is
+   a screen and a half of rail. Divide both back out, or the readiness score in
+   the rail foot — the scoreboard of the whole session — falls below the fold. */
+body.presenting .app  { min-height: calc(100vh / var(--pm-zoom, 1.15)); }
+body.presenting .rail { height: calc(100vh / var(--pm-zoom, 1.15)); }
+
+/* the page title is doing the work of a slide title while presenting */
+body.presenting .topbar h1 { font-size: clamp(23px, 2.9vw, 30px); }
+
+/* the captions that carry the marks: gap detail, card subtitles, coach fixes */
+body.presenting .stat .d,
+body.presenting .card-h .sub,
+body.presenting .coach-item .fix { font-size: 13px; }
+
+/* saves must not land on the bar the presenter is steering by */
+body.presenting .toast { bottom: 112px; }
+
+/* room for the bar underneath the longest page */
+body.presenting .page { padding-bottom: 150px; }
+
+/* --- the bar ---------------------------------------------------------------- */
 .pm-bar {
-  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(14px);
-  z-index: 80; display: none; align-items: center; gap: 14px;
-  padding: 9px 16px; border-radius: 999px;
-  background: var(--dark); color: var(--dark-ink); border: 1px solid var(--dark-line);
-  box-shadow: var(--sh-3); font-size: 12.5px; opacity: 0; transition: opacity .2s, transform .2s;
-  max-width: min(94vw, 940px);
+  position: fixed; left: 50%; bottom: 2px; transform: translateX(-50%);
+  z-index: 80; display: none; width: min(96vw, 1060px);
+  background: var(--dark); color: var(--dark-ink);
+  border: 1px solid var(--dark-line); border-radius: var(--r-lg);
+  box-shadow: var(--sh-3); overflow: hidden; opacity: 0;
+  transition: opacity .2s, bottom .2s;
 }
-body.presenting .pm-bar { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
-.pm-step { font-variant-numeric: tabular-nums; color: #fff; font-weight: 600; flex: none; }
-.pm-dots { display: flex; gap: 5px; flex: none; }
-.pm-dot { width: 6px; height: 6px; border-radius: 50%; background: #33405C; transition: all .22s; }
-.pm-dot.on { background: var(--accent); width: 18px; border-radius: 999px; }
-.pm-beat { color: var(--dark-ink); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pm-keys { color: #7E8DA8; flex: none; font-size: 11.5px; }
-.pm-keys kbd {
-  font: inherit; font-size: 10.5px; padding: 1px 5px; border-radius: 4px;
-  background: #1C2941; border: 1px solid #2C3B58; color: #A9B7CE;
+body.presenting .pm-bar { display: block; opacity: 1; bottom: 16px; }
+
+/* above 900px the rail is part of the layout. The bar sits in the content
+   column and is clamped to it, so the rail — and the live score in its foot —
+   is never covered by the thing the presenter is steering with. */
+@media (min-width: 901px) {
+  .pm-bar {
+    left: auto; right: 16px; transform: none;
+    width: min(1060px, calc(100vw - (var(--rail) * var(--pm-zoom, 1.15)) - 40px));
+  }
 }
 
-.pm-help { position: fixed; inset: 0; z-index: 90; background: rgba(12,20,37,.62); backdrop-filter: blur(3px); display: grid; place-items: center; }
+/* one tick per beat: where we are in two hours, and where the sections start */
+.pm-track { display: flex; gap: 2px; height: 5px; background: var(--dark-2); }
+.pm-tick { flex: 1; background: var(--dark-line); transition: background .18s; }
+.pm-tick.head { background: var(--dark-ink-2); opacity: .38; }
+.pm-tick.past { background: var(--accent-deep); opacity: 1; }
+.pm-tick.on { background: var(--accent); opacity: 1; }
+
+.pm-row { display: flex; align-items: center; gap: 16px; padding: 9px 15px 3px; }
+.pm-step { flex: none; font-size: 12px; color: var(--dark-ink-2); font-variant-numeric: tabular-nums; }
+.pm-step b { font-size: 18px; font-weight: 650; color: var(--dark-ink); letter-spacing: -0.02em; }
+
+.pm-beat { flex: 1; min-width: 0; }
+.pm-t { font-size: 15px; font-weight: 600; color: var(--dark-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm-say { font-size: 13px; color: var(--dark-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pm-meta { flex: none; display: flex; align-items: center; gap: 6px; }
+.pm-chip {
+  font-size: 12px; line-height: 1.5; padding: 2px 9px; border-radius: 999px;
+  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink-2);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.pm-clock { color: var(--dark-ink); }
+/* mirrored from the practice timer — the same thresholds it paints */
+.pm-run.in { color: var(--s3); border-color: var(--s3); }
+.pm-run.over { background: var(--bad); border-color: var(--bad); color: var(--dark-ink); }
+
+.pm-keys { padding: 0 15px 8px; font-size: 11.5px; color: var(--dark-ink-2); opacity: .85; }
+.pm-keys kbd, .pm-help-in kbd {
+  font: inherit; padding: 1px 5px; border-radius: 4px; margin-right: 2px;
+  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink);
+}
+
+.pm-go { position: fixed; left: -9999px; top: -9999px; }
+.pm-go[hidden] { display: none; }
+
+/* --- the key map ------------------------------------------------------------ */
+.pm-help {
+  position: fixed; inset: 0; z-index: 90; background: rgba(12, 20, 37, .62);
+  display: grid; place-items: center; padding: 20px;
+}
+.pm-help[hidden] { display: none; }      /* [hidden] must beat the display above */
 .pm-help-in {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-  padding: 26px 30px; box-shadow: var(--sh-3); max-width: 540px; width: calc(100% - 40px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: 24px 28px; box-shadow: var(--sh-3);
+  width: min(980px, 100%); max-height: 84vh; overflow: auto;
 }
-.pm-help-in h3 { font-size: 17px; font-weight: 620; margin-bottom: 14px; }
-.pm-help-in dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0 0 16px; align-items: baseline; }
-.pm-help-in dt { text-align: right; }
-.pm-help-in dd { margin: 0; font-size: 13.5px; color: var(--ink-500); }
-.pm-help-in kbd {
-  font: inherit; font-size: 11.5px; padding: 2px 7px; border-radius: 5px;
-  background: var(--surface-2); border: 1px solid var(--line-2); color: var(--ink-700);
+.pm-help-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.pm-help-in h3 { font-size: 18px; font-weight: 640; margin: 0; }
+.pm-help-head .pm-chip { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-500); }
+.pm-help-in h4 {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-400); font-weight: 620; margin: 0 0 10px;
 }
-.pm-help-in p { font-size: 12.5px; color: var(--ink-400); margin: 0; }
+.pm-help-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; align-items: start; }
 
-@media (prefers-reduced-motion: reduce) { .pm-bar, .pm-dot { transition: none; } }
+.pm-help-in dl { display: grid; grid-template-columns: auto 1fr; gap: 9px 14px; margin: 0; align-items: baseline; }
+.pm-help-in dt { text-align: right; white-space: nowrap; }
+.pm-help-in dd { margin: 0; font-size: 13px; color: var(--ink-500); }
+.pm-help-in dd b { color: var(--ink-700); font-weight: 620; }
+.pm-help-in kbd { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-700); font-size: 11.5px; padding: 2px 6px; }
+
+.pm-arc { list-style: none; margin: 0; padding: 0; max-height: 54vh; overflow: auto; }
+.pm-arc li {
+  display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px;
+  padding: 6px 9px; border-radius: var(--r-sm); cursor: pointer;
+}
+.pm-arc li:hover { background: var(--surface-2); }
+.pm-arc li.on { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.pm-arc .n { grid-row: span 2; font-size: 12px; color: var(--ink-300); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.pm-arc .b { font-size: 13px; color: var(--ink-700); }
+.pm-arc li.on .b { font-weight: 600; color: var(--ink-900); }
+.pm-arc .s { font-size: 11.5px; color: var(--ink-400); }
+
+.pm-help-in > p { font-size: 12.5px; color: var(--ink-400); margin: 18px 0 0; }
+
+/* --- small screens: the bar still has to be usable off the projector -------- */
+@media (max-width: 860px) {
+  .pm-keys, .pm-say { display: none; }
+  .pm-help-cols { grid-template-columns: 1fr; }
+  .pm-arc { max-height: 34vh; }
+}
+@media (max-width: 620px) {
+  .pm-meta .pm-zoomv, .pm-meta .pm-persona { display: none; }
+}
+
+/* --- reduced motion: the bar arrives, it does not slide in ------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .pm-bar, .pm-tick { transition: none; }
+}
 
 </style>
 </head>
@@ -2359,115 +2468,477 @@ V.profile = function () {
 </script>
 <script>
 /* =============================================================================
-   present.js — presenter mode for the platform.
-   A two-hour live demo is a navigation problem before it is a design problem:
-   the presenter must reach any screen instantly, keep a clean state between
-   runs, and never be caught hunting through a sidebar on a projector.
+   present.js — presenter mode: the room, not the page.
+
+   A two-hour live demo is a navigation problem before it is a design problem.
+   Three students take turns at one laptop, a projector sits eight metres from
+   the back row, and the interesting states of this product — a specific CW1
+   tab, a pre-filtered explorer, the goal wizard on its obstacles step — have
+   no addresses. So this module gives the demo four things the app cannot give
+   itself: a scripted arc that always knows where the next key press goes, a
+   zoom level that makes 12px captions legible from the back, honest demo
+   personas, and one keymap that does not fight the app's own.
 
    P            enter or leave presenter mode
-   1-9          jump straight to a screen
-   ← →          step through the demo in its narrative order
-   D            load the worked example student / clear it
-   ?            the key map
-   Esc          leave
+   ← →          step the arc — on the journey canvas, fly the camera first
+   1-9          jump to a section head
+   + − 0        projector zoom
+   D            cycle the demo workspace
+   ?            the key map            Esc  back out, one level at a time
+
+   Two rules shape the implementation. It decorates no page DOM at all — the
+   bar, the sheet and one hidden button are the only nodes it owns — and it
+   registers its keydown listener in the CAPTURE phase, because app.js listens
+   on document in the bubble phase for the same arrow keys on the roadmap.
+   Capture runs first, so stopPropagation there genuinely settles who wins.
    ========================================================================== */
 
 PSEFX.present = (function () {
-  /* The order a demo should actually run in — the student's journey, which is
-     not the same as the order of the sidebar. */
+
+  /* --- the arc -------------------------------------------------------------
+     Twenty-four beats in the order the demo should actually run, which is the
+     student's journey and not the order of the sidebar. `say` is the line the
+     presenter reads; `before()` sets the view state that gives a beat its
+     address. Those assignments reach the module-scope `let`s in views.js
+     because both files are classic scripts sharing the global lexical scope,
+     and this one is loaded after it. ------------------------------------- */
+
+  const FRESH_FILTER = { q: "", industry: "", demand: "", ai: "", major: "" };
+  const clone = o => JSON.parse(JSON.stringify(o));
+
   const ARC = [
-    { r: "#/",            k: "1", beat: "Where the student stands today" },
-    { r: "#/roadmap",     k: "2", beat: "The eight stages, as one canvas" },
-    { r: "#/careers",     k: "3", beat: "Researching occupations properly" },
-    { r: "#/skills",      k: "4", beat: "Rating yourself, and the gap that follows" },
-    { r: "#/goals",       k: "5", beat: "Turning the biggest gap into a SMART goal" },
-    { r: "#/cw1",         k: "6", beat: "The coursework workspace" },
-    { r: "#/cw2",         k: "7", beat: "Building a professional profile" },
-    { r: "#/reflections", k: "8", beat: "Evidence of growth, in 70-100 words" },
-    { r: "#/profile",     k: "9", beat: "The whole picture, scored" }
+    { r: "#/", k: "1", beat: "Where this student stands today",
+      say: "One number, seven parts. Every screen after this one is an input to it." },
+    { r: "#/", beat: "What the number is made of",
+      say: "The ring redraws its seven segments in the order the module teaches them." },
+
+    { r: "#/roadmap", k: "2", beat: "The eight stages, as one canvas",
+      say: "Arrow keys fly the camera stage by stage; every live line is real state." },
+
+    { r: "#/careers", k: "3", beat: "Ten occupations, before we narrow anything",
+      say: "Real labour-market figures, each printed with its proxy occupation and year.",
+      before: () => { careerFilter = Object.assign({}, FRESH_FILTER); } },
+    { r: "#/careers", beat: "Narrowed to technology, high demand",
+      say: "Two occupations left. The filters are the research method, not decoration.",
+      before: () => { careerFilter = { q: "", industry: "Technology & Data", demand: "High", ai: "", major: "" }; } },
+    { r: "#/career/data-analyst", beat: "One occupation, in depth",
+      say: "Opening a career is worth five points — watch the rail on the way back." },
+    { r: "#/careers", beat: "The shortlist, compared side by side",
+      say: "Salary and growth grow from zero; the shared skills are named underneath.",
+      before: () => { careerFilter = Object.assign({}, FRESH_FILTER); } },
+
+    { r: "#/skills", k: "4", beat: "Rating yourself against the target",
+      say: "Ten skills, current and target. The gap is the shape of the work ahead." },
+    { r: "#/skills", beat: "One slider, four consequences",
+      say: "Drag presentation to nine: the radar dents, the tile renames, the score moves." },
+
+    { r: "#/goals", k: "5", beat: "The gap, with a deadline attached",
+      say: "Four points for writing a goal, six more for the progress you actually make.",
+      before: () => { goalDraft = null; } },
+    { r: "#/goals", beat: "The SMART wizard, step one of six",
+      say: "Six steps, one idea each, so the panel slides read as a single process.",
+      before: () => { goalDraft = { obstacles: [] }; goalStep = 0; } },
+    { r: "#/goals", beat: "Step five — obstacles, and the plan around each",
+      say: "Naming a barrier without a solution earns nothing, and the coach checks both.",
+      before: () => {
+        const g = Store.get().goals[0];
+        goalDraft = g ? clone(g) : { obstacles: [] };
+        goalStep = 4;
+      } },
+
+    { r: "#/cw1", k: "6", beat: "CW1 — fourteen assessed requirements",
+      say: "Tick one: the evidence line names the slide and counts the sources behind it.",
+      before: () => { cw1Tab = "checklist"; } },
+    { r: "#/cw1", beat: "The ten-slide plan",
+      say: "A slide counts as planned once it has real notes, not once it has a title.",
+      before: () => { cw1Tab = "slides"; } },
+    { r: "#/cw1", beat: "References, formatted from the fields",
+      say: "Westminster Harvard, built from four inputs. Five sources is the threshold.",
+      before: () => { cw1Tab = "sources"; } },
+    { r: "#/cw1", beat: "Rehearsing to the five-to-seven minute window",
+      say: "Start the clock and deliver the real section. Green at five, red past seven.",
+      before: () => { cw1Tab = "practice"; } },
+    { r: "#/cw1", beat: "Ask PSE — press A",
+      say: "Fixed rules, in this browser. No model, no network, and it writes nothing.",
+      before: () => { cw1Tab = "checklist"; } },
+
+    { r: "#/cw2", k: "7", beat: "The profile, scored section by section",
+      say: "Ten weighted sections. Type into the headline and the preview follows." },
+
+    { r: "#/reflections", k: "8", beat: "Reflections as assessed evidence",
+      say: "Three of sufficient depth is what the score asks for, not three entries.",
+      before: () => { reflDraft = null; } },
+    { r: "#/reflections", beat: "The editor — seventy to a hundred words",
+      say: "The counter and the coach check structure and person. Neither writes it.",
+      before: () => {
+        const r = Store.get().reflections[0];
+        reflDraft = r ? clone(r) : { type: PSE.reflectionTypes[0].id };
+      } },
+
+    { r: "#/resources", beat: "Where every figure came from",
+      say: "Eight labour-market sources; one click files any of them as a reference." },
+
+    { r: "#/profile", k: "9", beat: "The whole picture, scored",
+      say: "Seven segments draw in module order while the total counts up beside them." },
+    { r: "#/profile", beat: "Week nine, on the same screens",
+      say: "Press D twice: every number re-animates to what a term of work produces." },
+    { r: "#/profile", beat: "Questions",
+      say: "The bar stays up — any screen in the product is one key press away." }
   ];
 
-  let on = false, idx = 0, bar = null, help = null, api = null;
+  /* The nine section names, as the rail calls them — used by the help sheet so
+     the key map names screens the way the product does. */
+  const SECTION = {
+    "#/": "Dashboard", "#/roadmap": "Roadmap", "#/careers": "Career Explorer",
+    "#/career/data-analyst": "Career detail", "#/skills": "Skills", "#/goals": "Goals",
+    "#/cw1": "CW1 — Presentation", "#/cw2": "CW2 — LinkedIn",
+    "#/reflections": "Reflections", "#/resources": "Resources", "#/profile": "My Career"
+  };
 
-  const go = r => { if (location.hash === r) return; location.hash = r; };
+  /* --- demo personas -------------------------------------------------------
+     Every persona is the shipped sample workspace with parts removed or ticked
+     — never new prose. A mentor should be able to ask "is that made up?" and
+     get the same answer for all four: no, it is one sample, shown at three
+     moments of the term, and the fourth is the presenter's own workspace. */
+  const PERSONAS = [
+    { id: "mine",  label: "My workspace" },
+    { id: "week1", label: "Sample — Week 1" },
+    { id: "week9", label: "Sample — Week 9" },
+    { id: "ready", label: "Sample — Submission ready" }
+  ];
 
-  function paint() {
-    if (!bar) return;
-    const cur = ARC[idx];
-    bar.querySelector(".pm-step").textContent = (idx + 1) + " / " + ARC.length;
-    bar.querySelector(".pm-beat").textContent = cur ? cur.beat : "";
-    bar.querySelectorAll(".pm-dot").forEach((d, i) => d.classList.toggle("on", i === idx));
+  const KEY = "pse-workspace-v1";
+  const BACKUP = "pse-workspace-backup";
+  const ZOOMS = [1, 1.15, 1.32, 1.5];
+
+  let on = false, idx = 0, zoom = 1, pending = null;
+  let bar = null, help = null, goBtn = null;
+  let persona = 0, backed = false, backup = null;
+  let startedAt = 0, clockId = 0;
+  let runSeen = false, runSecs = 0, runIn = false;
+
+  const mmss = s => String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(Math.floor(s) % 60).padStart(2, "0");
+  const esc2 = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hash = () => location.hash || "#/";
+  const clamp = i => Math.max(0, Math.min(ARC.length - 1, i));
+  const matches = (a, h) => a.r === h || (a.r.indexOf("#/career/") === 0 && h.indexOf("#/career/") === 0);
+  const safely = fn => { try { fn(); } catch (e) { console.warn("[present] " + (e && e.message)); } };
+
+  /* --- repainting without editing app.js -----------------------------------
+     app.js's delegated handler renders in place when the clicked route equals
+     the current hash, so a hidden button is a legitimate way to ask for a
+     repaint after a before() hook has changed cw1Tab or goalStep. */
+  function repaint(r) {
+    goBtn.setAttribute("data-route", r || hash());
+    goBtn.click();
   }
+
+  function jump(i) {
+    idx = clamp(i);
+    const b = ARC[idx];
+    if (b.before) safely(b.before);
+    if (matches(b, hash())) repaint(b.r);
+    else { pending = b; location.hash = b.r; }
+    paint();
+  }
+
+  function step(d) { jump(idx + d); }
 
   function syncFromRoute() {
-    const h = location.hash || "#/";
-    const i = ARC.findIndex(a => h === a.r || (a.r !== "#/" && h.startsWith(a.r)));
-    if (i >= 0) { idx = i; paint(); }
+    const h = hash();
+    if (!ARC[idx] || !matches(ARC[idx], h)) {
+      const i = ARC.findIndex(a => matches(a, h));
+      if (i >= 0) idx = i;
+    }
+    paint();
   }
 
-  function step(d) {
-    idx = Math.max(0, Math.min(ARC.length - 1, idx + d));
-    go(ARC[idx].r); paint();
+  /* --- the journey camera owns the arrows while it is on screen ------------- */
+  const stageNodes = () => document.querySelectorAll(".cv-node");
+  function focusedStage() {
+    const n = document.querySelector(".cv-node.focus");
+    return n ? +n.getAttribute("data-i") : -1;
+  }
+  const onCanvas = () => !!(window.Journey && Journey.active());
+
+  /* --- personas ------------------------------------------------------------- */
+  function ensureBackup() {
+    if (backed) return;
+    backed = true;
+    try {
+      backup = localStorage.getItem(KEY);
+      if (backup === null) localStorage.removeItem(BACKUP);
+      else localStorage.setItem(BACKUP, backup);
+    } catch (e) { /* private mode: the session still works, it just cannot be restored */ }
   }
 
+  function restoreMine() {
+    let raw = backup;
+    try { if (raw === null) raw = localStorage.getItem(BACKUP); } catch (e) {}
+    if (raw) { try { localStorage.setItem(KEY, raw); } catch (e) {} Store.load(); }
+    else Store.reset();                 /* there was nothing here before the demo */
+  }
+
+  function applyPersona() {
+    const p = PERSONAS[persona];
+    if (p.id === "mine") { restoreMine(); repaint(); paint(); return; }
+
+    ensureBackup();
+    Store.loadSample();
+
+    if (p.id === "week1") {
+      /* the same student, before the term did anything to the workspace */
+      Store.update(st => {
+        st.viewed = st.viewed.slice(0, 4);
+        st.goals = [];
+        st.skills = {};
+        st.cw1.checklist = {};
+        st.cw1.sources = [];
+        st.cw1.practice = [];
+        st.cw2.sections = {};
+        st.reflections = [];
+      });
+    }
+
+    if (p.id === "ready") {
+      /* the same student at hand-in: numbers and existing text only */
+      Store.update(st => {
+        PSE.cw1Checklist.forEach(i => { st.cw1.checklist[i.id] = true; });
+        st.cw2.sections.ai = Object.assign({}, st.cw2.sections.ai, { done: true });
+        const last = st.cw1.practice[st.cw1.practice.length - 1];
+        st.cw1.practice.push({
+          id: Store.uid(), seconds: 402, avg: "4.1",
+          improvement: last ? last.improvement : "",
+          date: new Date().toISOString().slice(0, 10),
+          scores: last ? Object.assign({}, last.scores) : {}
+        });
+      });
+    }
+
+    repaint();
+    paint();
+  }
+
+  function personaLabel() {
+    /* after a reload the cycle starts at "My workspace" again, so never claim
+       that a sample sitting in localStorage is the presenter's own work */
+    if (persona === 0 && Store.get().isSample) return "Sample workspace";
+    return PERSONAS[persona].label;
+  }
+
+  /* --- zoom ----------------------------------------------------------------
+     app.css sizes everything in px, so zoom on .app is the one lever that
+     scales the whole product — type, rules, charts and all — without a
+     parallel set of presenter styles that could drift from the real thing. */
+  function setZoom(i) {
+    zoom = Math.max(0, Math.min(ZOOMS.length - 1, i));
+    document.body.style.setProperty("--pm-zoom", ZOOMS[zoom]);
+    paint();
+  }
+
+  /* --- the bar -------------------------------------------------------------- */
   function build() {
     bar = document.createElement("div");
     bar.className = "pm-bar";
+    bar.setAttribute("data-fx-own", "present");
     bar.innerHTML =
-      '<span class="pm-step"></span>' +
-      '<span class="pm-dots">' + ARC.map(() => '<i class="pm-dot"></i>').join("") + '</span>' +
-      '<span class="pm-beat"></span>' +
-      '<span class="pm-keys"><kbd>←</kbd><kbd>→</kbd> step · <kbd>1</kbd>–<kbd>9</kbd> jump · <kbd>D</kbd> demo data · <kbd>?</kbd> keys · <kbd>Esc</kbd> exit</span>';
+      '<div class="pm-track" aria-hidden="true">' +
+        ARC.map(a => '<i class="pm-tick' + (a.k ? " head" : "") + '"></i>').join("") +
+      '</div>' +
+      '<div class="pm-row">' +
+        '<span class="pm-step"><b>01</b> / ' + ARC.length + '</span>' +
+        '<div class="pm-beat"><div class="pm-t"></div><div class="pm-say"></div></div>' +
+        '<div class="pm-meta">' +
+          '<span class="pm-chip pm-persona"></span>' +
+          '<span class="pm-chip pm-zoomv"></span>' +
+          '<span class="pm-chip pm-clock" title="Time since presenter mode started">00:00</span>' +
+          '<span class="pm-chip pm-run" hidden></span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pm-keys"><kbd>←</kbd><kbd>→</kbd> step · <kbd>1</kbd>–<kbd>9</kbd> section · ' +
+        '<kbd>+</kbd><kbd>−</kbd> zoom · <kbd>D</kbd> workspace · <kbd>A</kbd> ask · ' +
+        '<kbd>F</kbd> full screen · <kbd>?</kbd> keys · <kbd>Esc</kbd> back</div>';
     document.body.appendChild(bar);
 
     help = document.createElement("div");
     help.className = "pm-help";
+    help.setAttribute("data-fx-own", "present");
     help.hidden = true;
-    help.innerHTML = '<div class="pm-help-in"><h3>Presenter mode</h3><dl>' +
-      ARC.map(a => `<dt><kbd>${a.k}</kbd></dt><dd>${a.beat}</dd>`).join("") +
-      '<dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step through the demo in order</dd>' +
-      '<dt><kbd>D</kbd></dt><dd>Load the worked example student, or clear it</dd>' +
-      '<dt><kbd>P</kbd> / <kbd>Esc</kbd></dt><dd>Leave presenter mode</dd>' +
-      '</dl><p>Nothing here changes what a mentor sees on the page — it only changes how fast you can get there.</p></div>';
     document.body.appendChild(help);
-    help.addEventListener("click", () => { help.hidden = true; });
+    help.addEventListener("click", e => {
+      const row = e.target.closest("[data-i]");
+      if (row) { help.hidden = true; jump(+row.getAttribute("data-i")); return; }
+      if (!e.target.closest(".pm-help-in")) help.hidden = true;
+    });
+
+    /* app.js repaints in place when a "go" click names the current route — the
+       only way to re-render after a before() hook without editing app.js */
+    goBtn = document.createElement("button");
+    goBtn.setAttribute("data-act", "go");
+    goBtn.setAttribute("data-fx-own", "present");
+    goBtn.className = "pm-go";
+    goBtn.hidden = true;
+    document.body.appendChild(goBtn);
+  }
+
+  function paint() {
+    if (!bar || !on) return;
+    const b = ARC[idx] || {};
+    bar.querySelector(".pm-step").innerHTML = "<b>" + String(idx + 1).padStart(2, "0") + "</b> / " + ARC.length;
+    bar.querySelector(".pm-t").textContent = b.beat || "";
+    bar.querySelector(".pm-say").textContent = b.say || "";
+    bar.querySelectorAll(".pm-tick").forEach((t, i) => {
+      t.classList.toggle("on", i === idx);
+      t.classList.toggle("past", i < idx);
+    });
+    bar.querySelector(".pm-persona").textContent = personaLabel();
+    bar.querySelector(".pm-zoomv").textContent = Math.round(ZOOMS[zoom] * 100) + "%";
+    bar.querySelector(".pm-clock").textContent = mmss(startedAt ? (Date.now() - startedAt) / 1000 : 0);
+    paintRun();
+  }
+
+  function paintRun() {
+    if (!bar) return;
+    const el = bar.querySelector(".pm-run");
+    el.hidden = !runSeen;
+    if (!runSeen) return;
+    el.textContent = mmss(runSecs);
+    el.classList.toggle("in", runIn);
+    el.classList.toggle("over", runSecs > 420);
+  }
+
+  /* --- the key map, regenerated from the arc -------------------------------- */
+  function paintHelp() {
+    const heads = ARC.filter(a => a.k);
+    help.innerHTML =
+      '<div class="pm-help-in">' +
+        '<div class="pm-help-head"><h3>Presenter mode</h3>' +
+          '<span class="pm-chip">Beat ' + (idx + 1) + ' of ' + ARC.length + ' · ' +
+          esc2(personaLabel()) + ' · ' + Math.round(ZOOMS[zoom] * 100) + '%</span></div>' +
+        '<div class="pm-help-cols">' +
+          '<div><h4>Keys</h4><dl>' +
+            '<dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step the arc. On the journey canvas these fly the camera stage by stage first, and move on only from the last stage.</dd>' +
+            '<dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>' + heads.map(a => "<b>" + a.k + "</b> " + esc2(SECTION[a.r] || a.beat)).join(" · ") + '</dd>' +
+            '<dt><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></dt><dd>Projector zoom — ' + ZOOMS.map(z => Math.round(z * 100) + "%").join(" / ") + '. <kbd>0</kbd> returns to 115%.</dd>' +
+            '<dt><kbd>D</kbd></dt><dd>Cycle the workspace — ' + PERSONAS.map(p => esc2(p.label)).join(" → ") + '. Yours is backed up before the first switch and written back when the cycle returns to it.</dd>' +
+            '<dt><kbd>A</kbd></dt><dd>Ask PSE, the offline assistant. It belongs to the assistant, not to presenter mode, and works with presenter mode off.</dd>' +
+            '<dt><kbd>F</kbd></dt><dd>Full screen on the journey canvas.</dd>' +
+            '<dt><kbd>?</kbd></dt><dd>This sheet. Click any beat on the right to jump straight to it.</dd>' +
+            '<dt><kbd>P</kbd> <kbd>Esc</kbd></dt><dd>Leave presenter mode. On the journey canvas <kbd>Esc</kbd> returns the camera to the overview first.</dd>' +
+          '</dl></div>' +
+          '<div><h4>The arc</h4><ol class="pm-arc">' +
+            ARC.map((a, i) => '<li class="' + (i === idx ? "on" : "") + '" data-i="' + i + '">' +
+              '<span class="n">' + String(i + 1).padStart(2, "0") + '</span>' +
+              '<span class="b">' + esc2(a.beat) + '</span>' +
+              '<span class="s">' + esc2(SECTION[a.r] || a.r) + (a.k ? " · key " + a.k : "") + '</span></li>').join("") +
+          '</ol></div>' +
+        '</div>' +
+        '<p>Presenter mode changes only how fast you reach a screen — never what a mentor sees on it.</p>' +
+      '</div>';
   }
 
   function setOn(v) {
     on = v;
     document.body.classList.toggle("presenting", on);
-    if (on) { syncFromRoute(); paint(); }
-    if (!on && help) help.hidden = true;
+    if (on) {
+      if (!startedAt) {
+        startedAt = Date.now();
+        /* the bar outlives every page, so its clock must not be handed to the
+           render cycle's teardown */
+        clockId = setInterval(() => { if (on) paint(); }, 1000);
+      }
+      setZoom(zoom);
+      syncFromRoute();
+    } else if (help) help.hidden = true;
   }
 
-  return {
-    init(a) {
-      api = a;
-      build();
-      window.addEventListener("hashchange", syncFromRoute);
+  const stop = e => { e.preventDefault(); e.stopPropagation(); };
 
+  return {
+    init() {
+      build();
+      zoom = 1;                                   /* 115% is the default demo size */
+
+      window.addEventListener("hashchange", () => {
+        const b = pending; pending = null;
+        if (b && matches(b, hash()) && b.before) {
+          safely(b.before);
+          /* app.js clears goalDraft and reflDraft on every hash change, so a
+             beat that opens the wizard or the reflection editor has to re-arm
+             it and force the repaint itself. Both renders happen inside this
+             one event dispatch, so nothing intermediate ever reaches the glass. */
+          let draft = null;
+          try { draft = goalDraft || reflDraft; } catch (e) {}
+          if (draft) repaint(b.r);
+        }
+        syncFromRoute();
+      });
+
+      /* the practice timer's own module owns the clock; this only mirrors it */
+      document.addEventListener("pse:timer", e => {
+        const d = (e && e.detail) || {};
+        runSeen = true;
+        runSecs = +d.seconds || 0;
+        runIn = !!d.inWindow;
+        paintRun();
+      });
+
+      /* CAPTURE phase: app.js listens on document in the bubble phase for the
+         same arrows on the roadmap, so this is the only place a decision about
+         who handles a key can actually be enforced. */
       document.addEventListener("keydown", e => {
-        const tag = (e.target.tagName || "").toLowerCase();
-        if (tag === "input" || tag === "select" || tag === "textarea" || e.target.isContentEditable) return;
+        const t = e.target, tag = (t.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "select" || tag === "textarea" || t.isContentEditable) return;
         if (e.metaKey || e.ctrlKey || e.altKey) return;
 
-        if (e.key === "p" || e.key === "P") { setOn(!on); e.preventDefault(); return; }
-        if (!on) return;
+        const k = e.key;
 
-        if (e.key === "Escape") { if (!help.hidden) help.hidden = true; else setOn(false); e.preventDefault(); }
-        else if (e.key === "?" || (e.key === "/" && e.shiftKey)) { help.hidden = !help.hidden; e.preventDefault(); }
-        else if (e.key === "ArrowRight" || e.key === " ") { step(1); e.preventDefault(); }
-        else if (e.key === "ArrowLeft") { step(-1); e.preventDefault(); }
-        else if (e.key === "d" || e.key === "D") {
-          if (window.PSEDemo) PSEDemo.toggle();
-          e.preventDefault();
+        if (k === "p" || k === "P") { setOn(!on); e.preventDefault(); return; }
+        if (!on) return;                /* off, every key still belongs to the app */
+
+        if (k === "Escape") {
+          if (document.body.classList.contains("ask-open")) return;   /* the assistant owns Escape */
+          if (!help.hidden) { help.hidden = true; stop(e); return; }
+          if (onCanvas() && focusedStage() >= 0) { Journey.overview(); stop(e); return; }
+          setOn(false); stop(e); return;
         }
-        else if (/^[1-9]$/.test(e.key)) {
-          const i = +e.key - 1;
-          if (i < ARC.length) { idx = i; go(ARC[i].r); paint(); e.preventDefault(); }
+
+        if (k === "?" || (k === "/" && e.shiftKey)) {
+          if (help.hidden) paintHelp();
+          help.hidden = !help.hidden;
+          stop(e); return;
         }
-      });
+
+        if (k === "ArrowRight" || k === "PageDown" ||
+            (k === " " && tag !== "button" && tag !== "a" && tag !== "summary")) {
+          if (onCanvas() && focusedStage() < stageNodes().length - 1) { Journey.step(1); stop(e); return; }
+          step(1); stop(e); return;
+        }
+        if (k === "ArrowLeft" || k === "PageUp") {
+          if (onCanvas() && focusedStage() > 0) { Journey.step(-1); stop(e); return; }
+          step(-1); stop(e); return;
+        }
+
+        if (k === "+" || k === "=") { setZoom(zoom + 1); stop(e); return; }
+        if (k === "-" || k === "_") { setZoom(zoom - 1); stop(e); return; }
+        if (k === "0") { setZoom(1); stop(e); return; }
+
+        if (k === "d" || k === "D") {
+          persona = (persona + 1) % PERSONAS.length;
+          applyPersona(); stop(e); return;
+        }
+
+        if (/^[1-9]$/.test(k)) {
+          const i = ARC.findIndex(a => a.k === k);
+          if (i >= 0) { jump(i); stop(e); }
+          return;
+        }
+      }, true);
     },
+
+    /* No page DOM is decorated here — the bar only has to stay honest about
+       where the presenter has ended up, including navigation by mouse. */
     onRender() { if (on) syncFromRoute(); }
   };
 })();

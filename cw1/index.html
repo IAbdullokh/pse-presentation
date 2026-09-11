@@ -220,14 +220,22 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 .frame[data-enter="punch"] .r { transform: scale(.93); }
 .frame[data-enter="deal"]  .r { transform: translateY(34px) rotate(-1.4deg); transform-origin: 12% 100%; }
 .frame[data-enter="blur"]  .r { transform: translateY(12px); filter: blur(12px); }
-.frame[data-enter="wipe"]  .r { clip-path: inset(0 100% 0 0); transform: none; }
+/* Vertical insets stay negative so a descender is never clipped — only the
+   horizontal edge wipes. */
+.frame[data-enter="wipe"]  .r { clip-path: inset(-40% 100% -40% 0); transform: none; }
 
 .frame.active .r { animation: reveal .7s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(360ms + var(--i) * 140ms); }
 .frame[data-enter="punch"].active .r { animation-duration: .5s; animation-timing-function: cubic-bezier(.2,1.5,.35,1); }
 .frame[data-enter="wipe"].active  .r { animation-duration: .95s; }
 .frame[data-enter="deal"].active  .r { animation-duration: .78s; animation-delay: calc(300ms + var(--i) * 110ms); }
 .frame[data-enter="blur"].active  .r { animation-duration: .8s; }
-@keyframes reveal { to { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); } }
+/* clip-path is NOT in the shared keyframe: `inset(0 0 0 0)` reads as a no-op but
+   clips to the box, and with animation-fill-mode:forwards every frame held that
+   clip forever — shearing the descenders off italic serif glyphs whose ink
+   overflows a tight line-box. Only the wipe variant animates a clip at all. */
+@keyframes reveal { to { opacity: 1; transform: none; filter: none; } }
+@keyframes revealWipe { to { opacity: 1; transform: none; filter: none; clip-path: inset(-40% -40% -40% -40%); } }
+.frame[data-enter="wipe"].active .r { animation-name: revealWipe; }
 /* Must out-specify .frame[data-enter="x"] .r (0,3,0) or the overview shows a
    wiped frame as blank and a blurred one as fuzzy. */
 .ov .frame[data-enter] .r { opacity: 1; transform: none; filter: none; clip-path: none; animation: none; }
