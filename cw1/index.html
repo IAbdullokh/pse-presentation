@@ -307,16 +307,16 @@ body.notes #notes { display: block; }
 .pl-v { font-size: 14px; line-height: 1.35; color: var(--ink2); }
 
 /* ---------- provenance ---------- */
-.vis-provenance { height: 340px; }
+.vis-provenance { height: 400px; }
 .vis-provenance .pv-head, .vis-provenance .pv-row, .vis-provenance .pv-src { pointer-events: none; }
 .vis-provenance .pv-thread { fill: none; pointer-events: none; stroke-width: 1.5; stroke-opacity: .45;
   stroke-linecap: round; transition: stroke-opacity .2s ease, stroke-width .2s ease; }
 .vis-provenance .pv-row, .vis-provenance .pv-src { transition: opacity .2s ease; }
 .vis-provenance .pv-hit { fill: transparent; pointer-events: all; cursor: help; }
 /* isolate one link: everything drops back, the answer to the question stays lit */
-.vis-provenance.pv-lit .pv-thread { stroke-opacity: .12; }
+.vis-provenance.pv-lit .pv-thread { stroke-opacity: .14; }
 .vis-provenance.pv-lit .pv-thread.on { stroke-opacity: 1; stroke-width: 2.5; }
-.vis-provenance.pv-lit .pv-row, .vis-provenance.pv-lit .pv-src { opacity: .3; }
+.vis-provenance.pv-lit .pv-row, .vis-provenance.pv-lit .pv-src { opacity: .34; }
 .vis-provenance.pv-lit .pv-row.on, .vis-provenance.pv-lit .pv-src.on { opacity: 1; }
 /* While the entrance is running the rAF loop owns opacity frame by frame; the
    hover transition would only smear it. It comes back the moment we land. */
@@ -1148,14 +1148,14 @@ VIS.promptlab = { mount(host, api) {
    ========================================================================== */
 VIS.provenance = { mount(host, api) {
   const T = api.T;
-  const W = 1432, H = 340;
+  const W = 1432, H = 400;
 
   /* Column geometry. Claim text is ragged-right but the thread anchors are
      aligned on a rail at CX — a ragged set of start points reads as noise and
      the eye needs one place to look for the connection. */
   const FX = 0, TX = 34, CX = 442;      /* frame tag / claim text / claim rail */
   const SX = 1000, LX = 1018, RX = 1424; /* source rail / source text / count   */
-  const R0 = 62, R1 = 322;               /* first and last claim baseline band  */
+  const R0 = 58, R1 = 366;               /* first and last claim baseline band  */
 
   /* Colour is the key: each source owns one hue and every thread reaching it
      carries that hue, so the label and its threads match without a legend. */
@@ -1233,8 +1233,8 @@ VIS.provenance = { mount(host, api) {
   const rows = CLAIMS.map((c, i) => {
     const y = claimY(i), src = srcOf(c.src);
     const g = api.el("g", { class: "pv-row", opacity: api.reduced ? 1 : 0 }, s);
-    g.appendChild(text(FX, y + 5, c.f, T.acc, 12));
-    g.appendChild(text(TX, y + 5, c.text, T.ink2, 14));
+    g.appendChild(text(FX, y + 5, c.f, T.acc, 13));
+    g.appendChild(text(TX, y + 5, c.text, T.ink2, 15));
     /* the dot is the claim's end of the thread, so it takes the source colour */
     api.el("circle", { cx: CX, cy: y, r: 3, fill: src.colour }, g);
     return { g, y, src };
@@ -1244,16 +1244,35 @@ VIS.provenance = { mount(host, api) {
   const counts = {};
   CLAIMS.forEach(c => { counts[c.src] = (counts[c.src] || 0) + 1; });
 
+  const maxN = Math.max.apply(null, SOURCES.map(x => counts[x.id] || 0));
+
   const srcRows = SOURCES.map((src, i) => {
     const y = srcY(i);
-    const g = api.el("g", { class: "pv-src", opacity: api.reduced ? 1 : 0 }, s);
-    api.el("circle", { cx: SX, cy: y, r: 3.5, fill: src.colour }, g);
-    g.appendChild(text(LX, y + 5, src.label, src.colour, 14));
-    /* how many of the talk's numbers rest on this one source — the honest
-       reading of the map is that LinkedIn carries half of them */
     const n = counts[src.id] || 0;
-    g.appendChild(text(RX, y + 5, n + (n === 1 ? " claim" : " claims"), T.ink3, 12,
-      { "text-anchor": "end" }));
+    const lead = n === maxN;
+    const g = api.el("g", { class: "pv-src" + (lead ? " lead" : ""), opacity: api.reduced ? 1 : 0 }, s);
+
+    /* The frame's whole finding is that the evidence concentrates. A count in
+       small grey type buries that; a bar makes it the first thing the eye
+       reads, and the dominant source gets a band behind it so the shape of the
+       concentration is legible from the back of a room. */
+    if (lead) {
+      api.el("rect", { x: SX - 14, y: y - 20, width: RX - SX + 22, height: 40, rx: 8,
+        fill: src.colour, "fill-opacity": .09 }, g);
+    }
+
+    api.el("circle", { cx: SX, cy: y, r: 4.5, fill: src.colour }, g);
+    g.appendChild(text(LX, y + 1, src.label, src.colour, 16));
+
+    /* the count bar sits under the label, scaled against the busiest source */
+    const BW = 118, bx = LX, by = y + 11;
+    api.el("rect", { x: bx, y: by, width: BW, height: 5, rx: 2.5,
+      fill: T.line2, "fill-opacity": .5 }, g);
+    api.el("rect", { x: bx, y: by, width: Math.max(6, BW * (n / maxN)), height: 5, rx: 2.5,
+      fill: src.colour }, g);
+
+    g.appendChild(text(bx + BW + 12, by + 6, n + (n === 1 ? " claim" : " claims"),
+      lead ? src.colour : T.ink3, 13));
     return { g, src, y };
   });
 
