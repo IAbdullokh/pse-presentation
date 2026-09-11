@@ -28,10 +28,14 @@ body { background: var(--bg); color: var(--ink); font-family: var(--serif); over
 
 #stage { position: fixed; inset: 0; overflow: hidden; cursor: default; user-select: none;
   background: radial-gradient(1200px 800px at 15% 10%, #141a33 0%, transparent 60%), radial-gradient(1000px 700px at 85% 90%, #1a1730 0%, transparent 60%), var(--bg); }
-#depth, #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
-#depth { width: 9000px; height: 7000px; left: -1500px; top: -1200px; pointer-events: none;
+/* No permanent will-change here. These layers are 5800x6200 and 9000x7000;
+   promoting them forever asks the compositor for a texture large enough that
+   Chrome silently drops tiles, which showed up as frames painting half-width.
+   Promote only while the camera is actually moving. */
+#depth, #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+#depth { width: 6600px; height: 7000px; left: -400px; top: -400px; pointer-events: none;
   background: radial-gradient(circle at 1px 1px, rgba(243,239,230,.06) 1px, transparent 1.6px) 0 0 / 34px 34px; }
-.moving { transition: transform 1.05s cubic-bezier(.22,.8,.2,1); }
+.moving { transition: transform 1.05s cubic-bezier(.22,.8,.2,1); will-change: transform; }
 .tok { position: absolute; font-size: 22px; color: rgba(138,164,255,.28); border: 1px solid rgba(138,164,255,.16); padding: 6px 14px; border-radius: 999px; white-space: nowrap; animation: drift linear infinite; }
 @keyframes drift { from { transform: translate(0,0); } 50% { transform: translate(60px,-40px); } to { transform: translate(0,0); } }
 
@@ -1767,10 +1771,9 @@ VIS.tokenise = { mount(host, api) {
    ========================================================================== */
 
 const TEAM = [
-  { name: "Speaker 1 — add name", frames: "1–3" },
-  { name: "Speaker 2 — add name", frames: "4–5" },
-  { name: "Speaker 3 — add name", frames: "6–7" },
-  { name: "Speaker 4 — add name", frames: "8–10" }
+  { name: "Abdulloh", frames: "1–2 · 7 · 9–10" },
+  { name: "Asad",     frames: "3–4" },
+  { name: "Yusuf",    frames: "5–6 · 8" }
 ];
 
 const ACCESSED = "10 September 2026";
@@ -1812,7 +1815,7 @@ const DECK = {
       ${R(4, `<div class="callout"><span class="mono acc">THE QUESTION</span> Is this a job you can apply for — or a skill you are expected to have?</div>`)}` },
 
   /* ───────────────────────── 3 · RESPONSIBILITIES ───────────────────────── */
-  { id: "work", label: "Responsibilities & environment", speaker: 0, x: 3700, y: 300, w: 1700, h: 1270,
+  { id: "work", label: "Responsibilities & environment", speaker: 1, x: 3700, y: 300, w: 1700, h: 1270,
     notes: "Walk the week left to right — it is a product job, not a writing job. Stress evaluation: most of the work is measuring whether outputs got better. Then the environment: product teams, mostly remote or hybrid. The progression path is the key message — this title is a doorway, not a destination.",
     html: `
       <div class="kicker mono">03 · RESPONSIBILITIES · WORK ENVIRONMENT · PROGRESSION</div>
@@ -1869,7 +1872,7 @@ const DECK = {
       ${R(5, `<div class="foot mono dim">Relative importance: our reading of 2025–26 job adverts and the Anthropic, OpenAI and Google prompting guides. Judgement, not a survey.</div>`)}` },
 
   /* ───────────────────────── 5 · EDUCATION ───────────────────────── */
-  { id: "education", label: "Education & training", speaker: 1, x: 2000, y: 1750, w: 1400, h: 1160,
+  { id: "education", label: "Education & training", speaker: 2, x: 2000, y: 1750, w: 1400, h: 1160,
     notes: "There is no degree called prompt engineering, and that is the point. Any degree plus a portfolio. Name the three free vendor guides — they are the real syllabus. The Vanderbilt course is the most recognised credential. Then connect to us: the AI Literacy Course on our own module is the first step.",
     html: `
       <div class="kicker mono">05 · EDUCATION AND TRAINING</div>
@@ -1903,7 +1906,7 @@ const DECK = {
       ${R(5, `<div class="foot mono dim">UZBEKISTAN · too few postings under this exact title on hh.uz and UzJobs to quote a range honestly; the skill appears inside "AI specialist" and "data" roles. Verified ${ACCESSED}.</div>`)}` },
 
   /* ───────────────────────── 7 · AI & FUTURE ───────────────────────── */
-  { id: "future", label: "AI & the future", speaker: 2, x: 300, y: 3250, w: 1700, h: 1300,
+  { id: "future", label: "AI & the future", speaker: 0, x: 300, y: 3250, w: 1700, h: 1300,
     notes: "This is the turn in the story. The title is shrinking and the skill is exploding — both are true. Read the three numbers, then the arrows: prompts became context engineering, single prompts became agent design, writing became evaluation. The irony: AI made prompt engineering less of a job by getting better at understanding people. Land on WEF: the skills that survive are human ones.",
     html: `
       <div class="kicker mono">07 · AI, AUTOMATION AND GLOBAL TRENDS</div>
@@ -1923,7 +1926,7 @@ const DECK = {
       ${R(5, `<div class="callout"><span class="mono acc">WEF FUTURE OF JOBS 2025</span> 170 million roles created and 92 million displaced by 2030. <b>AI and big data</b> is the fastest-growing skill — and creative thinking, resilience and flexibility stay critical.</div>`)}` },
 
   /* ───────────────────────── 8 · DEVELOPMENT PLAN ───────────────────────── */
-  { id: "plan", label: "Career development plan", speaker: 3, x: 2200, y: 3250, w: 1500, h: 1140,
+  { id: "plan", label: "Career development plan", speaker: 2, x: 2200, y: 3250, w: 1500, h: 1140,
     notes: "This is our SMART plan as business students, not a generic one. Each year has a measurable target. Year 1 is free and starts this semester. Year 2 is the portfolio — three systems with evaluations, on GitHub. Year 3 is credential plus a real team. Ongoing: the field changes every six months, so reading release notes is a habit, not a task.",
     html: `
       <div class="kicker mono">08 · CAREER DEVELOPMENT PLAN</div>
@@ -1937,7 +1940,7 @@ const DECK = {
       </div>`)}` },
 
   /* ───────────────────────── 9 · CONCLUSION ───────────────────────── */
-  { id: "conclusion", label: "Conclusion", speaker: 3, x: 3900, y: 3250, w: 1300, h: 800,
+  { id: "conclusion", label: "Conclusion", speaker: 0, x: 3900, y: 3250, w: 1300, h: 800,
     notes: "Answer the question from frame 2 directly. Learn it as a skill; do not bet a career on the title. Then the three takeaways, slowly. Final line, then stop — do not add anything after it.",
     html: `
       <div class="kicker mono">09 · CONCLUSION</div>
@@ -1950,7 +1953,7 @@ const DECK = {
       ${R(3, `<div class="callout final"><span class="mono acc">OUR VERDICT</span> Every one of us should be a competent prompt engineer by graduation. None of us should plan to be only that.</div>`)}` },
 
   /* ───────────────────────── 10 · REFERENCES ───────────────────────── */
-  { id: "references", label: "References", speaker: 3, x: 2200, y: 4750, w: 1600, h: 1180,
+  { id: "references", label: "References", speaker: 0, x: 2200, y: 4750, w: 1600, h: 1180,
     notes: "Leave this frame up for questions. Every number in the talk traces to one of these. If challenged on a figure, point to the line.",
     html: `
       <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
