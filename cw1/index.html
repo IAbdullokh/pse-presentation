@@ -702,6 +702,9 @@ body.bib #bib { display: block; }
    overlay is open on screen, so the submission step is one keystroke with no
    state to remember.
    ========================================================================== */
+/* keyboard instructions are screen furniture; they must not appear on the
+   document that gets handed in */
+@media print { #bib .scr { display: none; } }
 @media print {
   @page { size: A4 portrait; margin: 16mm 15mm; }
   html, body { height: auto; overflow: visible; background: #fff; color: #000; }
@@ -3567,7 +3570,7 @@ window.DECK = DECK;
       a.who.localeCompare(b.who, "en") || a.yr - b.yr || a.what.localeCompare(b.what, "en"));
     const bandOf = r => (DECK.tiers.find(t => t.id === r.t) || {}).b || "";
     bib.innerHTML =
-      `<div class="bhead"><h3>References</h3><p class="bnote mono">PSE &middot; CW1 &middot; PROMPT ENGINEER AS A CAREER &middot; WESTMINSTER HARVARD &middot; ONE ALPHABETICAL SEQUENCE<br>${R.length} SOURCES &middot; RETRIEVED 10&ndash;11 SEPTEMBER 2026 &middot; B OR ESC TO CLOSE &middot; &#8984;P TO PRINT THE SUBMITTED LIST</p></div>
+      `<div class="bhead"><h3>References</h3><p class="bnote mono">PSE &middot; CW1 &middot; PROMPT ENGINEER AS A CAREER &middot; WESTMINSTER HARVARD &middot; ONE ALPHABETICAL SEQUENCE<br>${R.length} SOURCES &middot; RETRIEVED 10&ndash;11 SEPTEMBER 2026<span class="scr"> &middot; B OR ESC TO CLOSE &middot; &#8984;P TO PRINT THE SUBMITTED LIST</span></p></div>
        <ol class="bcols">${az.map(r => `<li class="be" data-n="${r.n}" data-band="${bandOf(r)}"><span class="bn mono">${String(r.n).padStart(2, "0")}</span><span class="bt">${DECK.harvard(r)}${r.note ? `<span class="nt">${r.note}</span>` : ""}</span></li>`).join("")}</ol>`;
   }
   /* It opens on whatever the reference frame was last showing, so "where is
@@ -3582,6 +3585,11 @@ window.DECK = DECK;
     else bib.scrollTop = 0;
   }
   const closeBib = () => document.body.classList.remove("bib");
+
+  /* CmdP is supposed to print the submitted reference list, but #bib is filled
+     lazily on the first B press — so printing without ever opening it produced
+     one blank page. Build it before the print snapshot is taken. */
+  addEventListener("beforeprint", () => { if (!bib.firstChild) buildBib(); });
 
   /* ---------- clock ----------
      Three speakers with different shares, so one global target would be wrong
