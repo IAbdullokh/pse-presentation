@@ -153,11 +153,22 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 .ref-u { display: block; font-size: 12px; color: var(--ink3); word-break: break-all; margin-top: 2px; }
 .ref-a { font-size: 11px; line-height: 1.3; color: var(--ink3); text-align: right; padding-top: 3px; }
 
-/* reveal on arrival */
-.r { opacity: 0; transform: translateY(18px); }
+/* --- arrival: each frame has its own move, so ten landings do not feel like one --- */
+.r { opacity: 0; }
+.frame[data-enter="rise"]  .r { transform: translateY(20px); }
+.frame[data-enter="slide"] .r { transform: translateX(-34px); }
+.frame[data-enter="punch"] .r { transform: scale(.93); }
+.frame[data-enter="deal"]  .r { transform: translateY(34px) rotate(-1.4deg); transform-origin: 12% 100%; }
+.frame[data-enter="blur"]  .r { transform: translateY(12px); filter: blur(12px); }
+.frame[data-enter="wipe"]  .r { clip-path: inset(0 100% 0 0); transform: none; }
+
 .frame.active .r { animation: reveal .7s cubic-bezier(.2,.8,.2,1) forwards; animation-delay: calc(360ms + var(--i) * 140ms); }
-@keyframes reveal { to { opacity: 1; transform: none; } }
-.ov .r { opacity: 1; transform: none; animation: none; }
+.frame[data-enter="punch"].active .r { animation-duration: .5s; animation-timing-function: cubic-bezier(.2,1.5,.35,1); }
+.frame[data-enter="wipe"].active  .r { animation-duration: .95s; }
+.frame[data-enter="deal"].active  .r { animation-duration: .78s; animation-delay: calc(300ms + var(--i) * 110ms); }
+.frame[data-enter="blur"].active  .r { animation-duration: .8s; }
+@keyframes reveal { to { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); } }
+.ov .r { opacity: 1; transform: none; filter: none; clip-path: none; animation: none; }
 @media (prefers-reduced-motion: reduce) { .r { opacity: 1; transform: none; } .frame.active .r { animation: none; } .moving { transition: none; } .caret { animation: none; } .tok { animation: none; } }
 
 /* ---------- on-screen UI ---------- */
@@ -314,6 +325,31 @@ div.vis-comet { height: 0; }
   transform: translateX(-6px); transition: left .18s linear; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 .ps-end { position: absolute; top: 42px; font-size: 12px; color: var(--ink3); }
 .ps-l { left: 0; } .ps-r { right: 0; }
+
+/* ---------- titlegen (frame 1) ---------- */
+.vis-titlegen { height: 240px; }
+.tg-status { display: inline-flex; align-items: center; gap: 9px; font-size: 16px; color: var(--ink3); margin-bottom: 10px; }
+.tg-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); animation: tgpulse 1.1s ease-in-out infinite; }
+.tg-status.done .tg-dot { background: var(--ok); animation: none; }
+@keyframes tgpulse { 0%,100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+
+.tg-h1 { font-size: 168px; line-height: .95; margin: 0; font-weight: 500; letter-spacing: -.035em;
+  display: flex; align-items: baseline; flex-wrap: wrap; }
+/* the tokens carry their own leading spaces — that is the point of showing
+   where a tokeniser splits — and a flex item would otherwise collapse them */
+.tg-tok { white-space: pre; opacity: 0; filter: blur(14px); transform: translateY(10px);
+  transition: opacity .34s ease, filter .34s ease, transform .34s cubic-bezier(.2,.8,.2,1); }
+.tg-tok.in { opacity: 1; filter: none; transform: none; }
+.tg-tok.em { font-style: italic; color: var(--acc2); }
+.tg-caret { width: 16px; height: 118px; background: var(--blue); align-self: center; margin-left: 14px;
+  animation: blink 1s steps(2) infinite; flex: none; }
+.tg-rule { height: 2px; width: 0; background: linear-gradient(90deg, var(--acc), transparent);
+  margin-top: 14px; transition: width 1s cubic-bezier(.2,.8,.2,1); }
+.tg-rule.in { width: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .tg-tok { opacity: 1; filter: none; transform: none; }
+  .tg-dot, .tg-caret { animation: none; }
+}
 
 </style>
 </head>
@@ -1722,6 +1758,79 @@ VIS.skillrank = { mount(host, api) {
 </script>
 <script>
 /* =============================================================================
+   titlegen — frame 1's opener.
+   The prompt above types itself, and then the deck's TITLE streams back token
+   by token, the way a model actually answers: not a word at a time, but a
+   fragment at a time, with a cursor riding the end of the output. The title of
+   the presentation is literally the model's response to the prompt on screen.
+   Nothing else in the deck can make that point as cheaply.
+   ========================================================================== */
+VIS.titlegen = { mount(host, api) {
+  /* The same fragments the tokeniser strip below shows for the answer — so the
+     two visuals agree about where the boundaries fall. */
+  const OUT = [
+    { t: "Prompt", em: false },
+    { t: " Engine", em: true },
+    { t: "er",      em: true }
+  ];
+
+  host.innerHTML =
+    '<div class="tg-status mono"><span class="tg-dot"></span><span id="tg-label">generating</span></div>' +
+    '<h1 class="tg-h1">' +
+      OUT.map((o, i) => `<span class="tg-tok${o.em ? " em" : ""}" data-i="${i}">${o.t}</span>`).join("") +
+      '<span class="tg-caret"></span>' +
+    '</h1>' +
+    '<div class="tg-rule"></div>';
+
+  const toks = host.querySelectorAll(".tg-tok");
+  const caret = host.querySelector(".tg-caret");
+  const rule = host.querySelector(".tg-rule");
+  const label = host.querySelector("#tg-label");
+  const status = host.querySelector(".tg-status");
+
+  function finish() {
+    toks.forEach(t => t.classList.add("in"));
+    caret.style.display = "none";
+    rule.classList.add("in");
+    status.classList.add("done");
+    label.textContent = "9 tokens in · 3 tokens out";
+  }
+
+  if (api.reduced) { finish(); return; }
+
+  /* Wait for the prompt line above to finish typing. The engine fires this on
+     the element it typed, so listening on the frame catches it wherever the
+     prompt sits in the markup. */
+  const frame = host.closest(".frame");
+  let started = false;
+  const begin = () => {
+    if (started) return;
+    started = true;
+    OUT.forEach((o, i) => {
+      /* uneven gaps: real streaming does not arrive on a metronome */
+      api.after(260 + i * 300 + (i === 1 ? 120 : 0), () => {
+        toks[i].classList.add("in");
+        if (i === OUT.length - 1) api.after(420, () => {
+          caret.style.display = "none";
+          rule.classList.add("in");
+          status.classList.add("done");
+          label.textContent = "9 tokens in · 3 tokens out";
+        });
+      });
+    });
+  };
+
+  if (frame) {
+    frame.addEventListener("typedone", begin);
+    api.onTeardown(() => frame.removeEventListener("typedone", begin));
+  }
+  /* the prompt may already have finished if we arrive back on this frame */
+  api.after(2600, begin);
+}};
+
+</script>
+<script>
+/* =============================================================================
    tokenise — frame 1, directly under the sentence that types itself out.
    The same sentence, re-cut into the chips a tokeniser actually emits. It puts
    the substrate of the whole talk on screen in one glance: "desc|ribe" and
@@ -1848,19 +1957,19 @@ const DECK = {
   frames: [
 
   /* ───────────────────────── 1 · TITLE ───────────────────────── */
-  { id: "title", label: "Title", speaker: 0, x: 300, y: 300, w: 1600, h: 1100,
+  { id: "title", label: "Title", speaker: 0, enter: "rise", x: 300, y: 300, w: 1600, h: 1100,
     notes: "Open with the prompt typing itself out. Let it finish before you speak. Then: 'This is a career that did not exist four years ago — and by this year, the job title is already fading while the skill is everywhere. We spent this project working out what that means for us.' Introduce the team and who covers what.",
     html: `
       <div class="kicker mono">PSE · CW1 GROUP PRESENTATION · WESTMINSTER INTERNATIONAL UNIVERSITY IN TASHKENT · 2026/27</div>
       <div class="prompt mono"><span class="pfx">&gt;</span> <span class="type" data-text="describe the career of a prompt engineer"></span><span class="caret"></span></div>
-      ${R(1, `<h1>Prompt <em>Engineer</em></h1>`)}
+      ${R(1, `<div class="vis vis-titlegen" data-vis="titlegen"></div>`)}
       ${R(2, `<div class="vis vis-tokenise" data-vis="tokenise"></div>`)}
       ${R(3, `<p class="lede">A career that was born in 2022, peaked in 2023, and by 2026 had dissolved into almost every AI job. Is it a <em>job</em> — or a <em>skill</em> everyone now needs?</p>`)}
       ${R(4, `<div class="team">${TEAM.map(t => `<span class="chip mono">${t.name} <b>· ${t.frames}</b></span>`).join("")}</div>`)}
       ${R(5, `<div class="tiny mono dim">→ next &nbsp;·&nbsp; O overview &nbsp;·&nbsp; N notes &nbsp;·&nbsp; T timer</div>`)}` },
 
   /* ───────────────────────── 2 · OVERVIEW ───────────────────────── */
-  { id: "overview", label: "Career overview", speaker: 0, x: 2100, y: 300, w: 1400, h: 900,
+  { id: "overview", label: "Career overview", speaker: 0, enter: "slide", x: 2100, y: 300, w: 1400, h: 900,
     notes: "Definition first, plainly. Then the timeline — three beats: appears, peaks, absorbs. The $375k figure was a 2023 Anthropic listing that made global headlines; say it is an outlier, not a norm. End on the question that structures the rest of the talk: job or skill?",
     html: `
       <div class="kicker mono">02 · CAREER OVERVIEW</div>
@@ -1874,7 +1983,7 @@ const DECK = {
       ${R(4, `<div class="callout"><span class="mono acc">THE QUESTION</span> Is this a job you can apply for — or a skill you are expected to have?</div>`)}` },
 
   /* ───────────────────────── 3 · RESPONSIBILITIES ───────────────────────── */
-  { id: "work", label: "Responsibilities & environment", speaker: 1, x: 3700, y: 300, w: 1700, h: 1270,
+  { id: "work", label: "Responsibilities & environment", speaker: 1, enter: "punch", x: 3700, y: 300, w: 1700, h: 1270,
     notes: "Walk the week left to right — it is a product job, not a writing job. Stress evaluation: most of the work is measuring whether outputs got better. Then the environment: product teams, mostly remote or hybrid. The progression path is the key message — this title is a doorway, not a destination.",
     html: `
       <div class="kicker mono">03 · RESPONSIBILITIES · WORK ENVIRONMENT · PROGRESSION</div>
@@ -1904,7 +2013,7 @@ const DECK = {
       ${R(5, `<div class="vis vis-promptlab" data-vis="promptlab"></div>`)}` },
 
   /* ───────────────────────── 4 · SKILLS ───────────────────────── */
-  { id: "skills", label: "Required skills", speaker: 1, x: 3700, y: 1750, w: 1500, h: 940,
+  { id: "skills", label: "Required skills", speaker: 1, enter: "wipe", x: 3700, y: 1750, w: 1500, h: 940,
     notes: "The bars are our judgement from job adverts and the three vendor guides, not a survey — say so. Two columns on purpose: this is the rare technical career where the human column is heavier. Point at 'precise writing' — for business students that is the transferable entry point. Then technical: you do not need to be a developer, but you need Python basics and you must understand how models fail.",
     html: `
       <div class="kicker mono">04 · REQUIRED SKILLS AND ABILITIES</div>
@@ -1931,7 +2040,7 @@ const DECK = {
       ${R(5, `<div class="foot mono dim">Relative importance: our reading of 2025–26 job adverts and the Anthropic, OpenAI and Google prompting guides. Judgement, not a survey.</div>`)}` },
 
   /* ───────────────────────── 5 · EDUCATION ───────────────────────── */
-  { id: "education", label: "Education & training", speaker: 2, x: 2000, y: 1750, w: 1400, h: 1160,
+  { id: "education", label: "Education & training", speaker: 2, enter: "blur", x: 2000, y: 1750, w: 1400, h: 1160,
     notes: "There is no degree called prompt engineering, and that is the point. Any degree plus a portfolio. Name the three free vendor guides — they are the real syllabus. The Vanderbilt course is the most recognised credential. Then connect to us: the AI Literacy Course on our own module is the first step.",
     html: `
       <div class="kicker mono">05 · EDUCATION AND TRAINING</div>
@@ -1945,7 +2054,7 @@ const DECK = {
       </div>`)}` },
 
   /* ───────────────────────── 6 · JOB MARKET ───────────────────────── */
-  { id: "market", label: "Job market & salary", speaker: 2, x: 300, y: 1750, w: 1500, h: 1240,
+  { id: "market", label: "Job market & salary", speaker: 2, enter: "punch", x: 300, y: 1750, w: 1500, h: 1240,
     notes: "Let the counters run before speaking. Two aggregators, deliberately: they disagree, and that spread is the honest answer. Startups pay far less; big tech far more. Then the demand strip — LinkedIn's numbers are about AI roles broadly, which is where this skill is now hired. Close on the Uzbekistan line: we did not find enough local postings under this exact title to quote a figure, so we say so.",
     html: `
       <div class="kicker mono">06 · CURRENT DEMAND AND SALARY</div>
@@ -1965,7 +2074,7 @@ const DECK = {
       ${R(5, `<div class="foot mono dim">UZBEKISTAN · too few postings under this exact title on hh.uz and UzJobs to quote a range honestly; the skill appears inside "AI specialist" and "data" roles. Verified ${ACCESSED}.</div>`)}` },
 
   /* ───────────────────────── 7 · AI & FUTURE ───────────────────────── */
-  { id: "future", label: "AI & the future", speaker: 0, x: 300, y: 3250, w: 1700, h: 1300,
+  { id: "future", label: "AI & the future", speaker: 0, enter: "rise", x: 300, y: 3250, w: 1700, h: 1300,
     notes: "This is the turn in the story. The title is shrinking and the skill is exploding — both are true. Read the three numbers, then the arrows: prompts became context engineering, single prompts became agent design, writing became evaluation. The irony: AI made prompt engineering less of a job by getting better at understanding people. Land on WEF: the skills that survive are human ones.",
     html: `
       <div class="kicker mono">07 · AI, AUTOMATION AND GLOBAL TRENDS</div>
@@ -1985,7 +2094,7 @@ const DECK = {
       ${R(5, `<div class="callout"><span class="mono acc">WEF FUTURE OF JOBS 2025</span> 170 million roles created and 92 million displaced by 2030. <b>AI and big data</b> is the fastest-growing skill — and creative thinking, resilience and flexibility stay critical.</div>`)}` },
 
   /* ───────────────────────── 8 · DEVELOPMENT PLAN ───────────────────────── */
-  { id: "plan", label: "Career development plan", speaker: 2, x: 2200, y: 3250, w: 1500, h: 1140,
+  { id: "plan", label: "Career development plan", speaker: 2, enter: "deal", x: 2200, y: 3250, w: 1500, h: 1140,
     notes: "This is our SMART plan as business students, not a generic one. Each year has a measurable target. Year 1 is free and starts this semester. Year 2 is the portfolio — three systems with evaluations, on GitHub. Year 3 is credential plus a real team. Ongoing: the field changes every six months, so reading release notes is a habit, not a task.",
     html: `
       <div class="kicker mono">08 · CAREER DEVELOPMENT PLAN</div>
@@ -1999,7 +2108,7 @@ const DECK = {
       </div>`)}` },
 
   /* ───────────────────────── 9 · CONCLUSION ───────────────────────── */
-  { id: "conclusion", label: "Conclusion", speaker: 0, x: 3900, y: 3250, w: 1300, h: 800,
+  { id: "conclusion", label: "Conclusion", speaker: 0, enter: "slide", x: 3900, y: 3250, w: 1300, h: 800,
     notes: "Answer the question from frame 2 directly. Learn it as a skill; do not bet a career on the title. Then the three takeaways, slowly. Final line, then stop — do not add anything after it.",
     html: `
       <div class="kicker mono">09 · CONCLUSION</div>
@@ -2012,7 +2121,7 @@ const DECK = {
       ${R(3, `<div class="callout final"><span class="mono acc">OUR VERDICT</span> Every one of us should be a competent prompt engineer by graduation. None of us should plan to be only that.</div>`)}` },
 
   /* ───────────────────────── 10 · REFERENCES ───────────────────────── */
-  { id: "references", label: "References", speaker: 0, x: 2200, y: 4750, w: 1600, h: 1180,
+  { id: "references", label: "References", speaker: 0, enter: "blur", x: 2200, y: 4750, w: 1600, h: 1180,
     notes: "Leave this frame up for questions. Every number in the talk traces to one of these. If challenged on a figure, point to the line.",
     html: `
       <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
@@ -2082,7 +2191,7 @@ const DECK = {
   function build() {
     world.style.width = W + "px"; world.style.height = H + "px";
     world.innerHTML = `<svg class="path" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><path d="${pathD()}"/></svg>` +
-      F.map((f, i) => `<section class="frame" data-i="${i}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
+      F.map((f, i) => `<section class="frame" data-i="${i}" data-enter="${f.enter || "rise"}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
         <div class="fnum mono">${String(i + 1).padStart(2, "0")}</div><div class="fin">${f.html}</div></section>`).join("");
     depth.innerHTML = TOKENS.map((t, i) => `<span class="tok mono" style="left:${(i * 137) % 100}%;top:${(i * 71 + 13) % 100}%;animation-delay:${-i * 1.7}s;animation-duration:${18 + (i % 5) * 4}s">${t}</span>`).join("");
     rail.innerHTML = F.map((f, i) => `<button class="dot" data-i="${i}" title="${f.label}"><span></span></button>`).join("") + `<div class="rlabel" id="rlabel"></div>`;
@@ -2166,7 +2275,13 @@ const DECK = {
   function typewrite(t) {
     const text = t.getAttribute("data-text"); if (reduced) { t.textContent = text; return; }
     let k = 0; t.textContent = "";
-    typeT = setInterval(() => { t.textContent = text.slice(0, ++k); if (k >= text.length) clearInterval(typeT); }, 34);
+    typeT = setInterval(() => {
+      t.textContent = text.slice(0, ++k);
+      if (k >= text.length) {
+        clearInterval(typeT);
+        t.dispatchEvent(new CustomEvent("typedone", { bubbles: true }));
+      }
+    }, 34);
   }
   function paintRail() {
     rail.querySelectorAll(".dot").forEach((d, k) => { d.classList.toggle("on", k === idx); d.classList.toggle("done", k < idx); });
