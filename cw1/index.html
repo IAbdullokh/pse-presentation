@@ -251,30 +251,6 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 .takeaways { margin: 0; padding: 0 0 0 40px; display: grid; gap: 14px; font-size: 25px; line-height: 1.4; color: var(--ink2); }
 .takeaways li::marker { color: var(--acc); font-family: var(--mono); } .takeaways b { color: var(--ink); font-weight: 600; }
 
-/* ---------- frames 17-18: the full reference list ----------
-   Fifty-three sources will not read as a list; they read as a wall. Three CSS
-   columns with break-inside:avoid balance themselves, the grouping headings
-   carry a line saying what that group of sources is FOR, and the hanging indent
-   puts every reference number in the same place down the left of each column so
-   a marker can find number 31 without scanning prose. */
-.refs2 { columns: 3; column-gap: 40px; font-size: 15px; line-height: 1.4; color: var(--ink2); }
-.refs2 h5 { break-inside: avoid; break-after: avoid; margin: 0 0 10px; padding-bottom: 7px;
-  border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .14em; color: var(--acc); }
-.refs2 h5:not(:first-child) { margin-top: 22px; }
-.refs2 h5 span { display: block; margin-top: 4px; letter-spacing: .04em; text-transform: none;
-  font-size: 11px; color: var(--ink3); }
-.ref2 { break-inside: avoid; margin-bottom: 11px; padding-left: 34px; text-indent: -34px; }
-.ref2 b { color: var(--ink); font-weight: 600; }
-.ref2 i { color: var(--ink2); }
-.ref2 .n { color: var(--acc); font-size: 13px; }
-.ref2 .u { font-family: var(--mono); font-size: 12px; color: var(--ink3); word-break: break-all; }
-/* word-break:break-all on the URL lets a line end mid-token, and the space
-   before the access date then disappears into the break — "…/soc/socguide.htmread
-   11 Sep 2026". An explicit separator survives it. */
-.ref2 .a { font-size: 11px; color: var(--ink3); letter-spacing: .08em; white-space: nowrap; }
-.ref2 .a::before { content: "· "; color: var(--line2); }
-
 /* ---------- frame 10: the reference dossier ---------- */
 .dossier { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start; }
 .ref-col { display: grid; align-content: start; }
@@ -389,23 +365,61 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 #top { top: 18px; left: 22px; right: 22px; display: flex; justify-content: space-between; align-items: center; gap: 14px; pointer-events: none; }
 #top > * { pointer-events: auto; }
 #brand { font-size: 12px; letter-spacing: .14em; color: var(--ink3); }
-#speaker { font-size: 12px; color: var(--ink2); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
-#clock { font-size: 15px; color: var(--ink3); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(8px); font-variant-numeric: tabular-nums; }
-#clock.run { color: var(--ink); border-color: var(--line2); } #clock.in { color: var(--ok); } #clock.over { color: var(--bad); }
+#speaker { font-size: 12px; color: var(--ink2); background: rgba(19,24,41,.82); border: 1px solid var(--line);
+  padding: 6px 12px 6px 10px; border-radius: 999px; backdrop-filter: blur(8px);
+  display: flex; align-items: center; gap: 8px; }
+#speaker::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--spk, var(--acc));
+  box-shadow: 0 0 10px -1px var(--spk, var(--acc)); transition: background .3s; }
+body[data-spk="0"] #speaker { --spk: var(--acc); }
+body[data-spk="1"] #speaker { --spk: var(--blue); }
+body[data-spk="2"] #speaker { --spk: var(--ok); }
+/* Elapsed against THIS speaker's target, with the fill underneath — a number
+   alone makes you do the arithmetic while you are talking. */
+#clock { position: relative; overflow: hidden; font-size: 15px; color: var(--ink3);
+  background: rgba(19,24,41,.82); border: 1px solid var(--line); padding: 6px 13px; border-radius: 999px;
+  cursor: pointer; backdrop-filter: blur(8px); font-variant-numeric: tabular-nums; }
+#clock .tgt { color: var(--ink3); opacity: .6; margin-left: 5px; font-size: 12px; }
+#clock i { position: absolute; left: 0; bottom: 0; height: 2px; background: currentColor; opacity: .5;
+  transition: width 1s linear; }
+#clock.run { color: var(--ink); border-color: var(--line2); }
+#clock.in { color: var(--ok); border-color: rgba(95,211,162,.4); }
+#clock.over { color: var(--bad); border-color: rgba(255,122,107,.45); }
 #bottom { left: 22px; right: 22px; bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
-#rail { display: flex; align-items: center; gap: 8px; background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
-.dot { width: 22px; height: 22px; border: 0; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
-.dot span { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); transition: all .25s; }
-.dot.done span { background: var(--ink3); } .dot.on span { background: var(--acc); width: 22px; border-radius: 999px; }
+/* The rail carries the handover. Three runs, one per speaker, each in that
+   speaker's colour — so at any moment the room's progress AND whose turn it is
+   are the same glance, and the two people not speaking can see their cue
+   coming. The colours match the speaker chips at the top. */
+#rail { display: flex; align-items: center; gap: 3px; background: rgba(19,24,41,.82); border: 1px solid var(--line); padding: 7px 9px 7px 12px; border-radius: 999px; backdrop-filter: blur(8px); }
+.run { display: flex; align-items: center; gap: 2px; padding: 3px 7px; border-radius: 999px;
+  position: relative; transition: background .3s; }
+.run + .run { margin-left: 7px; }
+.run + .run::before { content: ""; position: absolute; left: -8px; top: 50%; width: 1px; height: 13px;
+  background: var(--line2); transform: translateY(-50%); }
+.run.live { background: rgba(255,255,255,.05); }
+.dot { width: 19px; height: 20px; border: 0; background: transparent; padding: 0; cursor: pointer; display: grid; place-items: center; }
+.dot span { width: 7px; height: 7px; border-radius: 50%; background: var(--line2); transition: all .28s cubic-bezier(.2,.8,.2,1); }
+.dot.done span { background: var(--spk, var(--ink3)); opacity: .55; }
+.dot.on span { background: var(--spk, var(--acc)); width: 19px; border-radius: 999px; opacity: 1;
+  box-shadow: 0 0 12px -2px var(--spk, var(--acc)); }
+.dot[data-spk="0"], .run[data-spk="0"] { --spk: var(--acc); }
+.dot[data-spk="1"], .run[data-spk="1"] { --spk: var(--blue); }
+.dot[data-spk="2"], .run[data-spk="2"] { --spk: var(--ok); }
 /* the four frames marked optional in deck.js — hollow, so whoever is running
    the clock can see at a glance what comes out to make a 30-minute slot */
 .dot.cut span { background: transparent; box-shadow: inset 0 0 0 2px var(--line2); }
 .dot.cut.done span { box-shadow: inset 0 0 0 2px var(--ink3); }
 .dot.cut.on span { background: var(--acc); box-shadow: none; }
-.rlabel { font-size: 12px; color: var(--ink2); margin-left: 6px; white-space: nowrap; }
+.rlabel { font-size: 12px; color: var(--ink2); margin-left: 12px; white-space: nowrap;
+  display: flex; align-items: baseline; gap: 7px; }
+.rlabel b { color: var(--ink); font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.rlabel .of { color: var(--ink3); margin-left: -4px; }
+.rlabel .own { color: var(--ink3); border-left: 1px solid var(--line2); padding-left: 9px; margin-left: 3px; }
 #ctl { display: flex; gap: 8px; }
-#ctl button { font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--ink2); background: rgba(19,24,41,.8); border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; cursor: pointer; backdrop-filter: blur(8px); }
-#ctl button:hover { color: var(--ink); border-color: var(--line2); }
+#ctl button { font: inherit; font-size: 12px; letter-spacing: .06em; color: var(--ink2);
+  background: rgba(19,24,41,.82); border: 1px solid var(--line); padding: 8px 13px; border-radius: 999px;
+  cursor: pointer; backdrop-filter: blur(8px); transition: color .2s, border-color .2s, background .2s; }
+#ctl button:hover { color: var(--ink); border-color: var(--line2); background: rgba(31,38,62,.9); }
+#ctl button:active { transform: translateY(1px); }
 #hint { left: 50%; transform: translateX(-50%); bottom: 72px; font-size: 12px; color: var(--ink3); transition: opacity .8s; pointer-events: none; }
 #hint.fade { opacity: 0; }
 #notes { left: 22px; bottom: 76px; max-width: 520px; font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--ink2); background: rgba(19,24,41,.92); border: 1px solid var(--line2); border-left: 3px solid var(--acc); padding: 14px 18px; border-radius: 12px; display: none; backdrop-filter: blur(10px); }
@@ -569,6 +583,145 @@ div.vis-comet { height: 0; }
   .tg-dot, .tg-caret { animation: none; }
 }
 
+/* =============================================================================
+   frame 17 — the evidence, counted. Replaces .refs2 / .ref2 and frames 17-18.
+
+   Why the fifty-three citations are not on the frame. The height of a text
+   block is set by glyph AREA, so total_lines / column_count is a constant and
+   re-cutting the columns changes nothing: 53 Harvard entries plus an argument
+   will not fit on a projected frame at a size anybody can read, and the two
+   frames that tried rendered at 12.84px and 12.40px on a 1080p projector.
+   The camera's fit is min(1920/w, 1080/h) * 0.88, which scales UP below
+   viewport size — so a SMALL frame gets big type. 1476x830 fits at 1.1447,
+   which puts the smallest glyph here (12px legend -> 13.7 device px) above the
+   LARGEST glyph on either frame it replaces. The citations move to #bib, the
+   one surface in this deck the camera does not touch, where 19px is 19px.
+   Measured in headless Chrome with the deck's own fonts and the .r arrival
+   forced settled: content box 1342x716, layout needs 807 of 830.
+   ========================================================================== */
+.frame[data-id="evidence"] .fin    { padding: 56px 66px; gap: 20px; }
+.frame[data-id="evidence"] .kicker { font-size: 17px; }
+.frame[data-id="evidence"] h2      { font-size: 48px; max-width: 15ch; }
+.frame[data-id="evidence"] .hero   { grid-template-columns: 1.02fr .98fr; gap: 44px; align-items: end; }
+.frame[data-id="evidence"] .hero > .body { font-size: 24px; }
+.frame[data-id="evidence"] .foot   { font-size: 15px; }
+
+/* ---------- the strip ---------- */
+.vis-evidence { height: 264px; }
+.vis-evidence .ev-hit { fill: transparent; pointer-events: all; cursor: help; }
+.vis-evidence .ev-tk, .vis-evidence .ev-ga, .vis-evidence .ev-lab,
+.vis-evidence .ev-head, .vis-evidence .ev-leg, .vis-evidence .ev-rule,
+.vis-evidence .ev-caret { pointer-events: none; }
+.vis-evidence .ev-tk, .vis-evidence .ev-ga, .vis-evidence .ev-lab { transition: opacity .18s ease; }
+.vis-evidence .ev-caret { transition: transform .28s cubic-bezier(.2,.8,.2,1), opacity .2s ease; }
+/* Isolation. One class on the host dims, `.on` marks the survivors, and the
+   dim sits on the TICK groups rather than on the tier groups — a child at
+   opacity 1 inside a parent at .17 is still .17, and the whole point is that a
+   cross-cutting set (the nine Uzbek sources, the six that refused us) can be
+   lit across grade boundaries. */
+.vis-evidence.ev-lit .ev-tk, .vis-evidence.ev-lit .ev-ga, .vis-evidence.ev-lit .ev-lab { opacity: .17; }
+.vis-evidence.ev-lit .ev-tk.on, .vis-evidence.ev-lit .ev-ga.on, .vis-evidence.ev-lit .ev-lab.on { opacity: 1; }
+/* The arrival drives opacity and transform from the rAF loop; left on, every
+   frame would restart a 180ms transition and smear the sort behind itself.
+   Same trap provenance.js documents, same fix. */
+.vis-evidence.ev-arrive .ev-tk, .vis-evidence.ev-arrive .ev-ga,
+.vis-evidence.ev-arrive .ev-lab, .vis-evidence.ev-arrive .ev-caret { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .vis-evidence .ev-tk, .vis-evidence .ev-ga, .vis-evidence .ev-lab, .vis-evidence .ev-caret { transition: none; }
+}
+
+/* ---------- the reader: one citation, at a size a room can read ----------
+   Fifty-three entries at 12px prove nothing about format, because nobody can
+   check them. One entry at 24 device px proves the pattern, and the module
+   cycles the three cases a marker actually checks. min-height is the measured
+   worst case (refs 10 and 26, three lines of body) so the panel never jumps
+   as it cycles or as you point at different marks. */
+.rdr { border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 8px;
+  align-content: start; min-height: 134px; }
+.rdr-tag { font-size: 13px; letter-spacing: .14em; color: var(--acc); }
+.rdr-tag .rdr-n { color: var(--ink); }
+.rdr-tag b { color: var(--ink); font-weight: 500; }
+.rdr-b { margin: 0; font-size: 21px; line-height: 1.42; color: var(--ink2); transition: opacity .2s ease; }
+.rdr.swap .rdr-b { opacity: 0; }
+.rdr-b b { color: var(--ink); font-weight: 600; }
+.rdr-b i { color: var(--ink2); }
+.rdr-b .u { font-family: var(--mono); font-size: 15px; color: var(--blue); word-break: break-all; }
+.rdr-b .ac { color: var(--ink3); white-space: nowrap; }
+
+/* =============================================================================
+   B · the bibliography, outside the camera.
+   A GRID, not CSS columns: a multicol block inside a scrolling container runs
+   A–I down the whole left column and then J–Z down the whole right one, so
+   reading alphabetically means scrolling two and a half screens down and then
+   back to the top. Measured and rejected. Row flow puts the first two entries
+   on the first row and scanning downward stays alphabetical.
+   ========================================================================== */
+#bib { position: fixed; inset: 0; z-index: 30; display: none; overflow-y: auto;
+  overscroll-behavior: contain; background: rgba(11,14,23,.972); backdrop-filter: blur(14px);
+  padding: 44px 56px 64px; font-family: var(--serif); }
+body.bib #bib { display: block; }
+#bib .bhead { position: sticky; top: -44px; z-index: 1; display: flex; justify-content: space-between;
+  align-items: baseline; gap: 28px; background: var(--bg); border-bottom: 1px solid var(--line2);
+  padding: 8px 0 13px; margin: -8px 0 22px; }
+#bib h3 { margin: 0; font-size: 30px; font-weight: 500; color: var(--ink); letter-spacing: -.02em; }
+#bib .bnote { margin: 0; font-size: 12px; line-height: 1.6; letter-spacing: .1em; color: var(--ink3); text-align: right; }
+#bib .bcols { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 54px;
+  align-items: start; margin: 0; padding: 0; list-style: none; }
+#bib .be { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 0 10px;
+  font-size: 19px; line-height: 1.4; color: var(--ink2); scroll-margin: 120px;
+  border-radius: 8px; padding: 3px 8px 3px 0; transition: background .3s ease; }
+/* The margin index is a pointing device, not part of the citation — Harvard is
+   one unnumbered alphabetical sequence, and @media print drops this column. Its
+   colour is the band its mark carries on the strip, so "the green one, 04" is
+   the same object in both places. */
+#bib .bn { font-family: var(--mono); font-size: 12px; color: var(--ink3); padding-top: 6px;
+  font-variant-numeric: tabular-nums; text-align: right; }
+#bib .be[data-band="measured"]   .bn { color: var(--ok); }
+#bib .be[data-band="interested"] .bn { color: var(--acc); }
+#bib .be[data-band="relayed"]    .bn { color: var(--ink3); }
+#bib .be[data-band="ours"]       .bn { color: var(--ink); }
+#bib .be b { color: var(--ink); font-weight: 600; }
+#bib .be i { color: var(--ink2); }
+#bib .be .u { font-family: var(--mono); font-size: 14px; color: var(--blue); overflow-wrap: anywhere; }
+#bib .be .ac { color: var(--ink3); white-space: nowrap; }
+#bib .be .nt { display: block; font-size: 15px; line-height: 1.4; color: var(--ink3); font-style: italic; margin-top: 3px; }
+/* B opens on whatever the reader panel was showing. Do NOT add padding-left
+   here — the print sheet's hanging indent lives on .be, and an override would
+   clip the first four characters of this one entry off the page. */
+#bib .be.hit { background: rgba(242,169,59,.11); box-shadow: inset 3px 0 0 var(--acc); }
+@media (prefers-reduced-motion: reduce) { #bib .be { transition: none; } }
+
+/* =============================================================================
+   Print · the submitted reference list.
+   Cmd-P on dist/index.html prints this and nothing else: 53 entries in one
+   alphabetical Westminster Harvard sequence, unnumbered, every URL, every
+   access date, every retrieval note. Verified headless: four A4 pages.
+   The WORLD never enters the print sheet, so the frames' arrival transforms
+   cannot print a page of sheared invisible text — the trap any design that
+   printed a frame would have to disarm. And #bib prints whether or not the
+   overlay is open on screen, so the submission step is one keystroke with no
+   state to remember.
+   ========================================================================== */
+@media print {
+  @page { size: A4 portrait; margin: 16mm 15mm; }
+  html, body { height: auto; overflow: visible; background: #fff; color: #000; }
+  #stage, .ui:not(#bib) { display: none !important; }
+  #bib { display: block !important; position: static; overflow: visible;
+    background: #fff; color: #000; padding: 0; backdrop-filter: none; }
+  #bib .bhead { position: static; display: block; background: #fff; margin: 0 0 14pt;
+    padding: 0 0 8pt; border-bottom: .5pt solid #999; }
+  #bib h3 { color: #000; font-size: 19pt; margin-bottom: 4pt; }
+  #bib .bnote { color: #333; font-size: 7pt; text-align: left; letter-spacing: .06em; }
+  #bib .bcols { display: block; }
+  #bib .be { display: block; break-inside: avoid; color: #000; font-size: 10pt; line-height: 1.34;
+    padding: 0 0 0 26pt; text-indent: -26pt; margin: 0 0 7pt; scroll-margin: 0;
+    background: none !important; box-shadow: none !important; }
+  #bib .bn { display: none; }
+  #bib .be b, #bib .be i, #bib .be .ac { color: #000; }
+  #bib .be .u { color: #333; font-size: 8.5pt; }
+  #bib .be .nt { color: #444; font-size: 8.5pt; text-indent: 0; margin-top: 2pt; }
+}
+
 </style>
 </head>
 <body>
@@ -585,8 +738,9 @@ div.vis-comet { height: 0; }
   </div>
 </div>
 
-<div class="ui" id="hint">← → move · click to advance · O overview · N or P notes · T timer · F fullscreen · type a frame number to jump</div>
+<div class="ui" id="hint">← → move · click to advance · O overview · N or P notes · B sources · T timer · F fullscreen · type a frame number to jump</div>
 <div class="ui" id="notes"></div>
+<div class="ui" id="bib"></div>
 
 <div class="ui" id="bottom">
   <div id="rail"></div>
@@ -1046,6 +1200,389 @@ VIS.divergence = { mount(host, api) {
       if (own > .92) { d.dots.forEach(c => c.setAttribute("opacity", 1)); d.g.setAttribute("opacity", 1); }
     });
     if (p >= 1) { cross.setAttribute("opacity", 1); return false; }
+  });
+}};
+
+</script>
+<script>
+/* =============================================================================
+   evidence — frame 17, the reference frame.
+   Referencing is on the mark scheme, so this frame argues about the evidence
+   instead of reciting it. Fifty-three marks, one per source, sorted left to
+   right by ONE rule we can defend in a sentence — who actually did the
+   counting — and under each grade a bar showing how many of that grade contain
+   the job title at all. That bar is not a judgement: it is whether the words
+   appear. It is empty under the two grades that ought to have settled the
+   question and nearly full under the weakest, which is the hole the method
+   frame was built to fill.
+
+   NOT frame 16. Provenance answers "which figure came from where" — twelve
+   claims threaded to six sources. This answers "what is this bibliography made
+   of, and does any of it discuss the job" — fifty-three sources across eight
+   grades. Different unit, different shape, no threads.
+
+   Everything is read from DECK.refs / DECK.tiers / DECK.bands, so the marks,
+   the counts, the bars, the reader panel and the B sheet cannot disagree.
+   ========================================================================== */
+VIS.evidence = { mount(host, api) {
+  const T = api.T;
+  const REFS = (window.DECK && DECK.refs) || [], TIERS = (window.DECK && DECK.tiers) || [],
+        BANDS = (window.DECK && DECK.bands) || [];
+  if (!REFS.length || !TIERS.length || !BANDS.length) throw new Error("DECK.refs / tiers / bands missing");
+
+  /* ---------- geometry ----------
+     Solved against the measured content box, not guessed: the frame is
+     1476x830, its border is 1px a side and .fin pads 66px a side, so the box
+     is 1342 wide. 45 inter-tick pitches + 8 tick widths + 7 tier gaps = 1335,
+     which leaves 7px and lets every tick sit on a whole pixel. */
+  const W = 1342, H = 264;
+  const P = 22, TW = 16, G = 31;              /* pitch · tick width · tier gap */
+  const BY = 14, BR = 20;                     /* band numeral · its rule       */
+  const TY = 40, TH = 66, BASE = TY + TH;     /* tick band                     */
+  const UZY = 111;                            /* the local-source underline    */
+  const GY = 122, GH = 12;                    /* gauge track                   */
+  const FRY = 156, LBY = 180, LBY2 = 196;     /* fraction · tier label lines   */
+  const RULE = 214, ROY = 232, LGY = 254;     /* foot rule · readout · legend  */
+  const segW = n => (n - 1) * P + TW;
+
+  const s = api.svg(W, H); host.appendChild(s);
+  const text = (x, y, str, fill, size, extra) => {
+    const n = api.el("text", Object.assign({ x, y, fill, "font-family": T.mono,
+      "font-size": size, "letter-spacing": .8 }, extra || {}), null);
+    n.textContent = str; return n;
+  };
+  const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const mix = (a, b, p) => `rgb(${a[0] + (b[0] - a[0]) * p | 0},${a[1] + (b[1] - a[1]) * p | 0},${a[2] + (b[2] - a[2]) * p | 0})`;
+  const GREY = hex(T.ink3);
+  const pad2 = n => String(n).padStart(2, "0");
+
+  /* ---------- lay the tiers out ----------
+     Colour is the BAND, not the tier: four colours for four answers to "who
+     counted this", so 24 / 16 / 8 / 5 reads from the back of the room in a
+     second, while eight labelled positions carry the finer grading up close.
+     One channel per job — the cap carries the finding, the bar the aggregate,
+     the hollow marks how we got the source. Eight hues would have been eight
+     channels doing one job badly. */
+  let x = 0;
+  const tiers = TIERS.map(t => {
+    const rows = REFS.filter(r => r.t === t.id);
+    const o = { t, rows, x, w: segW(rows.length), band: t.b,
+                colour: T[BANDS.find(b => b.id === t.b).c],
+                names: rows.filter(r => r.names).length };
+    x += o.w + G; return o;
+  });
+  const bands = BANDS.map(b => {
+    const own = tiers.filter(o => o.band === b.id);
+    const rows = own.reduce((a, o) => a.concat(o.rows), []);
+    return { b, own, rows, x: own[0].x,
+             w: own[own.length - 1].x + own[own.length - 1].w - own[0].x,
+             colour: T[b.c], names: rows.filter(r => r.names).length };
+  });
+
+  /* the pre-sort row: 53 marks evenly spread over the same width, so the sort
+     on arrival neither gains nor loses ground — it only groups */
+  const UP = (x - G - TW) / (REFS.length - 1);
+
+  /* ---------- the band header: the four numbers ---------- */
+  const head = api.el("g", { class: "ev-head", opacity: api.reduced ? 1 : 0 }, s);
+  const bandRules = bands.map(bd => {
+    head.appendChild(text(bd.x, BY, String(bd.rows.length), bd.colour, 18, { "letter-spacing": -.4 }));
+    head.appendChild(text(bd.x + (bd.rows.length > 9 ? 25 : 14), BY, bd.b.n, T.ink3, 11));
+    return api.el("line", { class: "ev-rule", x1: bd.x, x2: bd.x + bd.w, y1: BR, y2: BR,
+      stroke: bd.colour, "stroke-width": 1.5, "stroke-opacity": .6 }, s);
+  });
+  const base = api.el("line", { class: "ev-rule", x1: 0, x2: x - G, y1: BASE + .5, y2: BASE + .5,
+    stroke: T.line2, "stroke-width": 1 }, s);
+
+  /* ---------- the fifty-three marks ----------
+     One mark is one source, and they are countable: 16px wide and 66 tall
+     render 18.3 x 75.6 on a 1080p projector. */
+  const ticks = REFS.map((r, i) => {
+    const tier = tiers.find(t => t.t.id === r.t);
+    const col = tier.colour, tx = tier.x + tier.rows.indexOf(r) * P;
+    const g = api.el("g", { class: "ev-tk", opacity: api.reduced ? 1 : 0 }, s);
+    api.el("title", {}, g).textContent = `${pad2(r.n)} · ${r.who} (${r.yr})`;
+    /* A capped, bright mark contains the job title; a faint one does not. That
+       is the only contrast on the mark, so the caps have to win it outright —
+       at .5 against .82 they were invisible on a projector. Measured, twice. */
+    const body = api.el("rect", { x: 0, y: TY, width: TW, height: TH, rx: 3,
+      fill: r.cond ? "none" : col, "fill-opacity": api.reduced && r.names ? .9 : .3,
+      stroke: r.cond ? col : "none", "stroke-width": 1.4,
+      "stroke-opacity": api.reduced && r.names ? .95 : .45 }, g);
+    const marks = [];
+    if (r.cond === "wall")                           /* refused us, or paywalled */
+      marks.push(api.el("line", { x1: 2.5, y1: BASE - 4, x2: TW - 2.5, y2: TY + 4,
+        stroke: col, "stroke-width": 1.1, "stroke-opacity": .8, opacity: api.reduced ? 1 : 0 }, g));
+    if (r.cond === "via")                            /* read through somebody else */
+      marks.push(api.el("circle", { cx: TW / 2, cy: TY + TH / 2, r: 2.6, fill: col,
+        opacity: api.reduced ? 1 : 0 }, g));
+    const cap = r.names ? api.el("rect", { x: 0, y: TY, width: TW, height: 9, rx: 2, fill: col,
+      opacity: api.reduced ? 1 : 0 }, g) : null;
+    /* The nine Uzbek sources get an underline rather than a block of their own.
+       Grade, not place, is what sorts this strip — and the fact that they land
+       in four different grades, none of them research and not one of them an
+       Uzbek statistical series, is a finding a heading would have hidden. */
+    const uz = r.uz ? api.el("rect", { x: 0, y: UZY, width: TW, height: 3, rx: 1.5, fill: T.acc2,
+      opacity: api.reduced ? 1 : 0 }, g) : null;
+    g.setAttribute("transform", `translate(${api.reduced ? tx : i * UP},0)`);
+    return { r, g, body, cap, uz, marks, col, tx, ux: i * UP, tier };
+  });
+
+  /* ---------- the gauge: does this grade name the job at all? ---------- */
+  const gauges = tiers.map(o => {
+    const g = api.el("g", { class: "ev-ga" }, s);
+    api.el("rect", { x: o.x, y: GY, width: o.w, height: GH, rx: GH / 2,
+      fill: T.line2, "fill-opacity": .55 }, g);
+    const fillW = o.w * o.names / o.rows.length;
+    const fill = api.el("rect", { x: o.x, y: GY, width: api.reduced ? fillW : 0,
+      height: GH, rx: GH / 2, fill: o.colour }, g);
+    /* zero is a real value and has to be drawn as one, or an empty track reads
+       as a bar that has not loaded yet — and the two zeros are the finding */
+    if (!o.names) api.el("line", { x1: o.x + 3, y1: GY + GH / 2, x2: o.x + 13, y2: GY + GH / 2,
+      stroke: o.colour, "stroke-width": 2, "stroke-linecap": "round", "stroke-opacity": .9 }, g);
+    return { o, g, fill, fillW };
+  });
+
+  /* ---------- fractions and tier names ---------- */
+  const labs = tiers.map(o => {
+    const g = api.el("g", { class: "ev-lab", opacity: api.reduced ? 1 : 0 }, s);
+    g.appendChild(text(o.x, FRY, o.names + "/" + o.rows.length, o.colour, 20, { "letter-spacing": 0 }));
+    /* the label is pre-split in TIERS — no runtime text measuring, and the
+       narrowest segment (82px, the four aggregators) fits either line */
+    g.appendChild(text(o.x, LBY, o.t.lab[0], T.ink2, 13));
+    g.appendChild(text(o.x, LBY2, o.t.lab[1], T.ink2, 13));
+    return { o, g };
+  });
+
+  /* ---------- foot: the readout, and the legend that is also a control ---- */
+  api.el("line", { class: "ev-rule", x1: 0, x2: x - G, y1: RULE, y2: RULE,
+    stroke: T.line, "stroke-width": 1 }, s);
+  const DEFAULT = "ONE MARK = ONE SOURCE \u00b7 A CAPPED MARK CONTAINS THE JOB TITLE \u00b7 16 OF 53 DO \u00b7 POINT AT A MARK FOR ITS FULL CITATION";
+  const readout = text(0, ROY, DEFAULT, T.ink3, 13);
+  s.appendChild(readout);
+
+  const LEG = [
+    { k: "atsource", c: T.ink3, n: 44, label: "READ AT SOURCE" },
+    { k: "wall",     c: T.bad,  n: 6,  label: "REFUSED US OR PAYWALLED" },
+    { k: "via",      c: T.acc,  n: 3,  label: "READ THROUGH SOMEBODY ELSE" },
+    { k: "uz",       c: T.acc2, n: 9,  label: "UZBEKISTAN, IN FOUR GRADES" }
+  ];
+  let lx = 0;
+  const legend = LEG.map(L => {
+    const g = api.el("g", { class: "ev-leg", opacity: api.reduced ? 1 : 0 }, s);
+    /* the swatch is the mark, drawn small — a key that does not match the thing
+       it keys is worse than no key */
+    if (L.k === "uz") api.el("rect", { x: lx, y: LGY - 6, width: 11, height: 3, rx: 1.5, fill: L.c }, g);
+    else if (L.k === "atsource") api.el("rect", { x: lx, y: LGY - 11, width: 10, height: 11, rx: 2,
+      fill: L.c, "fill-opacity": .5 }, g);
+    else {
+      api.el("rect", { x: lx, y: LGY - 11, width: 10, height: 11, rx: 2, fill: "none",
+        stroke: L.c, "stroke-width": 1.2 }, g);
+      if (L.k === "wall") api.el("line", { x1: lx + 1.5, y1: LGY - 1.5, x2: lx + 8.5, y2: LGY - 9.5,
+        stroke: L.c, "stroke-width": 1 }, g);
+      else api.el("circle", { cx: lx + 5, cy: LGY - 5.5, r: 1.8, fill: L.c }, g);
+    }
+    const str = L.n + " " + L.label;
+    g.appendChild(text(lx + 17, LGY, str, T.ink3, 12));
+    const w = 17 + str.length * 7.9;          /* JetBrains Mono advance at 12px */
+    const hit = api.el("rect", { class: "ev-hit", x: lx - 4, y: LGY - 17, width: w, height: 23 }, s);
+    lx += w + 26;
+    return { L, g, hit };
+  });
+
+  /* ---------- the caret: what the panel below is currently showing -------- */
+  const caret = api.el("path", { class: "ev-caret", d: "M-5,-7 L5,-7 L0,0 Z", fill: T.acc,
+    opacity: 0, transform: `translate(${TW / 2},${TY - 8})` }, s);
+
+  /* ---------- the reader panel ----------
+     deck.js renders one complete Harvard entry into .rdr server-side, so if
+     this module never mounts the frame still shows a correct citation rather
+     than the red "visual failed" string. A frame carrying a mark-scheme
+     criterion does not get to depend on a module loading. */
+  const frame = host.closest(".frame");
+  const panel = frame && frame.querySelector(".rdr");
+  const panelHome = panel ? panel.innerHTML : null;
+  const REF = n => REFS.find(r => r.n === n);
+  const tickOf = r => ticks.find(t => t.r === r);
+  let swapT = null, cycling = false;
+  function show(r, fade) {
+    if (!panel) return;
+    DECK.current = r.n;                        /* B opens on this entry */
+    caret.setAttribute("opacity", 1);
+    caret.setAttribute("transform", `translate(${tickOf(r).tx + TW / 2},${TY - 8})`);
+    const paint = () => { panel.innerHTML = DECK.reader(r); panel.classList.remove("swap"); };
+    clearTimeout(swapT);
+    if (fade && !api.reduced) { panel.classList.add("swap"); swapT = setTimeout(paint, 190); }
+    else paint();
+  }
+  /* The runtime only wipes the host's innerHTML on unmount; .rdr lives in the
+     frame and would keep whatever we last wrote into it. Put it back. */
+  api.onTeardown(() => {
+    clearTimeout(swapT);
+    if (panel) { panel.classList.remove("swap"); panel.innerHTML = panelHome; }
+  });
+
+  /* ---------- isolation ----------
+     One class on the host dims; `.on` marks the survivors. All of it in CSS so
+     none of it ever touches the animation loop. Same gesture as the provenance
+     frame, deliberately: two evidence frames that answered the pointer in two
+     different ways would teach the room two rules for one movement. */
+  const clear = () => {
+    host.classList.remove("ev-lit");
+    s.querySelectorAll(".on").forEach(n => n.classList.remove("on"));
+    readout.textContent = DEFAULT;
+  };
+  const light = (keep, line) => {
+    clear(); host.classList.add("ev-lit");
+    ticks.forEach(t => { if (keep(t)) t.g.classList.add("on"); });
+    readout.textContent = line;
+  };
+  const hit = (x0, y0, w, h, enter) => {
+    const r = api.el("rect", { class: "ev-hit", x: x0, y: y0, width: w, height: h }, s);
+    r.addEventListener("pointerenter", enter);
+    return r;
+  };
+  /* a grade: its marks, its gauge and its label survive together */
+  tiers.forEach((o, k) => {
+    hit(o.x - 4, TY - 16, o.w + 8, LBY2 - TY + 22, () => {
+      light(t => t.tier === o, `${o.t.lab.join(" ")} \u00b7 ${o.t.who} \u00b7 REFS ${pad2(o.rows[0].n)}\u2013${pad2(o.rows[o.rows.length - 1].n)} \u00b7 ${o.names} OF ${o.rows.length} NAME THE JOB`);
+      gauges[k].g.classList.add("on"); labs[k].g.classList.add("on");
+    });
+  });
+  /* one mark: the Q&A instrument. Point at it and its complete Westminster
+     Harvard entry is on the wall at 24 device pixels — larger and faster than
+     a marker could have found it in any list. Press B and the same entry is
+     already highlighted in the full bibliography. */
+  ticks.forEach(t => {
+    hit(t.tx - 3, TY - 16, TW + 6, TH + 26, () => {
+      light(u => u === t, `${pad2(t.r.n)} \u00b7 ${t.r.who.toUpperCase()} (${t.r.yr})${
+        t.r.cond === "wall" ? " \u00b7 REFUSED AUTOMATED RETRIEVAL" :
+        t.r.cond === "via"  ? " \u00b7 READ THROUGH A NAMED SECONDARY SOURCE" : ""}`);
+      cycling = false; show(t.r, true);
+    });
+  });
+  /* the legend is a control, not a key. Hovering UZBEKISTAN lights nine marks
+     standing in four different grades, and not one in research — a finding the
+     frame could not otherwise state, and the one a marker looking for a local
+     sources heading needs to be shown rather than told. */
+  legend.forEach(({ L, hit: h }) => {
+    h.addEventListener("pointerenter", () => {
+      const keep = L.k === "uz"       ? (t => !!t.r.uz)
+                 : L.k === "atsource" ? (t => !t.r.cond)
+                 : (t => t.r.cond === L.k);
+      light(keep, `${L.n} OF 53 \u00b7 ${L.label}${L.k === "uz" ? " \u00b7 NOT ONE OF THEM IS AN UZBEK STATISTICAL SERIES" : ""}`);
+    });
+  });
+  /* a pointer that leaves between two hit rects would strand the frame dimmed */
+  host.addEventListener("pointerleave", clear);
+  api.onTeardown(() => {
+    host.removeEventListener("pointerleave", clear);
+    host.classList.remove("ev-lit", "ev-arrive");
+  });
+
+  /* ---------- the three exemplars ----------
+     Fifty-three entries at 12px prove nothing about format, because nobody can
+     read them. One entry at 24 device px proves it — and these three are the
+     cases a marker actually checks: a corporate author with no person (04), a
+     multi-author preprint with an identifier (24), and unpublished research of
+     our own, dated and attributed to the authors (53). It rests on ours,
+     because that is the one worth leaving on the wall. */
+  const EXEMPLARS = [4, 24, 53];
+  let exi = 0; cycling = !api.reduced;
+  const stepEx = () => {
+    if (!cycling) return;
+    show(REF(EXEMPLARS[exi]), exi > 0);
+    if (++exi < EXEMPLARS.length) api.after(1250, stepEx); else cycling = false;
+  };
+
+  /* ---------- reduced motion / the overview's static mount ----------
+     Returning before settling left fifty-three grey marks in a straight line
+     with empty bars under them, which is the one thing this frame exists NOT
+     to show. */
+  if (api.reduced) {
+    ticks.forEach(t => t.body.setAttribute("fill", t.r.cond ? "none" : t.col));
+    show(REF(EXEMPLARS[EXEMPLARS.length - 1]), false);
+    return;
+  }
+  ticks.forEach(t => {
+    t.body.setAttribute("fill", t.r.cond ? "none" : T.ink3);
+    if (t.r.cond) t.body.setAttribute("stroke", T.ink3);
+  });
+
+  /* ---------- arrival ----------
+     The fifty-three arrive as one undifferentiated grey row and then sort
+     themselves into grades in front of the room; the bars fill after that. The
+     room watches the argument being made instead of being told it was made,
+     and the sweep of the bars is exactly the beat the presenter talks over.
+     The caps and the brightness they carry go on at the very end, so the last
+     thing that moves on this frame is which sources actually name the job. */
+  const A_IN = .34, S_AT = .34, S_STEP = .0125, S_DUR = .56;
+  const R_AT = 1.30, R_DUR = .34;
+  const G_AT = 1.62, G_STEP = .09, G_DUR = .46;
+  const L_AT = 2.32, L_STEP = .05, L_DUR = .26;
+  const C_AT = 2.74, C_STEP = .018, C_DUR = .30;
+  const END = 3.16;
+  const seg = (t, at, dur) => Math.max(0, Math.min(1, (t - at) / dur));
+  const cols = ticks.map(t => hex(t.col));
+  const rules = bandRules.concat([base]);
+
+  rules.forEach(l => { l.style.strokeDasharray = W; l.style.strokeDashoffset = W; });
+  host.classList.add("ev-arrive");
+
+  api.raf(t => {
+    const fade = api.ease.out(seg(t, 0, A_IN));
+    ticks.forEach((tk, i) => {
+      const p = api.ease.inOut(seg(t, S_AT + i * S_STEP, S_DUR));
+      tk.g.setAttribute("opacity", Math.max(fade, p).toFixed(3));
+      tk.g.setAttribute("transform", `translate(${(tk.ux + (tk.tx - tk.ux) * p).toFixed(2)},0)`);
+      const c = mix(GREY, cols[i], p);
+      if (tk.r.cond) tk.body.setAttribute("stroke", c); else tk.body.setAttribute("fill", c);
+      tk.marks.forEach(m => m.setAttribute("opacity", p.toFixed(3)));
+    });
+    const rp = api.ease.out(seg(t, R_AT, R_DUR));
+    head.setAttribute("opacity", rp.toFixed(3));
+    rules.forEach(l => { l.style.strokeDashoffset = W * (1 - rp); });
+    gauges.forEach((g, k) => g.fill.setAttribute("width",
+      (g.fillW * api.ease.out(seg(t, G_AT + k * G_STEP, G_DUR))).toFixed(2)));
+    labs.forEach((l, k) => l.g.setAttribute("opacity",
+      api.ease.out(seg(t, L_AT + k * L_STEP, L_DUR)).toFixed(3)));
+    legend.forEach((l, k) => l.g.setAttribute("opacity",
+      api.ease.out(seg(t, L_AT + k * L_STEP, L_DUR)).toFixed(3)));
+    ticks.forEach((tk, i) => {
+      if (!tk.cap && !tk.uz) return;
+      const p = seg(t, C_AT + i * C_STEP, C_DUR), el = api.ease.elastic(p);
+      if (tk.cap) {
+        tk.cap.setAttribute("opacity", p ? 1 : 0);
+        tk.cap.setAttribute("transform",
+          `translate(0,${(TY * (1 - el)).toFixed(2)}) scale(1,${el.toFixed(3)}) translate(0,${(-TY).toFixed(2)})`);
+        const e = api.ease.out(p);
+        tk.body.setAttribute("fill-opacity", (.3 + .6 * e).toFixed(3));
+        tk.body.setAttribute("stroke-opacity", (.45 + .5 * e).toFixed(3));
+      }
+      if (tk.uz) tk.uz.setAttribute("opacity", api.ease.out(p).toFixed(3));
+    });
+    if (t >= END) {
+      /* land on exact values so nothing is left mid-transform */
+      ticks.forEach(tk => {
+        tk.g.setAttribute("opacity", 1);
+        tk.g.setAttribute("transform", `translate(${tk.tx},0)`);
+        if (tk.r.cond) tk.body.setAttribute("stroke", tk.col); else tk.body.setAttribute("fill", tk.col);
+        tk.marks.forEach(m => m.setAttribute("opacity", 1));
+        if (tk.cap) {
+          tk.cap.setAttribute("opacity", 1); tk.cap.removeAttribute("transform");
+          tk.body.setAttribute("fill-opacity", .9); tk.body.setAttribute("stroke-opacity", .95);
+        }
+        if (tk.uz) tk.uz.setAttribute("opacity", 1);
+      });
+      head.setAttribute("opacity", 1);
+      rules.forEach(l => { l.style.strokeDashoffset = 0; });
+      gauges.forEach(g => g.fill.setAttribute("width", g.fillW));
+      labs.forEach(l => l.g.setAttribute("opacity", 1));
+      legend.forEach(l => l.g.setAttribute("opacity", 1));
+      host.classList.remove("ev-arrive");
+      api.after(240, stepEx);
+      return false;
+    }
   });
 }};
 
@@ -2186,7 +2723,7 @@ VIS.tokenise = { mount(host, api) {
 <script>
 /* =============================================================================
    deck.js — the presentation content. Edit this file, not the engine.
-   Eighteen frames on one world; the camera flies between them. Every number
+   Seventeen frames on one world; the camera flies between them. Every number
    here carries its source on the provenance and references frames; re-check
    the aggregator salaries before submission, because they move monthly.
 
@@ -2617,86 +3154,17 @@ const DECK = {
       ${R(3, `<div class="vis vis-provenance" data-vis="provenance"></div>`)}
       ${R(4, `<div class="callout"><span class="mono acc">WHAT THIS ADMITS</span> Four of these twelve figures rest on a single industry source, and four more are counts we ran ourselves on one afternoon. That is a concentration at both ends — and the reason we had to count at all is that no institution publishes the local numbers. We would rather show that than hide it behind twelve different-looking citations.</div>`)}` },
 
-  /* ───────────────────── 17 · REFERENCES I ───────────────────── */
-  { id: "references1", label: "References I · the evidence", speaker: 2, enter: "unfold", est: 0.6, w: 1900, h: 1110,
-    notes: "Do not read this. Land it, say 'fifty-three sources, grouped by what each one is for, every URL complete and every access date on screen', and give the room four seconds to see the shape. If anyone is going to challenge a number, this is the frame they will send you back to — so know that the first group is the one that does NOT name the job, which is the whole reason the method frame exists.",
-    html: `
-      <div class="kicker mono">17 · REFERENCES I · WESTMINSTER HARVARD · THE EVIDENCE</div>
-      ${R(1, `<div class="hero wide"><h2>Fifty-three sources, <em>grouped by what they are for</em>.</h2>
-        <p class="body">Official statistics first, then the large-sample datasets, then the research we tested our own claims against, then the aggregators we refuse to call statistics.</p></div>`)}
-      ${R(2, `<div class="refs2">
-<h5 class="mono">OFFICIAL STATISTICS AND CLASSIFICATIONS <span>the sources that would normally settle this — and do not name the job</span></h5>
-<div class="ref2"><span class="n mono">01</span> <b>O*NET OnLine, U.S. Department of Labor</b> (2026) <i>15-2051.00 Data Scientists</i> <span class="u">https://www.onetonline.org/link/summary/15-2051.00</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">02</span> <b>O*NET OnLine, U.S. Department of Labor</b> (2026) <i>15-2051.01 Business Intelligence Analysts</i> <span class="u">https://www.onetonline.org/link/summary/15-2051.01</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">03</span> <b>O*NET OnLine, U.S. Department of Labor</b> (2026) <i>Occupation search: "prompt engineer" (no match among the 1,016 O*NET-SOC occupations)</i> <span class="u">https://www.onetonline.org/find/result?s=prompt+engineer</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">04</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Occupational Outlook Handbook</i> <span class="u">https://www.bls.gov/ooh/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">05</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Occupational Outlook Handbook: Computer and Information Research Scientists</i> <span class="u">https://www.bls.gov/ooh/computer-and-information-technology/computer-and-information-research-scientists.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">06</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Occupational Outlook Handbook: Data Scientists</i> <span class="u">https://www.bls.gov/ooh/math/data-scientists.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">07</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Occupational Outlook Handbook: Market Research Analysts</i> <span class="u">https://www.bls.gov/ooh/business-and-financial/market-research-analysts.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">08</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Occupational Outlook Handbook: Software Developers, Quality Assurance Analysts, and Testers</i> <span class="u">https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">09</span> <b>U.S. Bureau of Labor Statistics</b> (2026) <i>Standard Occupational Classification (SOC) User Guide</i> <span class="u">https://www.bls.gov/soc/socguide.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<h5 class="mono">EMPLOYER AND PLATFORM DATA <span>large-sample surveys and posting datasets</span></h5>
-<div class="ref2"><span class="n mono">10</span> <b>Galeano, S., Hodge, N. and Ruder, A. / Federal Reserve Bank of Atlanta</b> (2025) <i>By Degree(s): Measuring Employer Demand for AI Skills by Educational Requirements, Workforce Currents 2025-1</i> <span class="u">https://www.atlantafed.org/research-and-data/publications/workforce-currents/2025/05/21/01-by-degrees-measuring-employer-demand-for-ai-skills-by-educational-requirements</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">11</span> <b>Indeed Hiring Lab</b> (2025) <i>AI at Work Report 2025: How GenAI is Rewiring the DNA of Jobs</i> <span class="u">https://hiringlab.indeed.com/2025/09/23/ai-at-work-report-2025-how-genai-is-rewiring-the-dna-of-jobs/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">12</span> <b>Indeed Hiring Lab</b> (2026) <i>AI Tracker (public repository; no prompt-engineer series)</i> <span class="u">https://github.com/hiring-lab/ai-tracker</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">13</span> <b>Lightcast</b> (2025) <i>Beyond the Buzz: Developing the AI Skills Employers Actually Need</i> <span class="u">https://lightcast.io/resources/blog/beyond-the-buzz-press-release-2025-07-23</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">14</span> <b>LinkedIn Economic Graph</b> (2025) <i>Jobs on the Rise 2025</i> <span class="u">https://www.linkedin.com/pulse/linkedin-jobs-rise-2025</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">15</span> <b>Microsoft WorkLab</b> (2025) <i>2025 Work Trend Index Annual Report</i> <span class="u">https://www.microsoft.com/en-us/worklab/work-trend-index/2025-the-year-the-frontier-firm-is-born</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">16</span> <b>World Economic Forum</b> (2025) <i>The Future of Jobs Report 2025</i> <span class="u">https://www.weforum.org/publications/the-future-of-jobs-report-2025/</span> <span class="a mono">read 10 Sep 2026</span></div>
-<h5 class="mono">PEER-REVIEWED AND PREPRINT RESEARCH <span>the studies we tested our own claims against</span></h5>
-<div class="ref2"><span class="n mono">17</span> <b>Battle, R. and Gollapudi, T.</b> (2024) <i>The Unreasonable Effectiveness of Eccentric Automatic Prompts</i>. arXiv:2402.10949 <span class="u">https://arxiv.org/abs/2402.10949</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">18</span> <b>Chen, L., Zaharia, M. and Zou, J.</b> (2023) <i>How is ChatGPT's behavior changing over time? arXiv:2307.09009 (GPT-4 84% → 51% on a fixed task, March to June 2023)</i> <span class="u">https://arxiv.org/abs/2307.09009</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">19</span> <b>Davenport, T.H. and Patil, D.J.</b> (2022) <i>Is Data Scientist Still the Sexiest Job of the 21st Century? Harvard Business Review</i>. Paywalled — we read the published summary only, not the full text, and quote no figures from it; confirm the exact article URL in a browser before submission <span class="u">https://hbr.org</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">20</span> <b>Liang, J.T., Yang, C., Sergeyuk, A., Breaux, T.D. and Myers, B.A.</b> (2025) <i>Understanding Prompt Programming Tasks and Questions</i>. arXiv:2507.17264 <span class="u">https://arxiv.org/abs/2507.17264</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">21</span> <b>Su, J., Zhang, J., Ullrich, K., Bottou, L. and Ibrahim, M.</b> (2025) <i>A Single Character can Make or Break Your LLM Evals</i>. arXiv:2510.05152, 2 October 2025 (Meta FAIR and NYU; ±23% MMLU swing; does not improve with scale) <span class="u">https://arxiv.org/abs/2510.05152</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">22</span> <b>Vu, A. and Oppenlaender, J.</b> (2026) <i>Prompt Engineer: Analyzing Hard and Soft Skill Requirements in the AI Job Market</i>. arXiv:2506.00058 <span class="u">https://arxiv.org/abs/2506.00058</span> <span class="a mono">read 11 Sep 2026</span></div>
-<h5 class="mono">SALARY AGGREGATORS <span>self-reported estimates — never called statistics here</span></h5>
-<div class="ref2"><span class="n mono">23</span> <b>Glassdoor</b> (2026) <i>AI Product Manager: average salary and pay trends, United States</i> <span class="u">https://www.glassdoor.com/Salaries/ai-product-manager-salary-SRCH_KO0,18.htm</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">24</span> <b>Glassdoor</b> (2026) <i>Prompt Engineer: average salary and pay trends, United States</i> <span class="u">https://www.glassdoor.com/Salaries/prompt-engineer-salary-SRCH_KO0,15.htm</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">25</span> <b>Indeed</b> (2026) <i>Prompt engineer salary in United States</i> <span class="u">https://www.indeed.com/career/prompt-engineer/salaries</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">26</span> <b>ZipRecruiter</b> (2026) <i>Prompt Engineering Salary, United States</i> <span class="u">https://www.ziprecruiter.com/Salaries/Prompt-Engineering-Salary</span> <span class="a mono">read 11 Sep 2026</span></div>
-</div>`)}` },
-
-  /* ───────────────────── 18 · REFERENCES II ───────────────────── */
-  { id: "references2", label: "References II · practice, place and press", speaker: 2, enter: "riffle", est: 0.6, w: 2000, h: 1150,
-    notes: "Second half. Two groups to point at. The Uzbekistan block, because four of those are counts we ran ourselves and they are labelled as ours. And the press block at the end, which is here to show we read the commentary and then weighted it as commentary. Close on that: the last group is last because it is the weakest evidence in the talk, and we would rather you saw us sort it than have to ask.",
-    html: `
-      <div class="kicker mono">18 · REFERENCES II · WESTMINSTER HARVARD · PRACTICE, PLACE AND PRESS</div>
-      ${R(1, `<div class="hero wide"><h2>What the craft is, <em>where we are</em>, and who is selling.</h2>
-        <p class="body">Vendor guides and practitioner write-ups describe the work. The Uzbekistan block includes the counts we ran ourselves, labelled as ours. Press and commentary sit last, on purpose.</p></div>`)}
-      ${R(2, `<div class="refs2">
-<h5 class="mono">VENDOR DOCUMENTATION <span>what the craft is, not whether it is a career</span></h5>
-<div class="ref2"><span class="n mono">27</span> <b>Anthropic</b> (2024) <i>AI prompt engineering: a deep dive [video roundtable with Askell, A., Witten, Z., Hershey, D</i>. and Albert, A.] <span class="u">https://www.youtube.com/watch?v=T9aRN5JkmL8</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">28</span> <b>Anthropic</b> (2026) <i>Demystifying evals for AI agents</i> <span class="u">https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">29</span> <b>Anthropic</b> (2026) <i>Prompt engineering overview</i> <span class="u">https://docs.anthropic.com/</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">30</span> <b>Anthropic Careers</b> (2026) <i>Prompt Engineer, Claude Code (Greenhouse job board)</i> — listing confirmed open on 11 September 2026, no salary shown; speaker notes only, re-check before presenting <span class="u">https://job-boards.greenhouse.io/anthropic/jobs/5159669008</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">31</span> <b>Anthropic Engineering</b> (2025) <i>Effective context engineering for AI agents</i> — "smarter models require less prescriptive engineering", 29 September 2025 <span class="u">https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">32</span> <b>Boonstra, L.</b> (2025) <i>Prompt Engineering</i>. Google <span class="u">https://www.kaggle.com/whitepaper-prompt-engineering</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">33</span> <b>OpenAI</b> (2026) <i>Deprecations (platform documentation)</i> — more than sixty model and endpoint retirements listed, 2022–2027; our count of their table, read 11 September 2026 <span class="u">https://developers.openai.com/api/docs/deprecations</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">34</span> <b>OpenAI</b> (2026) <i>Prompt engineering guide</i> <span class="u">https://platform.openai.com/docs/guides/prompt-engineering</span> <span class="a mono">read 10 Sep 2026</span></div>
-<h5 class="mono">PRACTITIONER ENGINEERING ACCOUNTS <span>named people publishing figures from shipped products</span></h5>
-<div class="ref2"><span class="n mono">35</span> <b>Bottaro, J.P. and Ramgopal, K.</b> (2024) <i>Musings on Building a Generative AI Product</i>. LinkedIn Engineering Blog <span class="u">https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">36</span> <b>Husain, H.</b> (2025) <i>A Field Guide to Rapidly Improving AI Products</i> <span class="u">https://hamel.dev/blog/posts/field-guide/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">37</span> <b>Husain, H.</b> (2026) <i>AI Evals: Everything You Need to Know</i> <span class="u">https://hamel.dev/blog/posts/evals-faq/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">38</span> <b>Yan, E., Bischof, B., Frye, C., Husain, H., Liu, J. and Shankar, S.</b> (2024) <i>What We Learned from a Year of Building with LLMs</i> <span class="u">https://applied-llms.org/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<h5 class="mono">UZBEKISTAN · THE LOCAL MARKET <span>including the counts we ran ourselves</span></h5>
-<div class="ref2"><span class="n mono">39</span> <b>Authors' own check</b> (2026) <i>Programme listings at Tashkent University of Information Technologies, Inha University in Tashkent and New Uzbekistan University, checked 11 September 2026</i> — no prompt engineering qualification found at any of them. No single URL; searched from each university's own programme pages <span class="u dim">no URL — see note</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">40</span> <b>German Economic Team / Berlin Economics</b> (2025) <i>The Uzbek IT sector: a rising star in Central Asia? Newsletter No</i>. 38 <span class="u">https://www.german-economic-team.com/en/newsletter/the-uzbek-it-sector-a-rising-star-in-central-asia/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">41</span> <b>HeadHunter Uzbekistan</b> (2026) <i>All Tashkent vacancies, 11,350 listed, counted by the authors 11 September 2026</i> <span class="u">https://tashkent.hh.uz/search/vacancy?area=97</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">42</span> <b>HeadHunter Uzbekistan</b> (2026) <i>Vacancy search for "prompt engineer", Tashkent, run by the authors 11 September 2026</i> <span class="u">https://tashkent.hh.uz/search/vacancy?text=%22prompt+engineer%22&amp;area=97&amp;search_field=name</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">43</span> <b>Oxford Insights</b> (2025) <i>Government AI Readiness Index 2025</i> <span class="u">https://oxfordinsights.com/ai-readiness/government-ai-readiness-index-2025/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">44</span> <b>Republic of Uzbekistan</b> (2024) <i>Presidential Resolution PP-358: Strategy for the Development of Artificial Intelligence Technologies until 2030, adopted 14 October 2024</i>. Lex.uz — National Database of Legislation <span class="u">https://lex.uz/en/docs/7159258</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">45</span> <b>Spot.uz</b> (2026) <i>Report on average monthly wages by sector, Q1 2026, citing data from the National Statistics Committee of Uzbekistan, 30 April 2026</i> <span class="u">https://www.spot.uz/ru/2026/04/30/wages/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">46</span> <b>The Times of Central Asia</b> (2026) <i>Report on Uzbekistan's AI economy, citing the Microsoft Global AI Diffusion Report, 7 August 2026</i> <span class="u">https://timesca.com/uzbekistan-ai-economy/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">47</span> <b>Trend News Agency</b> (2026) <i>Report on Uzbekistan's IT services exports in 2025, citing the Ministry of Digital Technologies, 10 January 2026</i> <span class="u">https://www.trend.az/business/4139902.html</span> <span class="a mono">read 11 Sep 2026</span></div>
-<h5 class="mono">PRESS AND INDUSTRY COMMENTARY <span>read, weighted as commentary, and labelled as such</span></h5>
-<div class="ref2"><span class="n mono">48</span> <b>Cerullo, M.</b> (2023) <i>AI tools like ChatGPT and Dall-E are spawning new jobs as companies look to hire 'prompt engineers'</i>. CBS News <span class="u">https://www.cbsnews.com/news/ai-artificial-intelligence-chatgpt-jobs-prompt-engineer/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">49</span> <b>Fortune, Fore, P.</b> (2025) <i>Prompt engineering, the &#36;200k six-figure role, is now obsolete thanks to AI</i> — source for the October 2022 Sam Altman quote used in the speaker notes; we could not retrieve the original recording <span class="u">https://fortune.com/2025/05/07/prompt-engineering-200k-six-figure-role-now-obsolete-thanks-to-ai/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">50</span> <b>Genkina, D.</b> (2024) <i>AI Prompt Engineering Is Dead</i>. IEEE Spectrum, 6 March 2024 (reports the three-model, 60-variant test and Battle's conclusion) <span class="u">https://spectrum.ieee.org/prompt-engineering-is-dead</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">51</span> <b>Girme, R., Miller, D., Zhao, M., Yang, L. and Kelly, C.</b> (2026) <i>Eval-driven development: Lessons from evaluating GenAI at scale</i>. Airbnb Engineering &amp; Data Science <span class="u">https://airbnb.tech/ai-ml/eval-driven-development-lessons-from-evaluating-genai-at-scale/</span> <span class="a mono">read 11 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">52</span> <b>PromptLayer</b> (2025) <i>AI prompt engineering jobs in 2025: skills, salaries and future outlook</i> <span class="u">https://blog.promptlayer.com/ai-prompt-engineering-jobs-in-2025-skills-salaries-future-outlook/</span> <span class="a mono">read 10 Sep 2026</span></div>
-<div class="ref2"><span class="n mono">53</span> <b>The AI Career Lab</b> (2026) <i>What happened to the prompt engineer?</i> <span class="u">https://theaicareerlab.com/careers/what-happened-to-the-prompt-engineer</span> <span class="a mono">read 10 Sep 2026</span></div>
-</div>`)}` }
+  /* ───────────────────── 17 · THE EVIDENCE, COUNTED ───────────────────── */
+  { id: "evidence", label: "References · the evidence, counted", speaker: 2,
+    enter: "unfold", est: 0.9, w: 1476, h: 830,
+    notes: "Do not read anything on this frame. Land it and let the sort run — the fifty-three marks arrive as one undifferentiated grey row and then sort themselves into grades in front of the room, and the bars fill last. Talk over it. 'Fifty-three sources, sorted by one rule: who actually did the counting.' Sweep left to right with your hand as the bars fill: 'and the bar under each group is how many of that group even contain the words prompt engineer. Zero under the nine official sources. Zero under the five engineers who do the work for a living. Almost every one under the salary sites and the press.' Then the line that ties the deck together: 'That gap is the whole reason slide two exists.' If you have four spare seconds, the last thing that moves is the caps — the sixteen sources that name the job — and the hollow marks: six refused us outright, three we could only read through somebody else, and we drew that rather than burying it. The panel underneath is already cycling three full citations while you talk: a corporate author, a two-author preprint with an arXiv id, and one of our own searches. That is the Harvard format, at a size the room can read, three times, without you claiming anything. In Q&A this frame is a pointing device. Point at any mark and its complete citation drops into the panel with its URL and access date. Hover UZBEKISTAN in the legend and the nine local sources light up standing in four different grades — that is the answer to 'where is your local evidence', and the honest half of it is that not one of them is an Uzbek statistical series. If you are challenged on completeness, press B: all fifty-three in full Westminster Harvard, one alphabetical sequence, at full size, opened on whichever entry you were last showing. Esc or B closes it. If a marker wants it on paper, that same sheet is what Cmd-P prints, and that is what we submit.",
+    html: () => `
+      <div class="kicker mono">17 &middot; REFERENCES &middot; FIFTY-THREE SOURCES, GRADED BY WHO DID THE COUNTING &middot; WESTMINSTER HARVARD</div>
+      ${R(1, `<div class="hero wide"><h2>Nine official sources. <em>Not one of them names the job.</em></h2>
+        <p class="body">Fifty-three sources, ordered by who did the counting. The bar under each grade is how many of that grade contain the job title at all &mdash; and the five practitioner accounts are empty too.</p></div>`)}
+      ${R(2, `<div class="vis vis-evidence" data-vis="evidence"></div>`)}
+      ${R(3, `<div class="rdr">${reader(REFS[3])}</div>`)}
+      ${R(4, `<div class="foot mono dim">All fifty-three, in full Westminster Harvard with every URL and access date, are on the bibliography sheet: press <b class="acc">B</b>. It sits outside the camera, so it renders at full size, and &#8984;P prints it as the submitted list. The grading is ours; the rule is <i>who did the counting</i>.</div>`)}` }
   ]
 };
 
@@ -2710,7 +3178,7 @@ const ROWS = [
   ["title", "method", "overview", "work", "dayinlife"],
   ["skills", "education", "market", "adjacent"],
   ["future", "uzbekistan", "risks", "plan"],
-  ["interview", "conclusion", "provenance", "references1", "references2"]
+  ["interview", "conclusion", "provenance", "evidence"]
 ];
 
 (function layout(frames, rows) {
@@ -2759,6 +3227,123 @@ const SPEAKER_TARGET = TEAM.map(t => ({ min: Math.round(t.seconds * 0.88), max: 
    order — drop them from the top and the argument still stands. */
 const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
 
+/* =============================================================================
+   The reference base. Fifty-three sources, once.
+     t     · evidence grade, keyed to TIERS, in descending order of distance
+             from an independent count. The grading is ours; the RULE is one
+             line and every one of the 53 is adjudicable by it — who did the
+             counting.
+     names · whether this source contains the job title at all. NOT a judgement
+             and not a quality mark: it is whether the words appear, which is
+             why the bar can be drawn without asserting anything.
+     cond  · ""     read in full at source                              (44)
+             "wall" refused automated retrieval, or paywalled           (6)
+             "via"  read through a named secondary source               (3)
+     uz    · one of the nine local sources. Orthogonal to grade, deliberately:
+             they land in four different grades, none of them research, and not
+             one of them is an Uzbek statistical series. A heading would have
+             hidden that; a mark makes it pointable.
+     n     · 01–53, contiguous within a tier and within a band, which makes the
+             number a pointing device. Harvard itself is unnumbered — the
+             printed list drops this column. Nothing in the deck cites a
+             reference by number (checked), so renumbering is free.
+   ========================================================================== */
+const BANDS = [
+  { id:"measured",   c:"ok",   n:"MEASURED BY SOMEBODY ELSE" },       /* 24 */
+  { id:"interested", c:"acc",  n:"AN INTERESTED PARTY PUBLISHED IT" },/* 16 */
+  { id:"relayed",    c:"ink3", n:"RELAYED, NOT COUNTED" },            /*  8 */
+  { id:"ours",       c:"ink",  n:"WE COUNTED IT" }                    /*  5 */
+];
+const TIERS = [
+  { id:"official", b:"measured",   lab:["OFFICIAL STATISTICS","AND LAW"],  who:"A state body counted it and published the count." },
+  { id:"dataset",  b:"measured",   lab:["LARGE-SAMPLE","DATASETS"],        who:"A platform or a bank counted its own data." },
+  { id:"research", b:"measured",   lab:["PEER-REVIEWED","AND PREPRINT"],   who:"A research team counted, and showed the method." },
+  { id:"practice", b:"interested", lab:["PRACTITIONER","ACCOUNTS"],        who:"Named engineers reporting from products they shipped." },
+  { id:"vendor",   b:"interested", lab:["VENDOR","DOCUMENTATION"],         who:"The company selling the model, describing the craft." },
+  { id:"salary",   b:"interested", lab:["SALARY","AGGREGATORS"],           who:"Users self-reported it. Nobody audited it." },
+  { id:"press",    b:"relayed",    lab:["PRESS AND","COMMENTARY"],         who:"Nobody counted anything. Somebody relayed it." },
+  { id:"ours",     b:"ours",       lab:["COUNTS WE RAN","OURSELVES"],      who:"Nobody publishes it, so we counted it and said so." }
+];
+
+const REFS = [
+{n:1,t:"official",who:"O*NET OnLine, U.S. Department of Labor",yr:2026,what:"15-2051.00 Data Scientists",url:"https://www.onetonline.org/link/summary/15-2051.00",acc:11},
+{n:2,t:"official",who:"O*NET OnLine, U.S. Department of Labor",yr:2026,what:"15-2051.01 Business Intelligence Analysts",url:"https://www.onetonline.org/link/summary/15-2051.01",acc:11},
+{n:3,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Occupational Outlook Handbook",url:"https://www.bls.gov/ooh/",acc:11},
+{n:4,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Occupational Outlook Handbook: Computer and Information Research Scientists",url:"https://www.bls.gov/ooh/computer-and-information-technology/computer-and-information-research-scientists.htm",acc:11},
+{n:5,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Occupational Outlook Handbook: Data Scientists",url:"https://www.bls.gov/ooh/math/data-scientists.htm",acc:11},
+{n:6,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Occupational Outlook Handbook: Market Research Analysts",url:"https://www.bls.gov/ooh/business-and-financial/market-research-analysts.htm",acc:11},
+{n:7,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Occupational Outlook Handbook: Software Developers, Quality Assurance Analysts, and Testers",url:"https://www.bls.gov/ooh/computer-and-information-technology/software-developers.htm",acc:11},
+{n:8,t:"official",who:"U.S. Bureau of Labor Statistics",yr:2026,what:"Standard Occupational Classification (SOC) User Guide",url:"https://www.bls.gov/soc/socguide.htm",acc:11},
+{n:9,t:"official",uz:1,who:"Republic of Uzbekistan",yr:2024,what:"Presidential Resolution PP-358: Strategy for the Development of Artificial Intelligence Technologies until 2030",pubx:"Lex.uz &mdash; National Database of Legislation",url:"https://lex.uz/en/docs/7159258",acc:11,note:"Adopted 14 October 2024. The only piece of law in the fifty-three, and it does not name the occupation."},
+{n:10,t:"dataset",who:"Galeano, S., Hodge, N. and Ruder, A.",yr:2025,what:"By Degree(s): Measuring Employer Demand for AI Skills by Educational Requirements",pubx:"Federal Reserve Bank of Atlanta, Workforce Currents 2025-1",url:"https://www.atlantafed.org/research-and-data/publications/workforce-currents/2025/05/21/01-by-degrees-measuring-employer-demand-for-ai-skills-by-educational-requirements",acc:11},
+{n:11,t:"dataset",names:1,who:"Indeed Hiring Lab",yr:2025,what:"AI at Work Report 2025: How GenAI is Rewiring the DNA of Jobs",url:"https://hiringlab.indeed.com/2025/09/23/ai-at-work-report-2025-how-genai-is-rewiring-the-dna-of-jobs/",acc:11},
+{n:12,t:"dataset",who:"Indeed Hiring Lab",yr:2026,what:"AI Tracker",url:"https://github.com/hiring-lab/ai-tracker",acc:11,note:"Public repository. It carries no prompt-engineer series, which is why we could not build a postings trend."},
+{n:13,t:"dataset",names:1,who:"Lightcast",yr:2025,what:"Beyond the Buzz: Developing the AI Skills Employers Actually Need",url:"https://lightcast.io/resources/blog/beyond-the-buzz-press-release-2025-07-23",acc:11},
+{n:14,t:"dataset",names:1,who:"LinkedIn Economic Graph",yr:2025,what:"Jobs on the Rise 2025",url:"https://www.linkedin.com/pulse/linkedin-jobs-rise-2025",acc:10},
+{n:15,t:"dataset",who:"Microsoft WorkLab",yr:2025,what:"2025 Work Trend Index Annual Report",url:"https://www.microsoft.com/en-us/worklab/work-trend-index/2025-the-year-the-frontier-firm-is-born",acc:11},
+{n:16,t:"dataset",cond:"wall",who:"World Economic Forum",yr:2025,what:"The Future of Jobs Report 2025",url:"https://www.weforum.org/publications/the-future-of-jobs-report-2025/",acc:10,note:"weforum.org refused automated retrieval; read through an indexed summary and re-opened by hand."},
+{n:17,t:"dataset",uz:1,who:"German Economic Team / Berlin Economics",yr:2025,what:"The Uzbek IT sector: a rising star in Central Asia? Newsletter No. 38",url:"https://www.german-economic-team.com/en/newsletter/the-uzbek-it-sector-a-rising-star-in-central-asia/",acc:11},
+{n:18,t:"dataset",uz:1,who:"Oxford Insights",yr:2025,what:"Government AI Readiness Index 2025",url:"https://oxfordinsights.com/ai-readiness/government-ai-readiness-index-2025/",acc:11},
+{n:19,t:"research",who:"Battle, R. and Gollapudi, T.",yr:2024,what:"The Unreasonable Effectiveness of Eccentric Automatic Prompts",pubx:"arXiv:2402.10949",url:"https://arxiv.org/abs/2402.10949",acc:11},
+{n:20,t:"research",who:"Chen, L., Zaharia, M. and Zou, J.",yr:2023,what:"How is ChatGPT&rsquo;s behavior changing over time?",pubx:"arXiv:2307.09009",url:"https://arxiv.org/abs/2307.09009",acc:11,note:"GPT-4 84% &rarr; 51% on a fixed task, March to June 2023."},
+{n:21,t:"research",cond:"wall",who:"Davenport, T.H. and Patil, D.J.",yr:2022,what:"Is Data Scientist Still the Sexiest Job of the 21st Century?",pubx:"Harvard Business Review",url:"https://hbr.org",acc:11,note:"Paywalled. We read the published summary only and quote no figures from it; confirm the exact article URL in a browser before submission."},
+{n:22,t:"research",names:1,who:"Liang, J.T., Yang, C., Sergeyuk, A., Breaux, T.D. and Myers, B.A.",yr:2025,what:"Understanding Prompt Programming Tasks and Questions",pubx:"arXiv:2507.17264",url:"https://arxiv.org/abs/2507.17264",acc:11},
+{n:23,t:"research",who:"Su, J., Zhang, J., Ullrich, K., Bottou, L. and Ibrahim, M.",yr:2025,what:"A Single Character can Make or Break Your LLM Evals",pubx:"arXiv:2510.05152",url:"https://arxiv.org/abs/2510.05152",acc:11,note:"Meta FAIR and NYU, 2 October 2025; &plusmn;23% MMLU swing, and it does not improve with scale."},
+{n:24,t:"research",names:1,who:"Vu, A. and Oppenlaender, J.",yr:2026,what:"Prompt Engineer: Analyzing Hard and Soft Skill Requirements in the AI Job Market",pubx:"arXiv:2506.00058",url:"https://arxiv.org/abs/2506.00058",acc:11},
+{n:25,t:"practice",who:"Bottaro, J.P. and Ramgopal, K.",yr:2024,what:"Musings on Building a Generative AI Product",pubx:"LinkedIn Engineering Blog",url:"https://www.linkedin.com/blog/engineering/generative-ai/musings-on-building-a-generative-ai-product",acc:11},
+{n:26,t:"practice",who:"Girme, R., Miller, D., Zhao, M., Yang, L. and Kelly, C.",yr:2026,what:"Eval-driven development: Lessons from evaluating GenAI at scale",pubx:"Airbnb Engineering &amp; Data Science",url:"https://airbnb.tech/ai-ml/eval-driven-development-lessons-from-evaluating-genai-at-scale/",acc:11},
+{n:27,t:"practice",who:"Husain, H.",yr:2025,what:"A Field Guide to Rapidly Improving AI Products",url:"https://hamel.dev/blog/posts/field-guide/",acc:11},
+{n:28,t:"practice",who:"Husain, H.",yr:2026,what:"AI Evals: Everything You Need to Know",url:"https://hamel.dev/blog/posts/evals-faq/",acc:11},
+{n:29,t:"practice",who:"Yan, E., Bischof, B., Frye, C., Husain, H., Liu, J. and Shankar, S.",yr:2024,what:"What We Learned from a Year of Building with LLMs",url:"https://applied-llms.org/",acc:11},
+{n:30,t:"vendor",names:1,who:"Anthropic",yr:2024,what:"AI prompt engineering: a deep dive",pubx:"video roundtable with Askell, A., Witten, Z., Hershey, D. and Albert, A.",url:"https://www.youtube.com/watch?v=T9aRN5JkmL8",acc:11},
+{n:31,t:"vendor",who:"Anthropic",yr:2026,what:"Demystifying evals for AI agents",url:"https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",acc:11},
+{n:32,t:"vendor",who:"Anthropic",yr:2026,what:"Prompt engineering overview",url:"https://docs.anthropic.com/",acc:10},
+{n:33,t:"vendor",names:1,who:"Anthropic Careers",yr:2026,what:"Prompt Engineer, Claude Code",pubx:"Greenhouse job board",url:"https://job-boards.greenhouse.io/anthropic/jobs/5159669008",acc:11,note:"The only advertisement for this exact job title anywhere in the fifty-three. Confirmed open 11 September 2026, no salary shown; re-check before presenting."},
+{n:34,t:"vendor",who:"Anthropic Engineering",yr:2025,what:"Effective context engineering for AI agents",url:"https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",acc:11,note:"&ldquo;Smarter models require less prescriptive engineering&rdquo;, 29 September 2025 &mdash; the vendor arguing against the job&rsquo;s future."},
+{n:35,t:"vendor",who:"Boonstra, L.",yr:2025,what:"Prompt Engineering",pubx:"Google",url:"https://www.kaggle.com/whitepaper-prompt-engineering",acc:10},
+{n:36,t:"vendor",who:"OpenAI",yr:2026,what:"Prompt engineering guide",url:"https://platform.openai.com/docs/guides/prompt-engineering",acc:10},
+{n:37,t:"salary",cond:"wall",who:"Glassdoor",yr:2026,what:"AI Product Manager: average salary and pay trends, United States",url:"https://www.glassdoor.com/Salaries/ai-product-manager-salary-SRCH_KO0,18.htm",acc:11,note:"Refused automated retrieval; read through an indexed summary and re-opened by hand."},
+{n:38,t:"salary",cond:"wall",names:1,who:"Glassdoor",yr:2026,what:"Prompt Engineer: average salary and pay trends, United States",url:"https://www.glassdoor.com/Salaries/prompt-engineer-salary-SRCH_KO0,15.htm",acc:10,note:"Refused automated retrieval; read through an indexed summary and re-opened by hand. Self-reported: never called a statistic in this talk."},
+{n:39,t:"salary",cond:"wall",names:1,who:"Indeed",yr:2026,what:"Prompt engineer salary in United States",url:"https://www.indeed.com/career/prompt-engineer/salaries",acc:10,note:"Refused automated retrieval; read through an indexed summary and re-opened by hand."},
+{n:40,t:"salary",cond:"wall",names:1,who:"ZipRecruiter",yr:2026,what:"Prompt Engineering Salary, United States",url:"https://www.ziprecruiter.com/Salaries/Prompt-Engineering-Salary",acc:11,note:"Refused automated retrieval; read through an indexed summary and re-opened by hand."},
+{n:41,t:"press",uz:1,who:"Spot.uz",yr:2026,what:"Average monthly wages by sector, Q1 2026",url:"https://www.spot.uz/ru/2026/04/30/wages/",acc:11,note:"Citing the National Statistics Committee of Uzbekistan, 30 April 2026. We could not obtain the Committee&rsquo;s own release."},
+{n:42,t:"press",uz:1,cond:"via",who:"The Times of Central Asia",yr:2026,what:"Report on Uzbekistan&rsquo;s AI economy",url:"https://timesca.com/uzbekistan-ai-economy/",acc:11,note:"Relaying the Microsoft Global AI Diffusion Report, 7 August 2026. We could not open the report itself."},
+{n:43,t:"press",uz:1,cond:"via",who:"Trend News Agency",yr:2026,what:"Report on Uzbekistan&rsquo;s IT services exports in 2025",url:"https://www.trend.az/business/4139902.html",acc:11,note:"Relaying the Ministry of Digital Technologies, 10 January 2026. No ministry release of our own."},
+{n:44,t:"press",names:1,who:"Cerullo, M.",yr:2023,what:"AI tools like ChatGPT and Dall-E are spawning new jobs as companies look to hire &lsquo;prompt engineers&rsquo;",pubx:"CBS News",url:"https://www.cbsnews.com/news/ai-artificial-intelligence-chatgpt-jobs-prompt-engineer/",acc:11},
+{n:45,t:"press",names:1,cond:"via",who:"Fore, P.",yr:2025,what:"Prompt engineering, the &#36;200k six-figure role, is now obsolete thanks to AI",pubx:"Fortune",url:"https://fortune.com/2025/05/07/prompt-engineering-200k-six-figure-role-now-obsolete-thanks-to-ai/",acc:11,note:"Our source for the October 2022 Sam Altman quote used in the speaker notes; the original recording was not retrievable."},
+{n:46,t:"press",names:1,who:"Genkina, D.",yr:2024,what:"AI Prompt Engineering Is Dead",pubx:"IEEE Spectrum",url:"https://spectrum.ieee.org/prompt-engineering-is-dead",acc:11,note:"Reports the three-model, sixty-variant test and Battle&rsquo;s conclusion &mdash; reference 19 is the study itself."},
+{n:47,t:"press",names:1,who:"PromptLayer",yr:2025,what:"AI prompt engineering jobs in 2025: skills, salaries and future outlook",url:"https://blog.promptlayer.com/ai-prompt-engineering-jobs-in-2025-skills-salaries-future-outlook/",acc:10},
+{n:48,t:"press",names:1,who:"The AI Career Lab",yr:2026,what:"What happened to the prompt engineer?",url:"https://theaicareerlab.com/careers/what-happened-to-the-prompt-engineer",acc:10},
+{n:49,t:"ours",who:"O*NET OnLine, U.S. Department of Labor",yr:2026,what:"Occupation search: &lsquo;prompt engineer&rsquo;",url:"https://www.onetonline.org/find/result?s=prompt+engineer",acc:11,note:"Searched by the authors, 11 September 2026: no match among the 1,016 O*NET-SOC occupations. The absence is the finding."},
+{n:50,t:"ours",who:"OpenAI",yr:2026,what:"Deprecations",pubx:"platform documentation",url:"https://developers.openai.com/api/docs/deprecations",acc:11,note:"More than sixty model and endpoint retirements listed, 2022&ndash;2027; counted from their table by the authors, 11 September 2026."},
+{n:51,t:"ours",uz:1,who:"Authors&rsquo; own check",yr:2026,what:"Programme listings at Tashkent University of Information Technologies, Inha University in Tashkent and New Uzbekistan University",url:"",acc:11,note:"Checked 11 September 2026 from each university&rsquo;s own programme pages; no prompt-engineering qualification at any of the three. No single URL."},
+{n:52,t:"ours",uz:1,who:"HeadHunter Uzbekistan",yr:2026,what:"All Tashkent vacancies",url:"https://tashkent.hh.uz/search/vacancy?area=97",acc:11,note:"11,350 listed; counted by the authors, 11 September 2026."},
+{n:53,t:"ours",uz:1,names:1,who:"HeadHunter Uzbekistan",yr:2026,what:"Vacancy search for &lsquo;prompt engineer&rsquo;, Tashkent",url:"https://tashkent.hh.uz/search/vacancy?text=%22prompt+engineer%22&amp;area=97&amp;search_field=name",acc:11,note:"Run by the authors, 11 September 2026: two results, out of 11,350."}
+];
+
+/* One renderer. The frame, the B sheet and the printed submission are the same
+   string, so they cannot drift out of Westminster Harvard with each other.
+   Author (Year) *Title*. Publication. Available at: URL (Accessed: date). */
+const harvard = r => `<b>${r.who}</b> (${r.yr}) <i>${r.what}</i>.${r.pubx ? " " + r.pubx + "." : ""} ` +
+  (r.url ? `Available at: <span class="u">${r.url}</span>` :
+           `[No single URL: searched from each institution&rsquo;s own pages.]`) +
+  ` <span class="ac">(Accessed: ${r.acc} September 2026).</span>`;
+
+/* the one entry the frame itself prints, at reading size */
+const reader = r => `<div class="rdr-tag mono">FULL ENTRY &middot; <span class="rdr-n">${String(r.n).padStart(2,"0")}</span> OF 53 &middot; WESTMINSTER HARVARD &middot; PRESS <b>B</b> FOR ALL FIFTY-THREE</div>
+      <p class="rdr-b">${harvard(r)}</p>`;
+
+/* the visual, the overlay and the print sheet all read these */
+DECK.refs = REFS; DECK.tiers = TIERS; DECK.bands = BANDS;
+DECK.harvard = harvard; DECK.reader = reader; DECK.current = 4;
+
+/* A top-level `const` in a classic script is NOT a property of window — it
+   lives in the global lexical scope, which sibling scripts can read by bare
+   name but `window.DECK` cannot. The visual modules and the bibliography guard
+   on window.DECK so they fail loudly rather than throwing, so publish it. */
+window.DECK = DECK;
+
+
 </script>
 <script>
 /* =============================================================================
@@ -2800,11 +3385,26 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
     world.style.width = W + "px"; world.style.height = H + "px";
     sizeDepth();
     world.innerHTML = `<svg class="path" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><path d="${pathD()}"/></svg>` +
-      F.map((f, i) => `<section class="frame" data-i="${i}" data-enter="${f.enter || "rise"}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
+      F.map((f, i) => `<section class="frame" data-i="${i}" data-id="${f.id}" data-enter="${f.enter || "rise"}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
         <div class="fnum mono">${String(i + 1).padStart(2, "0")}</div><div class="fin">${frameHTML(f)}</div></section>`).join("");
     depth.innerHTML = TOKENS.map((t, i) => `<span class="tok mono" style="left:${(i * 137) % 100}%;top:${(i * 71 + 13) % 100}%;animation-delay:${-i * 1.7}s;animation-duration:${18 + (i % 5) * 4}s">${t}</span>`).join("");
+    /* The rail is the only thing on screen during the whole talk, so it should
+       say more than "where am I". Grouped into the three speakers' runs, it
+       also says whose turn it is and how far through their own block they are —
+       which is the thing three nervous presenters actually need to see. */
     const cuts = (typeof OPTIONAL !== "undefined") ? OPTIONAL : [];
-    rail.innerHTML = F.map((f, i) => `<button class="dot${cuts.indexOf(f.id) < 0 ? "" : " cut"}" data-i="${i}" title="${f.label}${cuts.indexOf(f.id) < 0 ? "" : " — optional, cut first for a 30-minute slot"}"><span></span></button>`).join("") + `<div class="rlabel" id="rlabel"></div>`;
+    let runs = "", spkNow = -1;
+    F.forEach((f, i) => {
+      if (f.speaker !== spkNow) {
+        if (spkNow !== -1) runs += `</div>`;
+        spkNow = f.speaker;
+        runs += `<div class="run" data-spk="${spkNow}" title="${(TEAM[spkNow] || {}).name || ""} · ${(TEAM[spkNow] || {}).mins || ""}">`;
+      }
+      const cut = cuts.indexOf(f.id) < 0;
+      runs += `<button class="dot${cut ? "" : " cut"}" data-i="${i}" data-spk="${f.speaker}"
+        title="${i + 1} · ${f.label}${cut ? "" : " — optional, cut first for a 30-minute slot"}"><span></span></button>`;
+    });
+    rail.innerHTML = runs + `</div><div class="rlabel" id="rlabel"></div>`;
 
     /* The route between frames is the one thing a zoom canvas can do that slides
        cannot. Light it, if the module is present. */
@@ -2913,6 +3513,7 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
     }, delay));
     const t = TEAM[F[i].speaker];
     spk.textContent = t ? t.name + " · " + t.mins : "";
+    document.body.dataset.spk = F[i].speaker;   /* tints the chip and the rail run */
     notes.textContent = F[i].notes || "";
     if (lastSpeaker !== null && lastSpeaker !== F[i].speaker) resetClock();   /* each speaker times their own block */
     lastSpeaker = F[i].speaker;
@@ -2941,8 +3542,46 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   }
   function paintRail() {
     rail.querySelectorAll(".dot").forEach((d, k) => { d.classList.toggle("on", k === idx); d.classList.toggle("done", k < idx); });
-    $("#rlabel").textContent = (idx + 1) + " / " + F.length + " · " + F[idx].label;
+    rail.querySelectorAll(".run").forEach(r => r.classList.toggle("live", +r.dataset.spk === F[idx].speaker));
+    const own = F.filter(f => f.speaker === F[idx].speaker);
+    const nth = own.indexOf(F[idx]) + 1;
+    $("#rlabel").innerHTML = `<b>${idx + 1}</b><span class="of">/${F.length}</span> ${F[idx].label}` +
+      `<span class="own">${(TEAM[F[idx].speaker] || {}).name || ""} ${nth}/${own.length}</span>`;
   }
+
+  /* ---------- B · the bibliography, outside the camera ----------
+     #bib is a .ui layer — a sibling of #stage, not a child of #world — so the
+     camera transform never touches it. 19px there is 19px on the projector,
+     where the same entry inside a fitted frame renders at about 12. That one
+     fact is why the fifty-three complete citations live here and not on the
+     frame, and it costs the world no pixels and the compositor no tiles.
+     Built once from DECK.refs, so it cannot disagree with the strip. */
+  const bib = $("#bib");
+  function buildBib() {
+    const R = (window.DECK && DECK.refs) || [];
+    if (!R.length) { bib.innerHTML = `<p class="bnote mono">deck.js exposed no DECK.refs</p>`; return; }
+    /* Harvard is ONE alphabetical sequence and is not numbered — numbering is a
+       Vancouver habit. Sorting here rather than storing a second order means the
+       margin index and the strip can never point at different things. */
+    const az = R.slice().sort((a, b) =>
+      a.who.localeCompare(b.who, "en") || a.yr - b.yr || a.what.localeCompare(b.what, "en"));
+    const bandOf = r => (DECK.tiers.find(t => t.id === r.t) || {}).b || "";
+    bib.innerHTML =
+      `<div class="bhead"><h3>References</h3><p class="bnote mono">PSE &middot; CW1 &middot; PROMPT ENGINEER AS A CAREER &middot; WESTMINSTER HARVARD &middot; ONE ALPHABETICAL SEQUENCE<br>${R.length} SOURCES &middot; RETRIEVED 10&ndash;11 SEPTEMBER 2026 &middot; B OR ESC TO CLOSE &middot; &#8984;P TO PRINT THE SUBMITTED LIST</p></div>
+       <ol class="bcols">${az.map(r => `<li class="be" data-n="${r.n}" data-band="${bandOf(r)}"><span class="bn mono">${String(r.n).padStart(2, "0")}</span><span class="bt">${DECK.harvard(r)}${r.note ? `<span class="nt">${r.note}</span>` : ""}</span></li>`).join("")}</ol>`;
+  }
+  /* It opens on whatever the reference frame was last showing, so "where is
+     that from" in Q&A is: point at the mark, press B, and the entry is already
+     on the wall, highlighted, at full size. */
+  function openBib() {
+    if (!bib.firstChild) buildBib();
+    bib.querySelectorAll(".be.hit").forEach(n => n.classList.remove("hit"));
+    const cur = bib.querySelector(`.be[data-n="${(window.DECK && DECK.current) || 0}"]`);
+    document.body.classList.add("bib");
+    if (cur) { cur.classList.add("hit"); cur.scrollIntoView({ block: "center" }); }
+    else bib.scrollTop = 0;
+  }
+  const closeBib = () => document.body.classList.remove("bib");
 
   /* ---------- clock ----------
      Three speakers with different shares, so one global target would be wrong
@@ -2954,7 +3593,10 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   let sec = 0, tid = null;
   function paintClock() {
     const t = target();
-    clock.textContent = String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0");
+    const mid = Math.round((t.min + t.max) / 2);
+    clock.innerHTML = String(Math.floor(sec / 60)).padStart(2, "0") + ":" + String(sec % 60).padStart(2, "0") +
+      `<span class="tgt">/ ${Math.round(mid / 60)}:00</span>` +
+      `<i style="width:${Math.min(100, sec / mid * 100).toFixed(1)}%"></i>`;
     clock.className = "mono" + (tid ? " run" : "") + (sec >= t.min && sec <= t.max ? " in" : sec > t.max ? " over" : "");
     clock.title = (TEAM[F[idx] ? F[idx].speaker : 0] || { name: "" }).name + ": target " +
                   Math.round(t.min / 60) + "-" + Math.round(t.max / 60) +
@@ -2966,12 +3608,21 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   /* ---------- input ---------- */
   document.addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    /* While the bibliography is open it owns the keyboard, or the first person
+       to press Escape mid-list is thrown into the overview and the first arrow
+       key silently advances the deck behind the overlay. */
+    if (document.body.classList.contains("bib")) {
+      if (e.key === "b" || e.key === "B" || e.key === "Escape") { closeBib(); e.preventDefault(); }
+      return;
+    }
+
     switch (e.key) {
       case "ArrowRight": case "PageDown": case " ": case "Enter": if (overview) go(idx); else go(idx + 1); e.preventDefault(); break;
       case "ArrowLeft": case "PageUp": case "Backspace": go(idx - 1); e.preventDefault(); break;
       case "Home": go(0); break; case "End": go(F.length - 1); break;
       case "o": case "O": case "Escape": overview ? go(idx) : showOverview(); break;
       case "n": case "N": case "p": case "P": document.body.classList.toggle("notes"); break;
+      case "b": case "B": openBib(); e.preventDefault(); break;
       case "t": case "T": toggleClock(); break;
       case "r": case "R": resetClock(); break;
       case "f": case "F": document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
