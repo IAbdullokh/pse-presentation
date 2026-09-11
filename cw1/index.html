@@ -1167,15 +1167,21 @@ VIS.provenance = { mount(host, api) {
     { id: "press",     label: "Press reporting, 2023",          colour: T.ink3 }
   ];
 
+  /* Ordered to MATCH the source rail, not the order the claims appear in the
+     talk. Listing them in frame order made every thread cross every other one,
+     and the tangle was the first thing an audience saw. Grouped this way the
+     threads run as parallel bands, and how many claims a source carries becomes
+     readable at a glance — which is the only thing this diagram is for. Each
+     claim still shows its frame number, so the narrative link survives. */
   const CLAIMS = [
-    { f: "f2", text: "$375k listing, 2023",          src: "press" },
     { f: "f6", text: "$131,483 Glassdoor avg",       src: "glassdoor" },
     { f: "f6", text: "$112,806 Indeed avg",          src: "indeed" },
     { f: "f6", text: "+156% AI postings 24-25",      src: "linkedin" },
     { f: "f7", text: "-30% standalone postings",     src: "linkedin" },
     { f: "f7", text: "78% of AI adverts",            src: "linkedin" },
     { f: "f7", text: "+250% skill tags",             src: "linkedin" },
-    { f: "f7", text: "170M created / 92M displaced", src: "wef" }
+    { f: "f7", text: "170M created / 92M displaced", src: "wef" },
+    { f: "f2", text: "$375k listing, 2023",          src: "press" }
   ];
 
   const srcOf = id => SOURCES.find(s => s.id === id);
@@ -2033,7 +2039,7 @@ const R = (i, html, tag) => `<${tag || "div"} class="r" style="--i:${i}">${html}
 
 const DECK = {
   title: "Prompt Engineer as a Career",
-  world: { w: 5800, h: 6200 },
+  world: { w: 6400, h: 6200 },
   accessed: ACCESSED,
 
   frames: [
@@ -2203,12 +2209,22 @@ const DECK = {
       ${R(3, `<div class="callout final"><span class="mono acc">OUR VERDICT</span> Every one of us should be a competent prompt engineer by graduation. None of us should plan to be only that.</div>`)}` },
 
   /* ───────────────────────── 10 · REFERENCES ───────────────────────── */
-  { id: "references", label: "References", speaker: 2, enter: "blur", x: 2200, y: 4750, w: 1600, h: 1180,
-    notes: "Leave this frame up for questions. Every number in the talk traces to one of these. If challenged on a figure, point to the line.",
+  /* ───────────────────── 10 · WHERE THE NUMBERS CAME FROM ───────────────────── */
+  { id: "provenance", label: "Where the numbers came from", speaker: 2, enter: "blur", x: 2200, y: 4750, w: 1500, h: 1000,
+    notes: "The evidence frame. Say: 'Every number we put on screen traces to one of five sources. Four of our seven claims come from LinkedIn's own labour data — so if you doubt that one source you should doubt four of our claims at once, and we would rather you knew that than not.' Then invite it: point at any figure and we will name where it came from. Hovering a claim lights its thread.",
     html: `
-      <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
-      ${R(1, `<div class="vis vis-provenance" data-vis="provenance"></div>`)}
-      ${R(2, `<div class="dossier">
+      <div class="kicker mono">10 · WHERE EVERY NUMBER CAME FROM</div>
+      ${R(1, `<h2>Seven claims, <em>five sources</em>.</h2>`)}
+      ${R(2, `<p class="body">Each line on the left is a figure we put on screen, tagged with the frame it appeared on. Each line on the right is where it came from.</p>`)}
+      ${R(3, `<div class="vis vis-provenance" data-vis="provenance"></div>`)}
+      ${R(4, `<div class="callout"><span class="mono acc">WHAT THIS ADMITS</span> Four of our seven quantitative claims rest on one source. That is a concentration, and we are showing it rather than hiding it behind five different-looking citations.</div>`)}` },
+
+  /* ───────────────────── 11 · REFERENCES ───────────────────── */
+  { id: "references", label: "References", speaker: 2, enter: "rise", x: 4000, y: 4750, w: 1600, h: 790,
+    notes: "Leave this up for questions. The sources are grouped by what they are FOR, so a mentor asking 'where did the salary come from' goes to labour-market data, and one asking 'how do you know what the job involves' goes to vendor documentation. Say: we read all ten on the tenth of September and we re-check every one the week before submission, because aggregator salaries move monthly.",
+    html: `
+      <div class="kicker mono">11 · REFERENCES · WESTMINSTER HARVARD</div>
+      ${R(1, `<div class="dossier">
         <div class="ref-col">
           <h5 class="mono">LABOUR-MARKET DATA <span>the figures on screen</span></h5>
           <ol class="refs">
@@ -2236,7 +2252,8 @@ const DECK = {
           </ol>
         </div>
       </div>`)}
-      ${R(3, `<div class="foot mono warn">Hover any reference to light its thread above. Team: re-open every link and re-check every figure the week before submission — aggregator salaries move monthly.</div>`)}` }
+      ${R(2, `<div class="foot mono dim">Grouped by what each source is for. Every URL complete, every access date stated.</div>`)}` }
+
   ]
 };
 
