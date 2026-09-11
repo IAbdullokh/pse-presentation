@@ -88,17 +88,26 @@ body { background: var(--bg); color: var(--ink); font-family: var(--serif); over
 
 #stage { position: fixed; inset: 0; overflow: hidden; cursor: default; user-select: none;
   background: radial-gradient(1200px 800px at 15% 10%, #141a33 0%, transparent 60%), radial-gradient(1000px 700px at 85% 90%, #1a1730 0%, transparent 60%), var(--bg); }
-/* No permanent will-change here. These layers are 5800x6200 and 9000x7000;
-   promoting them forever asks the compositor for a texture large enough that
-   Chrome silently drops tiles, which showed up as frames painting half-width.
-   Promote only while the camera is actually moving. */
+/* COMPOSITOR BUDGET — read this before enlarging anything.
+   Every pixel of #world and #depth is a pixel Chrome may have to rasterise.
+   At eighteen frames the world is ~76 megapixels; a layer that also spanned the
+   world took the pair past 160MP, which is roughly 650MB of texture, and Chrome
+   responds by rasterising the tiles it can afford and silently dropping the
+   rest — frames paint half-width, or not at all.
+   So: no permanent will-change (promote only while the camera moves), and the
+   parallax layer is sized to the camera's actual travel, not to the world. */
 #depth, #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
-/* width/height are set from the world size in engine.js — one source of truth,
-   so adding a row of frames cannot leave a bald strip at the edge. */
-#depth { left: -400px; top: -400px; pointer-events: none;
+/* left/top/width/height are set in engine.js from how far the camera can
+   actually travel — see sizeDepth(). Roughly a seventh of the world's area. */
+#depth { pointer-events: none;
   background: radial-gradient(circle at 1px 1px, rgba(243,239,230,.06) 1px, transparent 1.6px) 0 0 / 34px 34px; }
 .moving { transition: transform 1.05s cubic-bezier(.22,.8,.2,1); will-change: transform; }
 .tok { position: absolute; font-size: 22px; color: rgba(138,164,255,.28); border: 1px solid rgba(138,164,255,.16); padding: 6px 14px; border-radius: 999px; white-space: nowrap; animation: drift linear infinite; }
+/* Blinking carets and pulsing dots on seventeen frames the room cannot see are
+   seventeen compositor wake-ups a second for nothing. */
+.frame:not(.active) .caret, .frame:not(.active) .pl-car,
+.frame:not(.active) .tg-dot, .frame:not(.active) .tg-caret { animation-play-state: paused; }
+.ov .tok { animation-play-state: paused; }
 @keyframes drift { from { transform: translate(0,0); } 50% { transform: translate(60px,-40px); } to { transform: translate(0,0); } }
 
 .path { position: absolute; left: 0; top: 0; overflow: visible; }
@@ -106,11 +115,22 @@ body { background: var(--bg); color: var(--ink); font-family: var(--serif); over
 
 /* ---------- frames ---------- */
 .frame { position: absolute; background: var(--surface); border: 1px solid var(--line); border-radius: 28px;
-  box-shadow: 0 30px 90px -30px rgba(0,0,0,.8); overflow: hidden; }
+  box-shadow: 0 18px 44px -22px rgba(0,0,0,.85); overflow: hidden;
+  /* Off-screen frames are not rendered at all. Seventeen of eighteen are
+     off-screen while presenting, and each one costs a full paint of several
+     hundred nodes plus its SVG visual. The frame carries explicit width and
+     height in its style attribute, so size containment is already satisfied and
+     nothing shifts when a frame comes back into view. */
+  content-visibility: auto; }
 .frame::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(242,169,59,.06), transparent 40%); pointer-events: none; }
 .fnum { position: absolute; right: 34px; top: 30px; font-size: 22px; color: var(--ink3); }
 .fin { position: absolute; inset: 0; padding: 74px 84px; display: flex; flex-direction: column; gap: 26px; }
-.ov .frame { cursor: pointer; }
+.frame.active, .frame.near { content-visibility: visible; }
+.ov .frame { cursor: pointer; box-shadow: none;
+  /* every frame is on screen at map scale, so containment saves nothing and the
+     browser pays for the check — and eighteen large blurred shadows at once is
+     the single most expensive thing on that view */
+  content-visibility: visible; }
 .ov .frame:hover { border-color: var(--acc); }
 
 .kicker { font-size: 18px; color: var(--acc); letter-spacing: .14em; }
@@ -2778,10 +2798,7 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
 
   function build() {
     world.style.width = W + "px"; world.style.height = H + "px";
-    /* The parallax layer has to cover the world plus the overscroll the camera
-       shows at the edges. Sizing it from the world, not from a number in the
-       stylesheet, means adding a row of frames cannot leave a bald strip. */
-    depth.style.width = (W + 800) + "px"; depth.style.height = (H + 800) + "px";
+    sizeDepth();
     world.innerHTML = `<svg class="path" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><path d="${pathD()}"/></svg>` +
       F.map((f, i) => `<section class="frame" data-i="${i}" data-enter="${f.enter || "rise"}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px">
         <div class="fnum mono">${String(i + 1).padStart(2, "0")}</div><div class="fin">${frameHTML(f)}</div></section>`).join("");
@@ -2800,11 +2817,49 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   let comet = null, cometPoints = null;
 
   /* ---------- camera ---------- */
+  /* `.moving` carries both the transition and will-change: transform. The
+     will-change must come OFF the moment the camera stops. Left on, it asks the
+     compositor to hold a ~76-megapixel layer promoted forever; Chrome cannot
+     afford the texture, drops tiles, and frames paint half-width or blank. That
+     failure looks like a rendering bug and is really a memory budget. */
+  let settleT = null;
   function apply(animate) {
     const mv = animate && !reduced;
+    clearTimeout(settleT);
     world.classList.toggle("moving", mv); depth.classList.toggle("moving", mv);
     world.style.transform = `translate(${cam.tx}px,${cam.ty}px) scale(${cam.s})`;
     depth.style.transform = `translate(${cam.tx * 0.3}px,${cam.ty * 0.3}px) scale(${1 + (cam.s - 1) * 0.2})`;
+    if (mv) settleT = setTimeout(settle, 1150);       /* transition is 1.05s */
+  }
+  function settle() { world.classList.remove("moving"); depth.classList.remove("moving"); }
+  /* transitionend is the accurate signal; the timeout above is the backstop for
+     the case where the transform did not actually change and no event fires. */
+  world.addEventListener("transitionend", e => { if (e.propertyName === "transform") settle(); });
+  /* The parallax layer only ever has to cover the VIEWPORT, at every camera
+     position the deck can reach — not the world. Sized to the world it was 91
+     megapixels against the world's 76, and the pair blew the compositor's tile
+     budget; solved for the camera's actual travel it is about an eighth of that
+     for pixel-identical output. Recomputed on resize because both the fit scale
+     and the viewport are inputs. */
+  function sizeDepth() {
+    const vw = stage.clientWidth, vh = stage.clientHeight, M = 220;
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    F.map(fitFrame).concat([overviewCam()]).forEach(c => {
+      const ds = 1 + (c.s - 1) * 0.2, px = c.tx * 0.3, py = c.ty * 0.3;
+      /* on screen a point x of the layer lands at x*ds + px, so to cover 0..vw
+         the layer must span (0-px)/ds .. (vw-px)/ds */
+      l = Math.min(l, (0 - px) / ds); r = Math.max(r, (vw - px) / ds);
+      t = Math.min(t, (0 - py) / ds); b = Math.max(b, (vh - py) / ds);
+    });
+    depth.style.left   = Math.floor(l - M) + "px";
+    depth.style.top    = Math.floor(t - M) + "px";
+    depth.style.width  = Math.ceil(r - l + M * 2) + "px";
+    depth.style.height = Math.ceil(b - t + M * 2) + "px";
+  }
+
+  function overviewCam() {
+    const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / W, vh / H) * 0.93;
+    return { s, tx: vw / 2 - W / 2 * s, ty: vh / 2 - H / 2 * s };
   }
   function fitFrame(f) {
     const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / f.w, vh / f.h) * 0.88;
@@ -2822,8 +2877,7 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   }
   function showOverview() {
     overview = true; stage.classList.add("ov");
-    const vw = stage.clientWidth, vh = stage.clientHeight, s = Math.min(vw / W, vh / H) * 0.93;
-    cam = { s, tx: vw / 2 - W / 2 * s, ty: vh / 2 - H / 2 * s }; apply(true);
+    cam = overviewCam(); apply(true);
     document.querySelectorAll(".frame").forEach(el => {
       el.classList.remove("active");
       if (window.VisRuntime) { VisRuntime.unmount(el); VisRuntime.mount(el, { static: true }); }
@@ -2840,6 +2894,11 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
     revealT.forEach(clearTimeout); revealT = []; clearInterval(typeT);
     document.querySelectorAll(".frame").forEach((el, k) => {
       const on = k === i; el.classList.toggle("active", on);
+      /* content-visibility:auto skips rendering AND animation while a frame is
+         off-screen. The camera takes 1.05s to arrive but the reveal fires at
+         520ms, so the frame has to be warm before then — and the neighbours
+         too, or stepping back and forth pays a fresh paint each time. */
+      el.classList.toggle("near", Math.abs(k - i) <= 1);
       if (!on) {
         el.querySelectorAll(".num").forEach(n => n.textContent = fmt(n, 0));
         el.querySelectorAll(".type").forEach(t => t.textContent = "");
@@ -2945,7 +3004,10 @@ const OPTIONAL = ["dayinlife", "adjacent", "interview", "uzbekistan"];
   let sx = null;
   stage.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener("touchend", e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) go(idx + (dx < 0 ? 1 : -1)); sx = null; });
-  new ResizeObserver(() => { overview ? showOverview() : (cam = fitFrame(F[idx]), apply(false)); }).observe(stage);
+  new ResizeObserver(() => {
+    sizeDepth();
+    overview ? showOverview() : (cam = fitFrame(F[idx]), apply(false));
+  }).observe(stage);
 
   /* ---------- start ---------- */
   build(); paintClock();
