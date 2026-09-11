@@ -1392,6 +1392,84 @@ const Journey = (function () {
 </script>
 <script>
 /* =============================================================================
+   fx.js — the presentation layer.
+   Views are pure functions returning HTML and the router replaces the page
+   wholesale, so there is nowhere for a view to own an animation. This runtime
+   gives that back: a module registers as PSEFX.<id> and is handed each freshly
+   rendered page to decorate, with every timer and observer it starts torn down
+   automatically on the next navigation.
+   ========================================================================== */
+
+const PSEFX = {};
+
+const FX = (function () {
+  const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let teardown = [];
+
+  function makeApi() {
+    const api = {
+      reduced: reduced(),
+      raf(fn) {
+        let id, t0 = null, stop = false;
+        const step = ts => {
+          if (stop) return;
+          if (t0 === null) t0 = ts;
+          if (fn((ts - t0) / 1000) !== false) id = requestAnimationFrame(step);
+        };
+        id = requestAnimationFrame(step);
+        teardown.push(() => { stop = true; cancelAnimationFrame(id); });
+      },
+      after(ms, fn) { const id = setTimeout(fn, api.reduced ? 0 : ms); teardown.push(() => clearTimeout(id)); return id; },
+      every(ms, fn) { const id = setInterval(fn, ms); teardown.push(() => clearInterval(id)); return id; },
+      observe(obs) { teardown.push(() => obs.disconnect()); return obs; },
+      on(el, ev, fn, opts) { el.addEventListener(ev, fn, opts); teardown.push(() => el.removeEventListener(ev, fn, opts)); },
+      onTeardown(fn) { teardown.push(fn); },
+      ease: {
+        out: t => 1 - Math.pow(1 - t, 3),
+        inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      }
+    };
+    return api;
+  }
+
+  /* Called by app.js immediately after a page's HTML is in the DOM. */
+  function run(root, ctx) {
+    teardown.forEach(fn => { try { fn(); } catch (e) {} });
+    teardown = [];
+    const api = makeApi();
+    Object.keys(PSEFX).forEach(id => {
+      const m = PSEFX[id];
+      if (!m || typeof m.onRender !== "function") return;
+      try { m.onRender(root, ctx, api); }
+      catch (e) { console.warn("[fx] " + id + " failed:", e && e.message); }
+    });
+  }
+
+  /* Once, after boot — for anything that outlives a page (overlays, hotkeys). */
+  function boot(api0) {
+    const api = api0 || {
+      reduced: reduced(), raf: f => requestAnimationFrame(f),
+      after: (ms, f) => setTimeout(f, ms), every: (ms, f) => setInterval(f, ms),
+      on: (el, ev, fn) => el.addEventListener(ev, fn), onTeardown() {},
+      ease: { out: t => 1 - Math.pow(1 - t, 3), inOut: t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2 }
+    };
+    Object.keys(PSEFX).forEach(id => {
+      const m = PSEFX[id];
+      if (m && typeof m.init === "function") {
+        try { m.init(api); } catch (e) { console.warn("[fx] init " + id + " failed:", e && e.message); }
+      }
+    });
+  }
+
+  return { run, boot, reduced };
+})();
+
+window.PSEFX = PSEFX;
+window.FX = FX;
+
+</script>
+<script>
+/* =============================================================================
    views.js — one render function per route. Each returns the page chrome plus
    its HTML; app.js mounts it and wires delegated events.
    ========================================================================== */
@@ -2259,6 +2337,8 @@ V.profile = function () {
     $("#psub").hidden = !page.sub;
     $("#page").innerHTML = page.html;
     if (page.mount) page.mount();
+    /* hand the freshly rendered page to the presentation layer */
+    if (window.FX) FX.run($("#page"), { route: location.hash || "#/", page: page, title: page.title });
     renderRail(location.hash || "#/");
     if (scroll) window.scrollTo({ top: 0, behavior: "auto" });
     $("#rail").classList.remove("open");
@@ -2506,6 +2586,7 @@ V.profile = function () {
   Store.subscribe(() => renderRail(location.hash || "#/"));
   lastHash = location.hash;
   render(false);
+  if (window.FX) FX.boot();
 })();
 
 </script>

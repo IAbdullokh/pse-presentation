@@ -168,7 +168,9 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 .frame[data-enter="deal"].active  .r { animation-duration: .78s; animation-delay: calc(300ms + var(--i) * 110ms); }
 .frame[data-enter="blur"].active  .r { animation-duration: .8s; }
 @keyframes reveal { to { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); } }
-.ov .r { opacity: 1; transform: none; filter: none; clip-path: none; animation: none; }
+/* Must out-specify .frame[data-enter="x"] .r (0,3,0) or the overview shows a
+   wiped frame as blank and a blurred one as fuzzy. */
+.ov .frame[data-enter] .r { opacity: 1; transform: none; filter: none; clip-path: none; animation: none; }
 @media (prefers-reduced-motion: reduce) { .r { opacity: 1; transform: none; } .frame.active .r { animation: none; } .moving { transition: none; } .caret { animation: none; } .tok { animation: none; } }
 
 /* ---------- on-screen UI ---------- */
