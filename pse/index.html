@@ -50,6 +50,793 @@
 </style>
 <style>
 /* =============================================================================
+   ask.css — "Ask PSE", the deterministic assistant overlay.
+   Every rule is scoped to #pse-ask or to the module's own .ask-open button, so
+   it cannot reach any DOM this module did not create. The answers deliberately
+   reuse app.css's .coach-item and .chip so the panel reads as part of the
+   product rather than a widget bolted onto it.
+   ========================================================================== */
+
+/* The topbar is a flex row with space-between; an auto margin keeps the button
+   docked to the right of the title without restyling the row's own children. */
+.topbar-row .ask-open { margin-left: auto; flex: none; }
+
+#pse-ask {
+  position: fixed; inset: 0; z-index: 95;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(12, 20, 37, .62);
+  opacity: 0; transition: opacity .14s ease-out;
+}
+#pse-ask[hidden] { display: none; }
+#pse-ask.on { opacity: 1; }
+
+#pse-ask .ask-panel {
+  width: 100%; max-width: 760px; max-height: 82vh;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: var(--sh-3); overflow: hidden;
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr);
+  transform: translateY(8px); transition: transform .16s cubic-bezier(.2, .8, .2, 1);
+}
+#pse-ask.on .ask-panel { transform: none; }
+
+/* --- the honest header ------------------------------------------------------ */
+#pse-ask .ask-head {
+  padding: 17px 20px 14px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+}
+#pse-ask .ask-head h2 { font-size: 16px; font-weight: 620; margin: 0; letter-spacing: -0.01em; }
+#pse-ask .ask-honest { font-size: 12.5px; color: var(--ink-500); margin: 5px 0 0; max-width: 62ch; }
+#pse-ask .ask-x { flex: none; }
+
+#pse-ask .ask-rules { border-bottom: 1px solid var(--line); background: var(--surface-2); }
+#pse-ask .ask-rules > summary {
+  padding: 9px 20px; cursor: pointer; font-size: 12.5px; font-weight: 550; color: var(--ink-500);
+}
+#pse-ask .ask-rules > summary:hover { color: var(--ink-900); }
+#pse-ask .ask-rules ul {
+  margin: 0; padding: 0 20px 14px 38px; display: grid; gap: 6px;
+  font-size: 12px; color: var(--ink-500); max-height: 40vh; overflow-y: auto;
+}
+
+/* --- questions and answers -------------------------------------------------- */
+#pse-ask .ask-body { display: grid; grid-template-columns: 234px minmax(0, 1fr); min-height: 0; }
+
+#pse-ask .ask-qs {
+  border-right: 1px solid var(--line); background: var(--surface-2);
+  padding: 14px; display: grid; gap: 7px; align-content: start;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+#pse-ask .ask-q {
+  text-align: left; white-space: normal; line-height: 1.35;
+  border-radius: var(--r); padding: 8px 11px; font-weight: 500;
+}
+#pse-ask .ask-q:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#pse-ask .ask-answer {
+  padding: 18px 20px 22px; overflow-y: auto; overscroll-behavior: contain; min-height: 0;
+}
+#pse-ask .ask-atitle { font-size: 15px; font-weight: 620; margin: 0 0 4px; }
+#pse-ask .ask-lead { font-size: 12.5px; color: var(--ink-400); margin: 0 0 15px; max-width: 60ch; }
+#pse-ask .ask-rows { gap: 15px; }
+
+#pse-ask .ask-row { transition: opacity .16s ease-out, transform .16s ease-out; }
+#pse-ask .ask-row.ask-in { opacity: 0; transform: translateY(6px); }
+#pse-ask .ask-row .t { font-weight: 550; }
+#pse-ask .ask-row .ic svg { width: 11px; height: 11px; }
+#pse-ask .ask-row.no .ic { font-size: 11.5px; font-weight: 700; line-height: 1; }
+#pse-ask .ask-row.tip .ic { background: var(--accent-soft); color: var(--accent-deep); }
+
+#pse-ask .ask-sub { font-size: 12px; color: var(--ink-400); margin-top: 3px; font-variant-numeric: tabular-nums; }
+#pse-ask .ask-list {
+  margin: 7px 0 0; padding-left: 17px; display: grid; gap: 4px;
+  font-size: 12px; color: var(--ink-500);
+}
+#pse-ask .ask-jump { margin-top: 9px; }
+
+#pse-ask .ask-tally {
+  margin: 18px 0 0; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 12px; color: var(--ink-400); font-variant-numeric: tabular-nums;
+}
+
+/* --- readable from the back row --------------------------------------------- */
+body.presenting #pse-ask .ask-honest { font-size: 13.5px; }
+body.presenting #pse-ask .ask-row { font-size: 14px; }
+body.presenting #pse-ask .ask-row .fix,
+body.presenting #pse-ask .ask-list,
+body.presenting #pse-ask .ask-sub { font-size: 13px; }
+
+/* --- narrow: the question column becomes a scrolling row -------------------- */
+@media (max-width: 700px) {
+  #pse-ask { padding: 0; place-items: stretch; }
+  #pse-ask .ask-panel {
+    max-width: none; max-height: 100vh; height: 100%;
+    border-radius: 0; border: 0; grid-template-rows: auto auto minmax(0, 1fr);
+  }
+  #pse-ask .ask-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #pse-ask .ask-qs {
+    border-right: 0; border-bottom: 1px solid var(--line);
+    grid-auto-flow: column; grid-auto-columns: max-content;
+    overflow-x: auto; overflow-y: hidden; padding: 11px 14px;
+  }
+  #pse-ask .ask-q { white-space: nowrap; border-radius: 999px; padding: 5px 11px; }
+}
+
+/* --- reduced motion: the panel is information, not an entrance -------------- */
+@media (prefers-reduced-motion: reduce) {
+  #pse-ask, #pse-ask .ask-panel, #pse-ask .ask-row { transition: none; }
+  #pse-ask .ask-panel { transform: none; }
+  #pse-ask .ask-row.ask-in { opacity: 1; transform: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   compare.css — the career comparison panel.
+   Every rule is scoped under .fx-compare or .fx-compare-lite, both of which
+   only ever exist on DOM this module created, so nothing here can reach
+   another module's markup. The panel borrows .card, .tbl, .pill and .btn from
+   app.css on purpose: it has to read as part of the product, not as a widget
+   bolted onto two pages.
+   ========================================================================== */
+
+/* On the explorer the panel is a card in its own right; on My Career it lives
+   inside the card that already promised a comparison, so it drops the border
+   and keeps only the rule that separates it from the shortlist above. */
+.fx-compare.inset { display: block; border-top: 1px solid var(--line); }
+.fx-compare.inset > .card-h { padding-top: 14px; }
+
+.fx-compare .fx-cmp-b { display: grid; gap: 14px; }
+
+/* --- legend ---------------------------------------------------------------- */
+.fx-compare .fx-cmp-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-500); }
+.fx-compare .fx-cmp-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.fx-compare .fx-cmp-legend i { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+
+/* --- chart ----------------------------------------------------------------- */
+/* Four columns and a 720-unit chart must never push the page sideways, so both
+   the chart and the table scroll inside their own box. */
+.fx-compare .fx-cmp-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+
+.fx-compare .fx-cmp-chart { display: block; width: 100%; height: auto; min-width: 600px; }
+.fx-compare .fx-cmp-name { font-size: 12.5px; font-weight: 550; fill: var(--ink-700); dominant-baseline: middle; }
+.fx-compare .fx-cmp-val  { font-size: 11.5px; fill: var(--ink-500); font-variant-numeric: tabular-nums; dominant-baseline: middle; }
+
+.fx-compare .fx-cmp-prov { font-size: 11.5px; color: var(--ink-400); max-width: 72ch; }
+
+/* --- table ----------------------------------------------------------------- */
+.fx-compare .fx-cmp-tbl { min-width: 560px; }
+.fx-compare .fx-cmp-tbl td { vertical-align: top; }
+.fx-compare .fx-cmp-tbl tbody th { width: 132px; white-space: nowrap; vertical-align: top; }
+.fx-compare .fx-cmp-tbl thead th { border-bottom: 1px solid var(--line-2); }
+
+/* Career names are names, not column labels — the uppercase treatment .tbl th
+   gives a header would make them unreadable. */
+.fx-compare .fx-cmp-tbl thead th:not(.fx-cmp-corner) { text-transform: none; letter-spacing: 0; padding: 6px 6px; }
+.fx-compare .fx-cmp-open { font-size: 13.5px; font-weight: 620; color: var(--ink-900); padding: 5px 8px; }
+.fx-compare .fx-cmp-open:hover { color: var(--accent-deep); }
+
+.fx-compare .fx-cmp-tbl b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.fx-compare .fx-cmp-note { font-size: 11.5px; color: var(--ink-400); margin-top: 3px; line-height: 1.45; }
+.fx-compare .fx-cmp-acts { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 12px; border-bottom: 0; }
+
+/* --- shared skills and the conclusion -------------------------------------- */
+.fx-compare .fx-cmp-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+
+.fx-compare .fx-cmp-end {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  padding: 13px 15px; border: 1px solid var(--accent-line); border-radius: var(--r);
+  background: var(--accent-soft);
+}
+.fx-compare .fx-cmp-end p { font-size: 13.5px; color: var(--ink-900); max-width: 64ch; margin: 0; }
+
+/* --- the one-line state ------------------------------------------------------
+   With fewer than two careers there is nothing to compare, so the module says
+   so in a single line rather than a large empty card. */
+.fx-compare-lite {
+  font-size: 12.5px; color: var(--ink-400);
+  padding: 10px 14px; border: 1px dashed var(--line-2); border-radius: var(--r);
+  background: var(--surface);
+}
+
+@media (max-width: 620px) {
+  .fx-compare .fx-cmp-end { flex-direction: column; align-items: flex-start; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   evidence.css — the audit line under each CW1 requirement, and the two
+   movements that report a tick. Every selector is anchored to .check-row or to
+   a class only this module writes, so it cannot reach another module's DOM.
+   ========================================================================== */
+
+/* The evidence sentence itself. Tabular numerals because the character and
+   source counts sit in a column of fourteen and are meant to be compared. */
+.check-row .fx-ev {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-400);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ticked on nothing. Amber, not red: this is an audit note, not a failure —
+   the point stays in the score either way. */
+.check-row .fx-ev-thin { color: var(--warn); }
+.check-row .fx-ev-warn {
+  border-left: 2px solid var(--warn);
+  padding-left: 8px;
+}
+
+/* The x/14 pill beats once, at the moment the count changes. */
+.card-h .pill.fx-ev-pop { animation: fx-ev-pop .22s ease-out; }
+@keyframes fx-ev-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* A coach item that has just been satisfied: struck through, then folded away.
+   The negative margin swallows the .coach grid gap so the list closes cleanly
+   instead of jumping 8px when the ghost is removed. */
+.coach-item.fx-ghost { overflow: hidden; }
+.coach-item.fx-ghost .fx-ev-struck { text-decoration: line-through; }
+.coach-item.fx-ev-out {
+  transition: max-height .24s ease, opacity .24s ease, margin-bottom .24s ease;
+  opacity: 0;
+  margin-bottom: -8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-h .pill.fx-ev-pop { animation: none; }
+  .coach-item.fx-ev-out { transition: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   journey.css — the canvas's arrival and its readout.
+   Every rule is scoped under .journey, so nothing here can reach a page this
+   module was not given. Colours are the dark tokens, because the canvas world
+   is the one place in the product that is not on a light ground.
+   ========================================================================== */
+
+/* --- arrival ---------------------------------------------------------------- */
+@keyframes fx-node-in { from { opacity: 0; } to { opacity: 1; } }
+.journey .cv-node.fx-node-in { animation: fx-node-in .26s both cubic-bezier(.2,.8,.2,1); }
+
+/* Must out-specify `.st-now .cv-ring`'s infinite pulse (0,2,0), or the stage
+   the student is actually standing on is the one stage that never arrives.
+   The class is removed on animationend so canvas.js owns the transform again. */
+@keyframes fx-ring-in { from { transform: scale(.9); } to { transform: scale(1); } }
+.journey .cv-ring.fx-ring-in { animation: fx-ring-in .26s both cubic-bezier(.2,.8,.2,1); }
+
+/* --- "where am I", in words ------------------------------------------------- */
+/* Absolutely positioned, not a flex item: a 100% flex-basis would have widened
+   .cv-hud's own (invisible) box across the canvas, and canvas.js ignores
+   pointerdown and click inside .cv-hud — so a third of the world would have
+   stopped responding to drag-to-pan and to node clicks. */
+.journey .cv-stage {
+  position: absolute; top: calc(100% + 8px); left: 0;   /* its own line, under the buttons */
+  width: 360px; max-width: 360px;
+  padding: 8px 11px; border-radius: 10px;
+  background: var(--dark); border: 1px solid var(--dark-line);
+  font-size: 12.5px; line-height: 1.35; color: var(--dark-ink);
+}
+.journey .cv-stage b {
+  display: block; font-size: 13px; font-weight: 620; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
+.journey .cv-stage span { display: block; margin-top: 2px; color: var(--dark-ink-2); }
+.journey .cv-stage em { font-style: normal; color: var(--accent-line); }
+
+/* --- full screen ------------------------------------------------------------ */
+/* The authored clamp() height would otherwise survive into the fullscreen
+   layer and letterbox the canvas inside a black screen. */
+.journey:fullscreen { width: 100%; height: 100%; border-radius: 0; border: 0; }
+.journey:-webkit-full-screen { width: 100%; height: 100%; border-radius: 0; border: 0; }
+
+@media (max-width: 720px) {
+  .journey .cv-stage { width: calc(100vw - 60px); max-width: calc(100vw - 60px); }
+}
+
+/* Reduced motion: the stages and the path are already at their final state —
+   the readout, the honest next step and full screen are unaffected. */
+@media (prefers-reduced-motion: reduce) {
+  .journey .cv-node.fx-node-in, .journey .cv-ring.fx-ring-in { animation: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   pageflow.css — the entrance order of a screen, the direction of the wizard,
+   and the error floor. Every rule is scoped to a class this module puts on and
+   takes off again, so no other module's DOM can be reached from here.
+   ========================================================================== */
+
+/* --- A. route entrance ------------------------------------------------------
+   Declared in CSS rather than as inline delays so that cards other modules
+   inject during the same onRender pass (the comparison panel, the radar figure)
+   are carried by the same stagger without those modules knowing this exists. */
+
+@keyframes fx-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.page.fx-enter > * { animation: fx-rise .22s both cubic-bezier(.2, .8, .2, 1); }
+
+.page.fx-enter > *:nth-child(1) { animation-delay: 0s; }
+.page.fx-enter > *:nth-child(2) { animation-delay: .042s; }
+.page.fx-enter > *:nth-child(3) { animation-delay: .084s; }
+.page.fx-enter > *:nth-child(4) { animation-delay: .126s; }
+.page.fx-enter > *:nth-child(5) { animation-delay: .168s; }
+.page.fx-enter > *:nth-child(6) { animation-delay: .21s; }
+.page.fx-enter > *:nth-child(7) { animation-delay: .252s; }
+
+/* Past the seventh card the reading order has been stated; anything further down
+   is below the fold anyway, so it arrives with the last of them. */
+.page.fx-enter > *:nth-child(n+8) { animation-delay: .294s; }
+
+/* --- C. wizard direction ----------------------------------------------------
+   Six hard cuts read as six unrelated forms. A short lateral move reads as one
+   procedure with a forward and a back. */
+
+@keyframes fx-slide-next {
+  from { opacity: .4; transform: translateX(18px); }
+  to   { opacity: 1;  transform: none; }
+}
+
+@keyframes fx-slide-back {
+  from { opacity: .4; transform: translateX(-18px); }
+  to   { opacity: 1;  transform: none; }
+}
+
+.card-b.fx-slide-next { animation: fx-slide-next .18s both cubic-bezier(.2, .8, .2, 1); }
+.card-b.fx-slide-back { animation: fx-slide-back .18s both cubic-bezier(.2, .8, .2, 1); }
+
+/* The step the wizard just banked. */
+@keyframes fx-pip-pop {
+  0%   { transform: scale(1); }
+  55%  { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+.wiz-step b.fx-pop { animation: fx-pip-pop .2s cubic-bezier(.2, .8, .2, 1); }
+
+/* --- D. error floor ---------------------------------------------------------
+   Deliberately plain: this card exists so that a failure in front of markers is
+   a sentence and a button rather than a blank projector. */
+
+.card.fx-recover { max-width: 520px; }
+.card.fx-recover .card-b { display: grid; gap: 10px; justify-items: start; }
+.card.fx-recover h3 { font-size: 16px; font-weight: 620; color: var(--ink-900); }
+.card.fx-recover p { font-size: 13.5px; color: var(--ink-500); max-width: 46ch; }
+
+/* --- E. reduced motion ------------------------------------------------------
+   The module already declines to add these classes when api.reduced is true;
+   this is the second line of defence for a preference that changes mid-session. */
+
+@media (prefers-reduced-motion: reduce) {
+  .page.fx-enter > *,
+  .card-b.fx-slide-next,
+  .card-b.fx-slide-back,
+  .wiz-step b.fx-pop { animation: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   present.css — presenter mode.
+   Two jobs: a bar the presenter reads and the room does not have to, and a set
+   of size corrections that only apply while presenting, so the product a
+   mentor looks at on a projector is the same product, just legible from the
+   back row. Everything here is scoped to body.presenting or to .pm-*.
+   ========================================================================== */
+
+/* --- readability while presenting -----------------------------------------
+   app.css sizes the whole product in px. Scaling .app is therefore the only
+   change that keeps type, rules, charts and spacing in their designed
+   proportion — a parallel set of presenter font sizes would drift from the
+   real thing within a week. Chrome and Safari have always supported this;
+   Firefox does from 126. --------------------------------------------------- */
+body.presenting .app { zoom: var(--pm-zoom, 1.15); }
+
+/* zoom scales lengths but not viewport units, so 100vh inside a zoomed .app is
+   a screen and a half of rail. Divide both back out, or the readiness score in
+   the rail foot — the scoreboard of the whole session — falls below the fold. */
+body.presenting .app  { min-height: calc(100vh / var(--pm-zoom, 1.15)); }
+body.presenting .rail { height: calc(100vh / var(--pm-zoom, 1.15)); }
+
+/* the page title is doing the work of a slide title while presenting */
+body.presenting .topbar h1 { font-size: clamp(23px, 2.9vw, 30px); }
+
+/* the captions that carry the marks: gap detail, card subtitles, coach fixes */
+body.presenting .stat .d,
+body.presenting .card-h .sub,
+body.presenting .coach-item .fix { font-size: 13px; }
+
+/* at 132% and above the nav outgrows one screen and the rail starts to scroll.
+   Pin its foot so the readiness score — the live scoreboard of the session —
+   is never the part that scrolls away. */
+body.presenting .rail-foot {
+  position: sticky; bottom: 0; z-index: 1;
+  background: var(--dark); padding-bottom: 2px;
+}
+
+/* saves must not land on the bar the presenter is steering by */
+body.presenting .toast { bottom: 112px; }
+
+/* room for the bar underneath the longest page */
+body.presenting .page { padding-bottom: 150px; }
+
+/* --- the bar ---------------------------------------------------------------- */
+.pm-bar {
+  position: fixed; left: 50%; bottom: 2px; transform: translateX(-50%);
+  z-index: 80; display: none; width: min(96vw, 1060px);
+  background: var(--dark); color: var(--dark-ink);
+  border: 1px solid var(--dark-line); border-radius: var(--r-lg);
+  box-shadow: var(--sh-3); overflow: hidden; opacity: 0;
+  transition: opacity .2s, bottom .2s;
+}
+body.presenting .pm-bar { display: block; opacity: 1; bottom: 16px; }
+
+/* above 900px the rail is part of the layout. The bar sits in the content
+   column and is clamped to it, so the rail — and the live score in its foot —
+   is never covered by the thing the presenter is steering with. */
+@media (min-width: 901px) {
+  .pm-bar {
+    left: auto; right: 16px; transform: none;
+    width: min(1060px, calc(100vw - (var(--rail) * var(--pm-zoom, 1.15)) - 40px));
+  }
+}
+
+/* one tick per beat: where we are in two hours, and where the sections start */
+.pm-track { display: flex; gap: 2px; height: 5px; background: var(--dark-2); }
+.pm-tick { flex: 1; background: var(--dark-line); transition: background .18s; }
+.pm-tick.head { background: var(--dark-ink-2); opacity: .38; }
+.pm-tick.past { background: var(--accent-deep); opacity: 1; }
+.pm-tick.on { background: var(--accent); opacity: 1; }
+
+.pm-row { display: flex; align-items: center; gap: 16px; padding: 9px 15px 3px; }
+.pm-step { flex: none; font-size: 12px; color: var(--dark-ink-2); font-variant-numeric: tabular-nums; }
+.pm-step b { font-size: 18px; font-weight: 650; color: var(--dark-ink); letter-spacing: -0.02em; }
+
+.pm-beat { flex: 1; min-width: 0; }
+.pm-t { font-size: 15px; font-weight: 600; color: var(--dark-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pm-say { font-size: 13px; color: var(--dark-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pm-meta { flex: none; display: flex; align-items: center; gap: 6px; }
+.pm-chip {
+  font-size: 12px; line-height: 1.5; padding: 2px 9px; border-radius: 999px;
+  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink-2);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.pm-clock { color: var(--dark-ink); }
+/* mirrored from the practice timer — the same thresholds it paints */
+.pm-run.in { color: var(--s3); border-color: var(--s3); }
+.pm-run.over { background: var(--bad); border-color: var(--bad); color: var(--dark-ink); }
+
+.pm-keys { padding: 0 15px 8px; font-size: 11.5px; color: var(--dark-ink-2); opacity: .85; }
+.pm-keys kbd, .pm-help-in kbd {
+  font: inherit; padding: 1px 5px; border-radius: 4px; margin-right: 2px;
+  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink);
+}
+
+.pm-go { position: fixed; left: -9999px; top: -9999px; }
+.pm-go[hidden] { display: none; }
+
+/* --- the key map ------------------------------------------------------------ */
+.pm-help {
+  position: fixed; inset: 0; z-index: 90; background: rgba(12, 20, 37, .62);
+  display: grid; place-items: center; padding: 20px;
+}
+.pm-help[hidden] { display: none; }      /* [hidden] must beat the display above */
+.pm-help-in {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl);
+  padding: 24px 28px; box-shadow: var(--sh-3);
+  width: min(980px, 100%); max-height: 84vh; overflow: auto;
+}
+.pm-help-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.pm-help-in h3 { font-size: 18px; font-weight: 640; margin: 0; }
+.pm-help-head .pm-chip { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-500); }
+.pm-help-in h4 {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-400); font-weight: 620; margin: 0 0 10px;
+}
+.pm-help-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; align-items: start; }
+
+.pm-help-in dl { display: grid; grid-template-columns: auto 1fr; gap: 9px 14px; margin: 0; align-items: baseline; }
+.pm-help-in dt { text-align: right; white-space: nowrap; }
+.pm-help-in dd { margin: 0; font-size: 13px; color: var(--ink-500); }
+.pm-help-in dd b { color: var(--ink-700); font-weight: 620; }
+.pm-help-in kbd { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-700); font-size: 11.5px; padding: 2px 6px; }
+
+.pm-arc { list-style: none; margin: 0; padding: 0; max-height: 54vh; overflow: auto; }
+.pm-arc li {
+  display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px;
+  padding: 6px 9px; border-radius: var(--r-sm); cursor: pointer;
+}
+.pm-arc li:hover { background: var(--surface-2); }
+.pm-arc li.on { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
+.pm-arc .n { grid-row: span 2; font-size: 12px; color: var(--ink-300); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.pm-arc .b { font-size: 13px; color: var(--ink-700); }
+.pm-arc li.on .b { font-weight: 600; color: var(--ink-900); }
+.pm-arc .s { font-size: 11.5px; color: var(--ink-400); }
+
+.pm-help-in > p { font-size: 12.5px; color: var(--ink-400); margin: 18px 0 0; }
+
+/* --- small screens: the bar still has to be usable off the projector -------- */
+@media (max-width: 860px) {
+  .pm-keys, .pm-say { display: none; }
+  .pm-help-cols { grid-template-columns: 1fr; }
+  .pm-arc { max-height: 34vh; }
+}
+@media (max-width: 620px) {
+  .pm-meta .pm-zoomv, .pm-meta .pm-persona { display: none; }
+}
+
+/* --- reduced motion: the bar arrives, it does not slide in ------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .pm-bar, .pm-tick { transition: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   radar.css — the skill radar on #/skills.
+   Every rule is scoped inside .fx-radar, which only radar.js ever creates, so
+   this file cannot reach another module's DOM.
+   ========================================================================== */
+
+.fx-radar {
+  margin: 0;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+/* Sized by the viewBox, never by pixels — the card is the only thing that
+   decides how wide the chart gets. */
+.fx-radar .fx-r-svg {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+  overflow: visible;
+}
+
+.fx-radar figcaption {
+  font-size: 12.5px;
+  color: var(--ink-400);
+  max-width: 52ch;
+  text-align: center;
+  line-height: 1.45;
+}
+
+/* --- the chart itself ----------------------------------------------------- */
+.fx-radar .fx-r-ring  { fill: none; stroke: var(--line); stroke-width: 1; }
+.fx-radar .fx-r-spoke { stroke: var(--surface-3); stroke-width: 1; }
+
+/* The target is an outline, not a fill: it is a line the student has not
+   reached yet, and a solid one would read as achieved. */
+.fx-radar .fx-r-target {
+  fill: none;
+  stroke: var(--ink-900);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  stroke-linejoin: round;
+}
+
+.fx-radar .fx-r-current {
+  fill: var(--accent);
+  fill-opacity: .18;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.fx-radar .fx-r-dot { fill: var(--accent); }
+
+.fx-radar .fx-r-lab {
+  font-size: 11px;
+  fill: var(--ink-400);
+  font-weight: 500;
+}
+
+/* On a phone the whole chart shrinks with the card, so the labels are bumped
+   to stay readable; the viewBox carries enough side margin to absorb it. */
+@media (max-width: 520px) {
+  .fx-radar { padding: 14px; }
+  .fx-radar .fx-r-lab { font-size: 12.5px; }
+  .fx-radar figcaption { font-size: 12px; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   ring.css — the readiness ring's seven segments and the rows they explain.
+   Every rule is anchored on .ring or on [data-part], both of which this module
+   stamps itself, so nothing here can reach another engineer's DOM.
+   ========================================================================== */
+
+/* A number that counts up must not jitter while it does it. */
+.ring .mid b { font-variant-numeric: tabular-nums; }
+
+.ring circle[data-arc] {
+  transition: opacity .16s;
+  cursor: pointer;
+}
+
+/* Keyboard parity with the pointer: the same arc, the same lit row. */
+.ring circle[data-arc]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.panel-dark .ring circle[data-arc]:focus-visible { outline-color: var(--accent-line); }
+
+/* The row of "What builds your score" that the hovered arc was earned by.
+   Scoped to [data-part] — the attribute this module stamps — so the class
+   name cannot collide with another module's use of it. */
+.card-b > [data-part].fx-lit {
+  background: var(--accent-soft);
+  border-radius: 8px;
+  box-shadow: 0 0 0 6px var(--accent-soft);
+  transition: background .15s, box-shadow .15s;
+}
+.card-b > [data-part] { transition: background .15s, box-shadow .15s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ring circle[data-arc],
+  .card-b > [data-part],
+  .card-b > [data-part].fx-lit { transition: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   score.css — the running scoreboard.
+   Only two things here: digits that hold their place while they count, and the
+   one chip that says which part of the model moved. Everything else on these
+   surfaces belongs to app.css.
+   ========================================================================== */
+
+/* Proportional digits reflow the whole tile on every frame of a count; tabular
+   ones keep the number still while its value changes. */
+.stat .v,
+.rail-score .v,
+.rail-score .fx-delta { font-variant-numeric: tabular-nums; }
+
+/* --- the delta chip -------------------------------------------------------
+   Appended into #railscore, so it lands under the bar on its own line inside
+   the dark rail. Transparent ground: it is a caption on the score, not a badge. */
+.rail-score .fx-delta {
+  display: block;
+  margin-top: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: #7FE0B4;
+  background: transparent;
+  animation: fx-delta-life 1600ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* A score can fall — deleting a goal, clearing a tick. Green would misreport it. */
+.rail-score .fx-delta.down { color: #F0B36B; }
+
+@keyframes fx-delta-life {
+  0%   { opacity: 0; transform: translateY(4px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  66%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Reduced motion keeps the chip — it is information — and drops the movement. */
+.rail-score .fx-delta.still {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* --- the achievement pulse ------------------------------------------------
+   Fires only when a threshold is crossed without the total changing, so the
+   crossing is not silent. One shot, never a loop. */
+.rail-score.fx-pulse { animation: fx-score-pulse 600ms cubic-bezier(.2, .8, .2, 1) 1; }
+
+@keyframes fx-score-pulse {
+  from { box-shadow: 0 0 0 0 rgba(37, 89, 199, .55); }
+  to   { box-shadow: 0 0 0 14px rgba(37, 89, 199, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-score .fx-delta { animation: none; opacity: 1; transform: none; }
+  .rail-score.fx-pulse  { animation: none; box-shadow: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
+   timer.css — the practice dial.
+   Every selector is scoped under .fx-clock or .fx-lastrun, both of which this
+   module creates and stamps data-fx-own="timer", so nothing here can reach
+   another module's DOM.
+   ========================================================================== */
+
+.fx-clock {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 250px;
+}
+
+/* Behind the digits and out of the way of the Start / Reset buttons. */
+.fx-clock .fx-dial {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 230px;
+  height: auto;
+  pointer-events: none;
+}
+
+.fx-clock #tface { position: relative; z-index: 1; }
+
+.fx-clock .fx-track { stroke: var(--surface-3); }
+.fx-clock .fx-band  { stroke: var(--ok); }
+
+/* The two ticks that say where 5:00 and 7:00 actually fall. */
+.fx-clock .fx-cap {
+  stroke: var(--ok);
+  stroke-width: 2;
+  stroke-linecap: butt;
+}
+
+/* stroke is written as an attribute by draw(); only the colour change between
+   the three thresholds is eased, so the arc never slides on its own. */
+.fx-clock .fx-prog {
+  stroke-linecap: butt;
+  transition: stroke .25s ease;
+}
+
+@keyframes fx-band-in {
+  0%   { opacity: .28; }
+  45%  { opacity: .5; }
+  100% { opacity: .28; }
+}
+.fx-clock .fx-band.fx-band-lit { animation: fx-band-in .6s ease; }
+
+.fx-lastrun {
+  font-size: 12.5px;
+  color: var(--ink-500);
+  line-height: 1.55;
+  max-width: 46ch;
+  margin: 0 auto 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Below a phone width the card padding leaves less than the dial's 230px. */
+@media (max-width: 360px) {
+  .fx-clock { min-height: 212px; }
+  /* The box shrinks, so the dial must shrink with it — a 230px ring inside a
+     212px box would sit over the last-run line and the caption. */
+  .fx-clock .fx-dial { max-width: 196px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-clock .fx-prog { transition: none; }
+  .fx-clock .fx-band.fx-band-lit { animation: none; }
+}
+
+</style>
+<style>
+/* =============================================================================
    PSE Career Platform — design system
    A light foundation with one accent, deliberately committed to a single
    visual world (the brief specifies a white/light product). Dark panels are
@@ -471,163 +1258,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .cv-view { position: absolute; border: 1.5px solid #CFE0FB; border-radius: 3px; box-shadow: 0 0 0 999px rgba(0,0,0,.28); }
 @media (max-width: 720px) { .cv-hint, .cv-mini { display: none; } .journey { height: 62vh; } }
 @media (prefers-reduced-motion: reduce) { .moving { transition: none; } .st-now .cv-ring { animation: none; box-shadow: 0 0 0 10px rgba(37,89,199,.24); } }
-
-</style>
-<style>
-/* =============================================================================
-   present.css — presenter mode.
-   Two jobs: a bar the presenter reads and the room does not have to, and a set
-   of size corrections that only apply while presenting, so the product a
-   mentor looks at on a projector is the same product, just legible from the
-   back row. Everything here is scoped to body.presenting or to .pm-*.
-   ========================================================================== */
-
-/* --- readability while presenting -----------------------------------------
-   app.css sizes the whole product in px. Scaling .app is therefore the only
-   change that keeps type, rules, charts and spacing in their designed
-   proportion — a parallel set of presenter font sizes would drift from the
-   real thing within a week. Chrome and Safari have always supported this;
-   Firefox does from 126. --------------------------------------------------- */
-body.presenting .app { zoom: var(--pm-zoom, 1.15); }
-
-/* zoom scales lengths but not viewport units, so 100vh inside a zoomed .app is
-   a screen and a half of rail. Divide both back out, or the readiness score in
-   the rail foot — the scoreboard of the whole session — falls below the fold. */
-body.presenting .app  { min-height: calc(100vh / var(--pm-zoom, 1.15)); }
-body.presenting .rail { height: calc(100vh / var(--pm-zoom, 1.15)); }
-
-/* the page title is doing the work of a slide title while presenting */
-body.presenting .topbar h1 { font-size: clamp(23px, 2.9vw, 30px); }
-
-/* the captions that carry the marks: gap detail, card subtitles, coach fixes */
-body.presenting .stat .d,
-body.presenting .card-h .sub,
-body.presenting .coach-item .fix { font-size: 13px; }
-
-/* at 132% and above the nav outgrows one screen and the rail starts to scroll.
-   Pin its foot so the readiness score — the live scoreboard of the session —
-   is never the part that scrolls away. */
-body.presenting .rail-foot {
-  position: sticky; bottom: 0; z-index: 1;
-  background: var(--dark); padding-bottom: 2px;
-}
-
-/* saves must not land on the bar the presenter is steering by */
-body.presenting .toast { bottom: 112px; }
-
-/* room for the bar underneath the longest page */
-body.presenting .page { padding-bottom: 150px; }
-
-/* --- the bar ---------------------------------------------------------------- */
-.pm-bar {
-  position: fixed; left: 50%; bottom: 2px; transform: translateX(-50%);
-  z-index: 80; display: none; width: min(96vw, 1060px);
-  background: var(--dark); color: var(--dark-ink);
-  border: 1px solid var(--dark-line); border-radius: var(--r-lg);
-  box-shadow: var(--sh-3); overflow: hidden; opacity: 0;
-  transition: opacity .2s, bottom .2s;
-}
-body.presenting .pm-bar { display: block; opacity: 1; bottom: 16px; }
-
-/* above 900px the rail is part of the layout. The bar sits in the content
-   column and is clamped to it, so the rail — and the live score in its foot —
-   is never covered by the thing the presenter is steering with. */
-@media (min-width: 901px) {
-  .pm-bar {
-    left: auto; right: 16px; transform: none;
-    width: min(1060px, calc(100vw - (var(--rail) * var(--pm-zoom, 1.15)) - 40px));
-  }
-}
-
-/* one tick per beat: where we are in two hours, and where the sections start */
-.pm-track { display: flex; gap: 2px; height: 5px; background: var(--dark-2); }
-.pm-tick { flex: 1; background: var(--dark-line); transition: background .18s; }
-.pm-tick.head { background: var(--dark-ink-2); opacity: .38; }
-.pm-tick.past { background: var(--accent-deep); opacity: 1; }
-.pm-tick.on { background: var(--accent); opacity: 1; }
-
-.pm-row { display: flex; align-items: center; gap: 16px; padding: 9px 15px 3px; }
-.pm-step { flex: none; font-size: 12px; color: var(--dark-ink-2); font-variant-numeric: tabular-nums; }
-.pm-step b { font-size: 18px; font-weight: 650; color: var(--dark-ink); letter-spacing: -0.02em; }
-
-.pm-beat { flex: 1; min-width: 0; }
-.pm-t { font-size: 15px; font-weight: 600; color: var(--dark-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pm-say { font-size: 13px; color: var(--dark-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.pm-meta { flex: none; display: flex; align-items: center; gap: 6px; }
-.pm-chip {
-  font-size: 12px; line-height: 1.5; padding: 2px 9px; border-radius: 999px;
-  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink-2);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.pm-clock { color: var(--dark-ink); }
-/* mirrored from the practice timer — the same thresholds it paints */
-.pm-run.in { color: var(--s3); border-color: var(--s3); }
-.pm-run.over { background: var(--bad); border-color: var(--bad); color: var(--dark-ink); }
-
-.pm-keys { padding: 0 15px 8px; font-size: 11.5px; color: var(--dark-ink-2); opacity: .85; }
-.pm-keys kbd, .pm-help-in kbd {
-  font: inherit; padding: 1px 5px; border-radius: 4px; margin-right: 2px;
-  background: var(--dark-2); border: 1px solid var(--dark-line); color: var(--dark-ink);
-}
-
-.pm-go { position: fixed; left: -9999px; top: -9999px; }
-.pm-go[hidden] { display: none; }
-
-/* --- the key map ------------------------------------------------------------ */
-.pm-help {
-  position: fixed; inset: 0; z-index: 90; background: rgba(12, 20, 37, .62);
-  display: grid; place-items: center; padding: 20px;
-}
-.pm-help[hidden] { display: none; }      /* [hidden] must beat the display above */
-.pm-help-in {
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl);
-  padding: 24px 28px; box-shadow: var(--sh-3);
-  width: min(980px, 100%); max-height: 84vh; overflow: auto;
-}
-.pm-help-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
-.pm-help-in h3 { font-size: 18px; font-weight: 640; margin: 0; }
-.pm-help-head .pm-chip { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-500); }
-.pm-help-in h4 {
-  font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
-  color: var(--ink-400); font-weight: 620; margin: 0 0 10px;
-}
-.pm-help-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; align-items: start; }
-
-.pm-help-in dl { display: grid; grid-template-columns: auto 1fr; gap: 9px 14px; margin: 0; align-items: baseline; }
-.pm-help-in dt { text-align: right; white-space: nowrap; }
-.pm-help-in dd { margin: 0; font-size: 13px; color: var(--ink-500); }
-.pm-help-in dd b { color: var(--ink-700); font-weight: 620; }
-.pm-help-in kbd { background: var(--surface-2); border-color: var(--line-2); color: var(--ink-700); font-size: 11.5px; padding: 2px 6px; }
-
-.pm-arc { list-style: none; margin: 0; padding: 0; max-height: 54vh; overflow: auto; }
-.pm-arc li {
-  display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px;
-  padding: 6px 9px; border-radius: var(--r-sm); cursor: pointer;
-}
-.pm-arc li:hover { background: var(--surface-2); }
-.pm-arc li.on { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); }
-.pm-arc .n { grid-row: span 2; font-size: 12px; color: var(--ink-300); font-variant-numeric: tabular-nums; padding-top: 1px; }
-.pm-arc .b { font-size: 13px; color: var(--ink-700); }
-.pm-arc li.on .b { font-weight: 600; color: var(--ink-900); }
-.pm-arc .s { font-size: 11.5px; color: var(--ink-400); }
-
-.pm-help-in > p { font-size: 12.5px; color: var(--ink-400); margin: 18px 0 0; }
-
-/* --- small screens: the bar still has to be usable off the projector -------- */
-@media (max-width: 860px) {
-  .pm-keys, .pm-say { display: none; }
-  .pm-help-cols { grid-template-columns: 1fr; }
-  .pm-arc { max-height: 34vh; }
-}
-@media (max-width: 620px) {
-  .pm-meta .pm-zoomv, .pm-meta .pm-persona { display: none; }
-}
-
-/* --- reduced motion: the bar arrives, it does not slide in ------------------ */
-@media (prefers-reduced-motion: reduce) {
-  .pm-bar, .pm-tick { transition: none; }
-}
 
 </style>
 </head>
@@ -2476,6 +3106,1463 @@ V.profile = function () {
 </script>
 <script>
 /* =============================================================================
+   ask.js — "Ask PSE": the deterministic assistant.
+
+   store.js already contains the best reasoning in the project — checkGoal,
+   checkReflection, checkCW1, nextStep and the readiness model — but those rules
+   are scattered across four forms and cannot be reached from anywhere else.
+   This module gives them one address. It runs those same functions over the
+   live workspace at the moment the student clicks a question, and renders the
+   result in the coach idiom the rest of the product already uses.
+
+   It is deliberately NOT a chatbot: there is no free-text box, no model, no
+   network and no generated prose. Every sentence below is either a fixed
+   string written here or a value read out of Store. That is the academic
+   integrity argument, and it is also why it can run from a USB stick.
+
+   A            open or close the panel
+   Esc          close (handled in capture so presenter mode never sees it)
+   ========================================================================== */
+
+PSEFX.ask = (function () {
+  "use strict";
+
+  /* Local, so the module does not depend on views.js having been parsed. */
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const CHECK = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10.4 4 4 8-8.4"/></svg>';
+  const ARROW = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5.6 15.4 10 11 14.4"/></svg>';
+
+  /* Which slide must carry the evidence for a ticked research requirement.
+     A tick is a claim; this map is what lets the panel ask for the receipt. */
+  const SLIDE_OF = { career: 1, research: 2, resp: 3, skills: 4, edu: 5,
+                     demand: 6, outlook: 6, salary: 6, ai: 7, plan: 8 };
+
+  const PART_ROUTE = { explore: "#/careers", skills: "#/skills", goals: "#/goals",
+    cw1: "#/cw1", practice: "#/cw1", cw2: "#/cw2", reflect: "#/reflections" };
+  const PART_CTA = { explore: "Open Career Explorer", skills: "Open Skills", goals: "Open Goals",
+    cw1: "Open CW1", practice: "Open Practice", cw2: "Open LinkedIn", reflect: "Open Reflections" };
+
+  let api = null, root = null, opener = null, answerEl = null;
+  let open = false, current = null, routeAtOpen = null, timers = [];
+
+  const reduced = () => (window.matchMedia
+    ? matchMedia("(prefers-reduced-motion: reduce)").matches
+    : !!(api && api.reduced));
+
+  const plural = (n, one, many) => n + " " + (n === 1 ? one : (many || one + "s"));
+
+  /* --- the questions -------------------------------------------------------
+     Each build() runs live Store functions and returns
+     { lead, rows: [{ tone, t, d, sub, list, route, cta }], tally }.
+     A row's tone is the coach vocabulary already in app.css: yes / no, plus
+     "tip" for a recommendation, which is neither a pass nor a failure. ---- */
+
+  function qNext() {
+    const ns = Store.nextStep();
+    return {
+      lead: "One recommendation, chosen by whatever is most blocking right now.",
+      rows: [{ tone: "tip", t: ns.title, d: ns.why, route: ns.route, cta: ns.cta }],
+      tally: "Recomputed every time you open this panel."
+    };
+  }
+
+  function qCW1() {
+    const s = Store.get(), rows = [];
+
+    Store.checkCW1().forEach(c => {
+      rows.push({ tone: c.ok ? "yes" : "no", t: c.label, d: c.fix, route: "#/cw1", cta: "Open CW1" });
+    });
+
+    /* The tick is free; the evidence is not. Anything marked complete whose
+       slide is still empty gets named here rather than quietly counted. */
+    PSE.cw1Checklist.forEach(item => {
+      const n = SLIDE_OF[item.id];
+      if (!n || !s.cw1.checklist[item.id]) return;
+      const slide = s.cw1.slides[n] || {};
+      const notes = (slide.notes || "").trim();
+      if (notes.length >= 40) return;
+      const srcs = (slide.sources || "").split(/[;,]/).map(x => x.trim()).filter(Boolean).length;
+      rows.push({
+        tone: "no",
+        t: item.label + " is ticked, but slide " + n + " " +
+           (notes.length ? "has only " + plural(notes.length, "character") + " of notes" : "has no notes") +
+           (srcs ? " and " + plural(srcs, "source") + " attached" : " and no source attached"),
+        d: "A tick with nothing behind it is not evidence. " + item.help,
+        route: "#/cw1", cta: "Open CW1"
+      });
+    });
+
+    return {
+      lead: "Your checklist, your slide notes and your source library, read together.",
+      rows,
+      tally: "Evidence: " + s.cw1.sources.length + " of 5 Harvard sources · " +
+             Store.slidesDone() + " of " + PSE.cw1Slides.length + " slides with research notes."
+    };
+  }
+
+  function qGoals() {
+    const goals = Store.get().goals;
+    const lead = "Every goal is run through the eight SMART tests in store.js. Failures are named; nothing is rewritten for you.";
+    if (!goals.length) {
+      return { lead, rows: [{ tone: "no", t: "You have not written a SMART goal yet",
+        d: "The goal builder walks through each letter of SMART and checks your wording as you type.",
+        route: "#/goals", cta: "Open Goal Builder" }] };
+    }
+    let failing = 0;
+    const rows = goals.map(g => {
+      const fails = Store.checkGoal(g).filter(c => !c.ok);
+      if (fails.length) failing++;
+      return {
+        tone: fails.length ? "no" : "yes",
+        t: g.title || "Untitled goal",
+        d: fails.length
+          ? plural(fails.length, "test") + " of the eight " + (fails.length === 1 ? "fails" : "fail") + ":"
+          : "Every SMART test passes.",
+        sub: g.deadline ? "Deadline " + g.deadline + " · " + (g.progress || 0) + "% complete"
+                        : "No deadline set · " + (g.progress || 0) + "% complete",
+        list: fails.map(f => f.label + (f.fix ? " — " + f.fix : "")),
+        route: "#/goals", cta: "Open Goals"
+      };
+    });
+    return { lead, rows,
+      tally: failing ? plural(failing, "goal") + " of " + goals.length + " still " + (failing === 1 ? "fails" : "fail") + " at least one test."
+                     : "All " + goals.length + " goals pass every test." };
+  }
+
+  function qRefl() {
+    const refl = Store.get().reflections;
+    const lead = "Each reflection is checked against the five prompts, the word range and the first-person rule.";
+    if (!refl.length) {
+      return { lead, rows: [{ tone: "no", t: "You have not written a reflection yet",
+        d: "Reflections are assessed evidence of professional growth. Aim for 70–100 words each.",
+        route: "#/reflections", cta: "Open Reflections" }] };
+    }
+    const rows = refl.map(r => {
+      const fails = Store.checkReflection(r).filter(c => !c.ok);
+      const w = Store.wordCount([r.what, r.learn, r.skills, r.career, r.next].join(" "));
+      const range = w < 70 ? plural(w, "word") + " — " + (70 - w) + " short of the 70-word minimum"
+                  : w > 100 ? plural(w, "word") + " — " + (w - 100) + " over the 100-word LinkedIn target"
+                  : plural(w, "word") + " — inside the 70–100 range";
+      return {
+        tone: fails.length ? "no" : "yes",
+        t: r.title || "Untitled reflection",
+        d: fails.length ? plural(fails.length, "check") + " still " + (fails.length === 1 ? "fails" : "fail") + ":" : "Every check passes.",
+        sub: range,
+        list: fails.map(f => f.label + (f.fix ? " — " + f.fix : "")),
+        route: "#/reflections", cta: "Open Reflections"
+      };
+    });
+    return { lead, rows,
+      tally: Store.reflectionsInRange() + " of " + refl.length + " reflections reach the 70 words the score requires." };
+  }
+
+  function qLinkedIn() {
+    const s = Store.get(), rows = [];
+    PSE.linkedinSections.forEach(sec => {
+      const v = s.cw2.sections[sec.id] || {};
+      const min = sec.min || 20;
+      const done = sec.type === "check" ? !!v.done : !!(v.value && v.value.trim().length >= min);
+      if (done) return;
+      const len = (v.value || "").trim().length;
+      rows.push({
+        tone: "no",
+        t: sec.label + " — worth " + plural(sec.weight, "point"),
+        d: sec.help,
+        sub: sec.type === "check" ? "Not ticked yet."
+                                  : len + " of the " + min + " characters this section needs.",
+        route: "#/cw2", cta: "Open LinkedIn Builder"
+      });
+    });
+    const c2 = Store.cw2Progress();
+    if (!rows.length) {
+      rows.push({ tone: "yes", t: "Nothing outstanding here",
+        d: "All " + PSE.linkedinSections.length + " LinkedIn sections meet their minimum.", route: "#/cw2", cta: "Open LinkedIn Builder" });
+    }
+    return {
+      lead: "Every section that does not yet meet its own minimum, heaviest weighting first in the builder.",
+      rows,
+      tally: c2.done + " of " + c2.total + " sections complete · profile strength " + c2.pct + "%."
+    };
+  }
+
+  function qGaps() {
+    const all = Store.skillRows();
+    const unrated = all.filter(r => !r.current || !r.target).length;
+    const gapped = all.slice().sort((a, b) => b.gap - a.gap).filter(r => r.gap > 0).slice(0, 3);
+    const lead = "Your " + all.length + " skills, sorted by the distance between where you are and where you said you need to be.";
+
+    /* An unrated skill is not a skill without a gap — it is a skill the model
+       cannot see. Say that, rather than reporting an empty list as good news. */
+    if (!gapped.length) {
+      const rows = [unrated
+        ? { tone: "no",
+            t: plural(unrated, "skill") + " still " + (unrated === 1 ? "has" : "have") + " no rating",
+            d: "A skill needs both a current level and a target before it can show a gap." +
+               (unrated === all.length ? "" : " Nothing you have rated is below its target."),
+            route: "#/skills", cta: "Open Skills" }
+        : { tone: "yes", t: "Nothing outstanding here",
+            d: "Every skill is at or above the target you set for it.",
+            route: "#/skills", cta: "Open Skills" }];
+      return { lead, rows };
+    }
+
+    return {
+      lead, rows: gapped.map(r => ({
+        tone: "no",
+        t: r.name + " — gap of " + r.gap,
+        d: "Now " + r.current + "/10, target " + r.target + "/10." + (r.why ? " You wrote: " + r.why : ""),
+        list: r.actions || [],
+        route: "#/skills", cta: "Open Skills"
+      })),
+      tally: unrated ? plural(unrated, "skill") + " not yet rated, so " + (unrated === 1 ? "it is" : "they are") + " not in this list." : ""
+    };
+  }
+
+  function qScore() {
+    const R = Store.readiness();
+    return {
+      lead: "Career readiness " + R.total + " / 100. Seven parts, each earned from work already recorded in this workspace.",
+      rows: PSE.readinessParts.map(p => {
+        const got = R.parts[p.id] || { earned: 0, max: p.max, detail: "" };
+        /* Part-earned is progress, not a failure — only an untouched part
+           gets the warning mark, or the breakdown reads as an accusation. */
+        return {
+          tone: got.earned >= got.max ? "yes" : got.earned > 0 ? "tip" : "no",
+          t: p.label + " — " + got.earned + " of " + got.max,
+          d: got.detail,
+          sub: p.help,
+          route: PART_ROUTE[p.id], cta: PART_CTA[p.id]
+        };
+      }),
+      tally: "No part of this number is typed in by hand."
+    };
+  }
+
+  const QUESTIONS = [
+    { id: "next",  q: "What should I do next?",           build: qNext },
+    { id: "cw1",   q: "What is missing from my CW1?",     build: qCW1 },
+    { id: "goals", q: "Are my goals SMART?",              build: qGoals },
+    { id: "refl",  q: "What is weak in my reflections?",  build: qRefl },
+    { id: "li",    q: "How do I strengthen my LinkedIn?", build: qLinkedIn },
+    { id: "gaps",  q: "Where are my biggest skill gaps?", build: qGaps },
+    { id: "score", q: "What is my score made of?",        build: qScore }
+  ];
+
+  /* --- rendering ----------------------------------------------------------- */
+
+  function rowHTML(r) {
+    const tone = r.tone === "yes" ? "yes" : r.tone === "tip" ? "tip" : "no";
+    const icon = tone === "yes" ? CHECK : tone === "tip" ? ARROW : "!";
+    return '<div class="coach-item ask-row ask-in ' + tone + '">' +
+      '<span class="ic" aria-hidden="true">' + icon + '</span>' +
+      '<div class="ask-body-col">' +
+        '<div class="t">' + esc(r.t) + '</div>' +
+        (r.d   ? '<div class="fix">' + esc(r.d) + '</div>' : "") +
+        (r.sub ? '<div class="ask-sub">' + esc(r.sub) + '</div>' : "") +
+        (r.list && r.list.length
+          ? '<ul class="ask-list">' + r.list.map(x => '<li>' + esc(x) + '</li>').join("") + '</ul>' : "") +
+        (r.route
+          ? '<button class="btn btn-sm ask-jump" data-act="go" data-route="' + esc(r.route) + '">' +
+              esc(r.cta || "Open") + ARROW + '</button>' : "") +
+      '</div></div>';
+  }
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  /* Rows arrive one finding at a time so the presenter can narrate each one.
+     Capped at twelve: past that it would stop pacing and start stalling. */
+  function reveal() {
+    const rows = answerEl.querySelectorAll(".ask-row");
+    if (reduced()) { rows.forEach(el => el.classList.remove("ask-in")); return; }
+    rows.forEach((el, i) => {
+      timers.push(setTimeout(() => el.classList.remove("ask-in"), Math.min(i, 11) * 60));
+    });
+  }
+
+  function ask(id) {
+    const item = QUESTIONS.find(q => q.id === id) || QUESTIONS[0];
+    current = item.id;
+    root.querySelectorAll(".ask-q").forEach(b => b.classList.toggle("on", b.getAttribute("data-q") === current));
+
+    let out;
+    try { out = item.build(); }
+    catch (e) {
+      out = { lead: "", rows: [{ tone: "no", t: "This check could not run",
+        d: "Your work is safe — it is stored in this browser, not in this panel.", route: "#/", cta: "Back to Dashboard" }] };
+      console.warn("[fx] ask: " + item.id + " failed:", e && e.message);
+    }
+
+    clearTimers();
+    answerEl.innerHTML =
+      '<h3 class="ask-atitle">' + esc(item.q) + '</h3>' +
+      (out.lead ? '<p class="ask-lead">' + esc(out.lead) + '</p>' : "") +
+      '<div class="coach ask-rows">' + out.rows.map(rowHTML).join("") + '</div>' +
+      (out.tally ? '<p class="ask-tally">' + esc(out.tally) + '</p>' : "");
+    answerEl.scrollTop = 0;
+    reveal();
+  }
+
+  /* The rules, written out. Inspectable logic is the whole argument, so these
+     are the literal thresholds the checks use — not a paraphrase of them. */
+  function rulesHTML() {
+    const parts = PSE.readinessParts.map(p => p.label + " " + p.max).join(", ");
+    const rules = [
+      "Measurable fails until the text contains a digit and reaches 10 characters.",
+      "Specific needs 25 characters; Achievable, Relevant and Actions need 20 each; Time-bound needs a date; at least one obstacle needs a solution longer than 10 characters.",
+      "A reflection must answer all " + PSE.reflectionPrompts.length + " prompts with 8 words or more each and be written in the first person — the words I, my or me. It counts towards your score at 70 words; the coach flags anything outside 70–140; 70–100 is the LinkedIn post target.",
+      "Five or more Harvard sources counts as real research. The score awards one point per source, up to four.",
+      "A LinkedIn About section needs 60 characters; every other written section needs 20. The photo and the AI Literacy certificate are simple ticks.",
+      "A slide counts as planned once its notes pass 20 characters.",
+      "Career readiness is out of 100: " + parts + "."
+    ];
+    return '<details class="ask-rules"><summary>How each check works</summary>' +
+      '<ul>' + rules.map(r => '<li>' + esc(r) + '</li>').join("") + '</ul></details>';
+  }
+
+  /* --- shell --------------------------------------------------------------- */
+
+  function build() {
+    root = document.createElement("div");
+    root.id = "pse-ask";
+    root.className = "ask";
+    root.hidden = true;
+    root.setAttribute("data-fx-own", "ask");
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-labelledby", "pse-ask-title");
+    root.innerHTML =
+      '<div class="ask-panel">' +
+        '<header class="ask-head">' +
+          '<div>' +
+            '<h2 id="pse-ask-title">Ask PSE</h2>' +
+            '<p class="ask-honest">These answers are produced by fixed rules running in this browser. ' +
+            'No model, no network, no generated text — and it will never write your coursework for you.</p>' +
+          '</div>' +
+          '<button class="btn btn-sm ask-x" type="button">Close</button>' +
+        '</header>' +
+        rulesHTML() +
+        '<div class="ask-body">' +
+          '<nav class="ask-qs" aria-label="Questions">' +
+            QUESTIONS.map(q => '<button type="button" class="chip ask-q" data-q="' + q.id + '">' + esc(q.q) + '</button>').join("") +
+          '</nav>' +
+          '<div class="ask-answer" aria-live="polite"></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(root);
+    answerEl = root.querySelector(".ask-answer");
+
+    /* The topbar is static chrome — render() never replaces it — so one
+       injection at boot is enough and there is nothing to redo per page. */
+    const row = document.querySelector(".topbar-row");
+    if (row) {
+      opener = document.createElement("button");
+      opener.type = "button";
+      opener.className = "btn btn-sm ask-open";
+      opener.setAttribute("data-fx-own", "ask");
+      opener.setAttribute("aria-haspopup", "dialog");
+      opener.setAttribute("aria-expanded", "false");
+      opener.title = "Ask PSE — press A";
+      opener.textContent = "Ask PSE";
+      const menu = row.querySelector(".railtoggle");
+      if (menu) row.insertBefore(opener, menu); else row.appendChild(opener);
+      opener.addEventListener("click", () => setOpen(!open));
+    }
+
+    root.addEventListener("click", e => {
+      if (e.target === root) { setOpen(false); return; }                 /* scrim */
+      if (e.target.closest(".ask-x")) { setOpen(false); return; }
+      const q = e.target.closest(".ask-q");
+      if (q) { ask(q.getAttribute("data-q")); return; }
+      /* A jump is an answer acted on: close, and let app.js's delegated
+         handler receive the same click and navigate. Never stop it here. */
+      if (e.target.closest("[data-act]")) setOpen(false);
+    });
+  }
+
+  function setOpen(v) {
+    if (v === open) return;
+    open = v;
+    document.body.classList.toggle("ask-open", open);
+    if (opener) opener.setAttribute("aria-expanded", open ? "true" : "false");
+
+    if (open) {
+      routeAtOpen = location.hash || "#/";
+      root.hidden = false;
+      /* Never leave the panel empty on a projector: run the first question. */
+      ask(current || QUESTIONS[0].id);
+      if (reduced()) root.classList.add("on");
+      /* One frame to let the panel exist before it transitions. Guarded, because
+         a close can land between the two frames and must win. */
+      else requestAnimationFrame(() => requestAnimationFrame(() => { if (open) root.classList.add("on"); }));
+      const first = root.querySelector(".ask-q.on") || root.querySelector(".ask-q");
+      if (first) first.focus({ preventScroll: true });
+    } else {
+      clearTimers();
+      root.classList.remove("on");
+      root.hidden = true;
+      if (opener) opener.focus({ preventScroll: true });
+    }
+  }
+
+  function onKey(e) {
+    const tag = (e.target && e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea" || (e.target && e.target.isContentEditable)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    if (e.key === "a" || e.key === "A") { setOpen(!open); e.preventDefault(); e.stopPropagation(); return; }
+    /* Capture phase, so presenter mode's Escape and app.js's Journey Escape
+       never also fire while this panel owns the room. */
+    if (open && e.key === "Escape") { setOpen(false); e.preventDefault(); e.stopPropagation(); }
+  }
+
+  return {
+    init(a) {
+      if (root) return;                 /* boot twice, decorate once */
+      api = a;
+      build();
+      /* Registered raw rather than through api.on: FX.boot()'s fallback api
+         drops the options argument, and capture is the whole point here. */
+      document.addEventListener("keydown", onKey, true);
+    },
+
+    /* The panel is an overlay over a page it did not render. If something else
+       navigated underneath it, the answer on screen is about the wrong screen. */
+    onRender(pageRoot, ctx) {
+      if (open && ctx && ctx.route !== routeAtOpen) setOpen(false);
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   compare.js — career comparison.
+
+   The contract names career comparison three times and nothing in the repo
+   answers it: the explorer collects a shortlist, the profile page says
+   "shortlist careers from the explorer to compare them here", and then lists
+   them. This module is the missing join. It is also the only place where the
+   two data sets the student owns — the career library and their own
+   self-assessment — are read against each other, which is the difference
+   between displaying research and reasoning over it.
+
+   It adds no route. The panel is injected into two pages that already exist,
+   and every button in it uses a data-act app.js already handles, so nothing
+   outside this file and its stylesheet changes.
+
+   Honesty rule, enforced throughout: every salary and growth figure in the
+   library is a US Bureau of Labor Statistics proxy occupation, so no figure is
+   ever rendered without the note naming that occupation and its year.
+   ========================================================================== */
+
+PSEFX.compare = (function () {
+
+  /* Growth is drawn against a fixed ceiling rather than against the largest
+     value in this particular shortlist: a fixed scale means two different
+     shortlists can be read against each other. The ceiling is read off the
+     library itself and rounded up to the next 5, so the strongest figure in
+     the data (+33%, Cybersecurity Analyst) fills the bar without ever being
+     clamped — a clamped bar would draw +33% and +25% at the same length, which
+     is the one thing a chart of these figures must never do. Computed lazily,
+     because this file must not depend on load order. */
+  let ceiling = 0;
+  function growthCeiling() {
+    if (!ceiling) {
+      const top = PSE.careers.reduce((m, c) => Math.max(m, growthOf(c)), 0);
+      ceiling = Math.max(25, Math.ceil(top / 5) * 5);
+    }
+    return ceiling;
+  }
+
+  /* Chart geometry, in viewBox units. The svg is scaled to the card, so these
+     are proportions rather than pixels. */
+  const W = 720, LABEL = 168, VALUE = 86, ROW = 60, PAD = 8, BAR_H = 14;
+  const BARW = W - LABEL - VALUE;
+
+  /* Last painted bar fractions, keyed by career id. Module scope, not api
+     state, so it survives the teardown between renders — that is what lets an
+     added career grow into place while the bars already on screen only move if
+     the rescale actually moved them. */
+  const geom = new Map();
+
+  const NWORD = { 1: "one", 2: "two", 3: "three", 4: "four" };
+
+  const growthOf = c => parseFloat(c.growth) || 0;
+
+  /* Education is a paragraph; the comparison only wants the route. */
+  const firstSentence = t => ((String(t || "").match(/^[^.]+\./) || [String(t || "")])[0]).trim();
+
+  function shortlisted() {
+    return Store.get().shortlist
+      .map(id => PSE.careers.find(c => c.id === id))
+      .filter(Boolean)
+      .slice(0, 4);
+  }
+
+  /* --- skills fit ---------------------------------------------------------
+     A required skill counts as met only when the student has set a target and
+     reached it: an unrated skill is not a pass, it is an unknown. --------- */
+  function fit(c, rows) {
+    const req = c.skillIds.map(id => rows.find(r => r.id === id)).filter(Boolean);
+    const met = req.filter(r => r.target > 0 && r.current >= r.target);
+    const short = req.filter(r => !(r.target > 0 && r.current >= r.target))
+                     .sort((a, b) => b.gap - a.gap);
+    return { req, met, short };
+  }
+
+  const shortLabel = r => r.target > 0
+    ? r.name + " " + r.current + "→" + r.target
+    : r.name + " (not rated)";
+
+  /* --- chart --------------------------------------------------------------- */
+
+  function chartSVG(list, maxSal) {
+    const h = ROW * list.length - 8;
+    const track = y => `<rect x="${LABEL}" y="${y}" width="${BARW}" height="${BAR_H}" rx="3" fill="var(--surface-2)"/>`;
+
+    let s = `<svg class="fx-cmp-chart" viewBox="0 0 ${W} ${h}" role="img" data-fx-own="compare"
+      aria-label="Median salary and projected growth for the careers on your shortlist">`;
+    s += `<line x1="${LABEL - .5}" y1="0" x2="${LABEL - .5}" y2="${h}" stroke="var(--line)" stroke-width="1"/>`;
+
+    list.forEach((c, i) => {
+      const y = PAD + i * ROW, y2 = y + BAR_H + 10;
+      s += `<text class="fx-cmp-name" x="${LABEL - 12}" y="${y + BAR_H + 5}" text-anchor="end">${esc(c.title)}</text>`;
+      s += track(y) + track(y2);
+      s += `<rect class="fx-cmp-bar" data-c="${c.id}" data-m="sal" x="${LABEL}" y="${y}" width="0" height="${BAR_H}" rx="3" fill="var(--s1)">
+        <title>${esc(c.title)} — ${money(c.salary)}. ${esc(c.salaryNote)}.</title></rect>`;
+      s += `<text class="fx-cmp-val" data-c="${c.id}" data-m="sal" x="${LABEL + 7}" y="${y + BAR_H / 2}">${money(c.salary)}</text>`;
+      s += `<rect class="fx-cmp-bar" data-c="${c.id}" data-m="grw" x="${LABEL}" y="${y2}" width="0" height="${BAR_H}" rx="3" fill="var(--s3)">
+        <title>${esc(c.title)} — ${esc(c.growth)} projected growth. ${esc(c.growthNote)}.</title></rect>`;
+      s += `<text class="fx-cmp-val" data-c="${c.id}" data-m="grw" x="${LABEL + 7}" y="${y2 + BAR_H / 2}">${esc(c.growth)}</text>`;
+    });
+
+    return s + "</svg>";
+  }
+
+  function place(b, f) {
+    const w = Math.max(0, f) * BARW;
+    b.rect.setAttribute("width", w.toFixed(2));
+    b.val.setAttribute("x", (LABEL + w + 7).toFixed(2));
+  }
+
+  /* Bars only move when the number behind them moved. Revisiting the page with
+     the same shortlist repaints silently; adding a career grows its pair from
+     zero and slides the others to their new share of the rescaled axis. */
+  function grow(panel, list, maxSal, api) {
+    const bars = [], next = new Map();
+
+    list.forEach((c, i) => {
+      const prev = geom.get(c.id);
+      const to = { sal: c.salary / maxSal, grw: Math.min(1, growthOf(c) / growthCeiling()) };
+      next.set(c.id, to);
+      ["sal", "grw"].forEach(m => {
+        const rect = panel.querySelector('rect.fx-cmp-bar[data-c="' + c.id + '"][data-m="' + m + '"]');
+        const val = panel.querySelector('text.fx-cmp-val[data-c="' + c.id + '"][data-m="' + m + '"]');
+        if (rect && val) bars.push({ rect, val, i, from: prev ? prev[m] : 0, to: to[m] });
+      });
+    });
+
+    geom.clear();
+    next.forEach((v, k) => geom.set(k, v));
+
+    const moving = bars.filter(b => Math.abs(b.to - b.from) > 0.001);
+    if (api.reduced || !moving.length) { bars.forEach(b => place(b, b.to)); return; }
+
+    bars.forEach(b => place(b, moving.indexOf(b) >= 0 ? b.from : b.to));
+    const D = 0.42, STAG = 0.07;
+    api.raf(t => {
+      let done = true;
+      moving.forEach(b => {
+        const p = Math.max(0, Math.min(1, (t - b.i * STAG) / D));
+        if (p < 1) done = false;
+        place(b, b.from + (b.to - b.from) * api.ease.out(p));
+      });
+      if (done) { moving.forEach(b => place(b, b.to)); return false; }
+    });
+  }
+
+  /* --- panel --------------------------------------------------------------- */
+
+  function tableHTML(list, rows) {
+    const head = list.map(c =>
+      `<th scope="col"><button class="btn btn-sm btn-ghost fx-cmp-open" data-act="go" data-route="#/career/${c.id}">${esc(c.title)}</button></th>`).join("");
+
+    const row = (label, cell) =>
+      `<tr><th scope="row">${esc(label)}</th>${list.map(cell).join("")}</tr>`;
+
+    const fits = list.map(c => fit(c, rows));
+
+    return `<div class="fx-cmp-scroll"><table class="tbl fx-cmp-tbl">
+      <thead><tr><th scope="col" class="fx-cmp-corner">Compare on</th>${head}</tr></thead>
+      <tbody>
+        ${row("Demand", c => `<td>${demandPill(c.demand)}</td>`)}
+        ${row("AI impact", c => `<td>${aiPill(c.ai)}</td>`)}
+        ${row("Career level", c => `<td>${esc(c.level)}</td>`)}
+        ${row("Education route", c => `<td>${esc(firstSentence(c.education))}</td>`)}
+        ${row("Projected growth", c => `<td><b>${esc(c.growth)}</b><div class="fx-cmp-note">${esc(c.growthNote)}</div></td>`)}
+        ${row("Median salary", c => `<td><b>${money(c.salary)}</b><div class="fx-cmp-note">${esc(c.salaryNote)}</div></td>`)}
+        ${row("Skills fit", (c, i) => {
+          const f = fits[i];
+          return `<td><b>${f.met.length} of ${f.req.length} required skills at target</b>${
+            f.short.length ? `<div class="fx-cmp-note">Short on ${f.short.map(shortLabel).map(esc).join(", ")}</div>` : ""}</td>`;
+        })}
+      </tbody>
+      <tfoot><tr><td></td>${list.map(c => `<td class="fx-cmp-acts">
+        <button class="btn btn-sm btn-primary" data-act="setcw1career" data-id="${c.id}">Use as my CW1 career</button>
+        <button class="btn btn-sm" data-act="shortlist" data-id="${c.id}" data-stop="1">Remove</button></td>`).join("")}</tr></tfoot>
+    </table></div>`;
+  }
+
+  /* One sentence, assembled from the data and nothing else. */
+  function conclusion(list, rows) {
+    const best = list.reduce((a, c) => growthOf(c) > growthOf(a) ? c : a, list[0]);
+    const n = NWORD[list.length] || String(list.length);
+
+    const tally = new Map();
+    list.forEach(c => fit(c, rows).short.forEach(r => {
+      const e = tally.get(r.id) || { row: r, n: 0 };
+      e.n += 1; tally.set(r.id, e);
+    }));
+    const ranked = [...tally.values()].sort((a, b) => (b.row.gap - a.row.gap) || (b.n - a.n));
+    const worst = ranked.find(e => e.row.gap > 0);
+    const unrated = ranked.find(e => e.row.target === 0);
+
+    if (worst) return { text: `${best.title} has the strongest outlook of your ${n}, but you are short on ${worst.row.name} — that gap is your goal.`,
+      cta: "Turn that gap into a goal", route: "#/goals" };
+    if (unrated) return { text: `${best.title} has the strongest outlook of your ${n}, but ${unrated.row.name} is still unrated — rate it before you choose.`,
+      cta: "Open Skills", route: "#/skills" };
+    return { text: `${best.title} has the strongest outlook of your ${n}, and you are at target on every skill these careers require.`,
+      cta: "Open Goals", route: "#/goals" };
+  }
+
+  function panelHTML(list, rows, maxSal) {
+    const shared = PSE.skills.filter(s => list.every(c => c.skillIds.includes(s.id)));
+    const c = conclusion(list, rows);
+
+    return `<div class="card-h"><div><h3>Compare your shortlist</h3>
+        <p class="sub">${list.length} career${list.length === 1 ? "" : "s"} side by side. Choosing one is the reasoning CW1 is marked on — this is the evidence for it.</p></div></div>
+      <div class="card-b fx-cmp-b">
+        <div class="fx-cmp-legend">
+          <span><i style="background:var(--s1)"></i>Median salary</span>
+          <span><i style="background:var(--s3)"></i>Projected growth, scaled to ${growthCeiling()}%</span>
+        </div>
+        <div class="fx-cmp-scroll">${chartSVG(list, maxSal)}</div>
+        <p class="fx-cmp-prov">Both figures are US Bureau of Labor Statistics proxy occupations. The exact occupation and year sits under every figure in the table.</p>
+        ${tableHTML(list, rows)}
+        <div class="fx-cmp-shared">
+          ${shared.length
+            ? `<div class="fx-cmp-chips">${shared.map(s => `<span class="pill acc">${esc(s.name)}</span>`).join("")}</div>
+               <p class="fx-cmp-note">Required by all of these — worth building whichever you choose.</p>`
+            : `<p class="fx-cmp-note">These careers share no required skill, so your shortlist spans different skill sets.</p>`}
+        </div>
+        <div class="fx-cmp-end">
+          <p>${esc(c.text)}</p>
+          <button class="btn btn-sm btn-primary" data-act="go" data-route="${c.route}">${esc(c.cta)}</button>
+        </div>
+      </div>`;
+  }
+
+  function liteHTML(n) {
+    return n === 1
+      ? "Shortlist a second career to compare them."
+      : "Shortlist two careers to compare them side by side.";
+  }
+
+  /* --- placement ----------------------------------------------------------- */
+
+  /* Ten engineers are building in parallel, so "the first card" means the first
+     card the view itself rendered — anything another module injected is skipped
+     rather than used as an anchor. */
+  const mine = el => !el.closest('[data-fx-own]:not([data-fx-own="compare"])');
+
+  function hostFor(root, route) {
+    if (route === "#/careers") {
+      const filter = [...root.querySelectorAll(".card")].find(mine);   /* the filter card */
+      return filter ? { anchor: filter, mode: "after" } : null;
+    }
+    /* profile: inside the card that already promises a comparison */
+    const h3 = [...root.querySelectorAll(".card .card-h h3")]
+      .find(el => el.textContent.trim() === "Shortlisted careers" && mine(el));
+    const card = h3 && h3.closest(".card");
+    return card ? { anchor: card, mode: "append" } : null;
+  }
+
+  function mount(node, host) {
+    if (host.mode === "after") host.anchor.insertAdjacentElement("afterend", node);
+    else host.anchor.appendChild(node);
+  }
+
+  /* --- provenance on the explorer cards ------------------------------------
+     Nothing visible is added to a card; the proxy occupation behind the growth
+     figure simply becomes one hover away instead of one page away. -------- */
+  function stampCards(root) {
+    root.querySelectorAll(".career-card").forEach(card => {
+      if (card.closest('[data-fx-own]:not([data-fx-own="compare"])')) return;
+      const route = card.getAttribute("data-route") || "";
+      const c = PSE.careers.find(x => "#/career/" + x.id === route);
+      if (!c || !c.growthNote) return;
+      card.querySelectorAll(".tags .pill").forEach(p => {
+        /* A pill another module has taken over is that module's to label. */
+        if (p.closest('[data-fx-own]:not([data-fx-own="compare"])')) return;
+        if (p.textContent.trim() === c.growth + " growth") p.setAttribute("title", c.growth + " — " + c.growthNote);
+      });
+    });
+  }
+
+  return {
+    onRender(root, ctx, api) {
+      const route = ctx.route;
+      if (route !== "#/careers" && route !== "#/profile") return;
+      if (route === "#/careers") stampCards(root);
+
+      const host = hostFor(root, route);
+      if (!host) return;
+
+      const list = shortlisted();
+
+      /* A career dropped from the shortlist forgets its geometry, so putting it
+         back later grows it from zero again rather than snapping it in. */
+      [...geom.keys()].forEach(id => { if (!list.some(c => c.id === id)) geom.delete(id); });
+
+      if (list.length < 2) {
+        /* An empty comparison is worse than none, so this is one quiet line —
+           except on the profile page with nothing shortlisted, where the
+           existing empty state already says exactly this. */
+        if (route === "#/profile" && !list.length) return;
+        const lite = document.createElement("div");
+        lite.className = "fx-compare-lite";
+        lite.setAttribute("data-fx-own", "compare");
+        lite.textContent = liteHTML(list.length);
+        mount(lite, host);
+        return;
+      }
+
+      const rows = Store.skillRows();
+      const maxSal = Math.max.apply(null, list.map(c => c.salary));
+
+      const panel = document.createElement("section");
+      panel.className = "fx-compare" + (route === "#/careers" ? " card" : " inset");
+      panel.setAttribute("data-fx-own", "compare");
+      panel.innerHTML = panelHTML(list, rows, maxSal);
+      mount(panel, host);
+
+      grow(panel, list, maxSal, api);
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   evidence.js — the CW1 research checklist, audited.
+
+   Fourteen checkboxes that tick themselves for free are the one place in this
+   product that rewards pretending, and they feed fourteen points into a score
+   the rest of the platform asks to be believed. So this module puts the
+   student's own work underneath each requirement: which slide is supposed to
+   carry it, how much they have actually written there, and how many sources
+   back it up — read live from Store, never asserted.
+
+   It audits; it does not punish. Nothing here writes to state, patches
+   Store.cw1Progress or changes a single point of the readiness score. A
+   requirement ticked on thin evidence still counts — it just says so.
+
+   The motion is the same argument: at the moment of the click the check draws
+   itself (the click registered), the x/14 pill beats once (this is what it was
+   worth), and the coach item that has just been satisfied strikes itself
+   through and collapses instead of disappearing between two frames.
+   ========================================================================== */
+
+PSEFX.evidence = (function () {
+
+  /* Which slide of the ten-slide plan is supposed to carry each requirement.
+     Straight from section 16's slide order: 6 — Job Market — is the evidence
+     for demand, outlook and salary alike. */
+  const SLIDE = {
+    career: 1, research: 2, resp: 3, skills: 4, edu: 5,
+    demand: 6, ai: 7, outlook: 6, salary: 6, plan: 8
+  };
+
+  const REF_BAR = 5;          /* section 17: five sources is the referencing bar */
+  const SLIDE_BAR = 10;
+
+  /* A student ticks one box at a time. Four or more changing at once means the
+     demo data was loaded or a workspace was imported — a state swap, not a
+     recalculation the room just watched, so it gets no animation. */
+  const MAX_DRAW = 3;
+  const MAX_GHOSTS = 2;       /* a bulk change must not turn into a cascade */
+
+  /* Generated, because the platform ships no icon library and no network. */
+  const CHECK_SVG = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="m4 10.4 4 4 8-8.4" stroke-width="2.4"/></svg>';
+
+  /* null until this tab has been seen once, so a first paint animates nothing. */
+  let prevTick = null;        /* Map: requirement id -> was it ticked */
+  let prevCoach = null;       /* the coach card's labels, in order */
+
+  /* --- helpers ----------------------------------------------------------- */
+
+  /* Ten engineers decorate this page and cannot see each other. */
+  const foreign = el => {
+    const owner = el.closest("[data-fx-own]");
+    return !!owner && owner.getAttribute("data-fx-own") !== "evidence";
+  };
+
+  const plural = (n, word) => n + " " + word + (n === 1 ? "" : "s");
+
+  const countSources = str =>
+    String(str || "").split(/[,;]/).map(x => x.trim()).filter(Boolean).length;
+
+  /* api.after collapses its delay to 0 under reduced motion, which is right for
+     an animation and wrong for the 600ms the resolved coach label has to stay
+     readable. This is the plain timer, still torn down with the page. */
+  function hold(api, ms, fn) {
+    const id = setTimeout(fn, ms);
+    api.onTeardown(() => clearTimeout(id));
+  }
+
+  /* --- B. the evidence line ---------------------------------------------- */
+
+  function evidenceFor(id, ticked, s) {
+    const n = SLIDE[id];
+
+    if (n) {
+      const sl = s.cw1.slides[n] || {};
+      const chars = (sl.notes || "").trim().length;
+      const srcs = countSources(sl.sources);
+      if (!chars) {
+        return ticked
+          ? { text: "Ticked, but slide " + n + " has no notes yet", thin: true }
+          : { text: "Slide " + n + " carries this — no notes written there yet", thin: false };
+      }
+      return { text: "Slide " + n + " · " + plural(chars, "character") + " of notes · " +
+                     (srcs ? plural(srcs, "source") : "no sources listed"), thin: false };
+    }
+
+    /* The four requirements whose evidence is not a slide but a whole workspace. */
+    if (id === "refs") {
+      const k = s.cw1.sources.length;
+      if (ticked && k < REF_BAR) return { text: "Ticked, but only " + k + " of " + REF_BAR + " sources are in the library", thin: true };
+      return { text: plural(k, "source") + " in the library" + (k < REF_BAR ? " · " + REF_BAR + " needed" : ""), thin: false };
+    }
+    if (id === "slides") {
+      const k = Store.slidesDone();
+      if (ticked && k < SLIDE_BAR) return { text: "Ticked, but only " + k + " of " + SLIDE_BAR + " slides have notes", thin: true };
+      return { text: k + " of " + SLIDE_BAR + " slides planned", thin: false };
+    }
+    if (id === "practice") {
+      const k = s.cw1.practice.length;
+      if (ticked && !k) return { text: "Ticked, but no timed run is recorded", thin: true };
+      return { text: k ? plural(k, "timed run") + " recorded" : "No timed run recorded yet", thin: false };
+    }
+    if (id === "intv") return { text: "Optional — not counted against you", thin: false };
+
+    return null;
+  }
+
+  function paintEvidence(rows, s) {
+    rows.forEach(row => {
+      const t = row.querySelector(".t");
+      if (!t) return;
+      const block = t.parentNode;
+      const ev = evidenceFor(row.getAttribute("data-id"), row.classList.contains("on"), s);
+      if (!ev) return;
+
+      /* render() hands us fresh HTML every time, but re-running over the same
+         DOM must not stack two lines. */
+      Array.prototype.forEach.call(block.querySelectorAll(".fx-ev"), n => n.remove());
+      block.classList.remove("fx-ev-warn");
+
+      const line = document.createElement("div");
+      line.className = "fx-ev" + (ev.thin ? " fx-ev-thin" : "");
+      line.setAttribute("data-fx-own", "evidence");
+      line.textContent = ev.text;
+      block.appendChild(line);
+      if (ev.thin) block.classList.add("fx-ev-warn");
+    });
+  }
+
+  /* --- C. the tick draws itself ------------------------------------------ */
+
+  function drawCheck(row, api) {
+    const path = row.querySelector(".box svg path");
+    if (!path || typeof path.getTotalLength !== "function") return;
+    let len;
+    try { len = path.getTotalLength(); } catch (e) { return; }
+    if (!len) return;
+
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    void path.getBoundingClientRect();        /* commit the empty box before tweening away from it */
+
+    api.raf(t => {
+      const k = Math.min(1, t / 0.22);
+      path.style.strokeDashoffset = (len * (1 - api.ease.out(k))).toFixed(2);
+      if (k < 1) return true;
+      path.style.strokeDasharray = "";        /* hand the mark back to the stylesheet */
+      path.style.strokeDashoffset = "";
+      return false;
+    });
+  }
+
+  function flashPill(card, api) {
+    const pill = card && card.querySelector(".card-h .pill");
+    if (!pill || foreign(pill)) return;
+    pill.classList.remove("fx-ev-pop");
+    void pill.offsetWidth;
+    pill.classList.add("fx-ev-pop");
+    api.on(pill, "animationend", () => pill.classList.remove("fx-ev-pop"));
+  }
+
+  /* --- D. the resolved coach item ---------------------------------------- */
+
+  function coachList(root) {
+    const cards = Array.prototype.slice.call(root.querySelectorAll(".card"));
+    const card = cards.filter(c => {
+      const h = c.querySelector(".card-h h3");
+      return h && /^coach/i.test(h.textContent.trim());
+    })[0];
+    return card ? card.querySelector(".coach") : null;
+  }
+
+  const labelsOf = coach => Array.prototype.slice.call(coach.children)
+    .filter(el => !el.classList.contains("fx-ghost"))
+    .map(el => { const t = el.querySelector(".t"); return t ? t.textContent.trim() : ""; });
+
+  /* A label can also vanish because checkCW1() only shows the first six missing
+     items — unticking something pushes the sixth off the end. Striking that
+     through would claim a resolution that never happened, so every ghost has to
+     be explained by the state actually being satisfied now. */
+  function isResolved(label, s) {
+    const item = PSE.cw1Checklist.filter(i => i.label === label)[0];
+    if (item) return !!s.cw1.checklist[item.id];
+    if (label === "Fewer than five references") return s.cw1.sources.length >= REF_BAR;
+    if (/slides still have no notes$/.test(label)) return Store.slidesDone() === SLIDE_BAR;
+    return false;
+  }
+
+  function ghost(coach, label, index, api) {
+    const el = document.createElement("div");
+    el.className = "coach-item yes fx-ghost";
+    el.setAttribute("data-fx-own", "evidence");
+    el.innerHTML = '<span class="ic">' + CHECK_SVG + '</span><div><div class="t fx-ev-struck"></div></div>';
+    el.querySelector(".t").textContent = label;
+    coach.insertBefore(el, coach.children[Math.min(index, coach.children.length)] || null);
+
+    /* Reduced motion still gets the sentence — it just does not get the slide. */
+    if (api.reduced) { hold(api, 600, () => el.remove()); return; }
+
+    el.style.maxHeight = el.scrollHeight + "px";
+    void el.offsetHeight;
+    el.classList.add("fx-ev-out");
+    el.style.maxHeight = "0px";
+    hold(api, 280, () => el.remove());
+  }
+
+  /* --- the render pass ---------------------------------------------------- */
+
+  return {
+    init() { /* nothing outlives a page here, and Store.subscribe has no unsubscribe */ },
+
+    onRender(root, ctx, api) {
+      /* A. */
+      if (!root || (ctx && ctx.route) !== "#/cw1") return;
+      const rows = Array.prototype.slice.call(root.querySelectorAll(".check-row"))
+        .filter(r => !foreign(r));
+      if (!rows.length) return;
+
+      const s = Store.get();
+
+      paintEvidence(rows, s);
+
+      /* C — what changed since the last time this tab was on screen. */
+      const seen = !!prevTick;
+      const now = new Map();
+      const changed = [];
+      let ticked = 0, wasTicked = 0;
+      rows.forEach(row => {
+        const id = row.getAttribute("data-id");
+        const on = row.classList.contains("on");
+        now.set(id, on);
+        if (on) ticked++;
+        if (seen && prevTick.get(id) === true) wasTicked++;
+        if (seen && prevTick.get(id) === false && on) changed.push(row);
+      });
+      prevTick = now;
+
+      /* Four or more boxes moving at once is a persona load or an import — a
+         state swap, not something the room watched happen — so nothing moves. */
+      const bulk = changed.length > MAX_DRAW || Math.abs(ticked - wasTicked) > MAX_DRAW;
+
+      if (seen && !bulk && !api.reduced) {
+        changed.forEach(row => drawCheck(row, api));
+        /* The pill prints the count, so it beats whenever the count moved.
+           Unticking is a recalculation too: the point leaves the score and the
+           number must be seen to fall, or the one honest click in the demo is
+           the only one the product does not acknowledge. */
+        if (ticked !== wasTicked) flashPill(rows[0].closest(".card"), api);
+      }
+
+      /* D. */
+      const coach = coachList(root);
+      if (!coach || foreign(coach)) { prevCoach = null; return; }
+      const labels = labelsOf(coach);
+      if (prevCoach) {
+        const gone = [];
+        prevCoach.forEach((lab, i) => {
+          if (lab && labels.indexOf(lab) < 0 && isResolved(lab, s)) gone.push({ lab: lab, i: i });
+        });
+        gone.slice(0, MAX_GHOSTS).forEach(g => ghost(coach, g.lab, g.i, api));
+      }
+      prevCoach = labels;
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   journey.js — the Journey canvas earns its arrival.
+
+   canvas.js already computes the single most meaningful figure on this screen:
+   how far along the eight stages this student actually is. It writes that
+   figure into the progress stroke at mount, so it is true but never seen to
+   happen. Here the line grows to where the student stands and the stages
+   arrive in chronological order, which turns a map into a story — and then the
+   camera flies, as it always did.
+
+   The other two things this module does are honesty repairs rather than motion:
+   the canvas never says in words which stage the camera is on, and "Fly to my
+   next step" silently lands on the current stage whenever the recommendation
+   is a route no stage owns (#/profile — the very first recommendation an empty
+   workspace produces). A mentor comparing two screens catches that in seconds.
+
+   Owns: the progress path, the stage nodes' arrival, and the two elements it
+   adds to .cv-hud (both marked data-fx-own="journey"). It never writes a
+   transform to .cv-node or .cv-ring outside a one-shot keyframe, because
+   canvas.js re-applies transforms to those on every camera move.
+   ========================================================================== */
+
+PSEFX.journey = (function () {
+  const OWN = "journey";
+
+  /* canvas.js matches Store.nextStep().route against stage routes and falls
+     back to the current stage when nothing matches. Two module routes belong to
+     no stage at all (#/profile, #/resources), so that fallback fires on exactly
+     the recommendation a new student sees first. This is the honest mapping. */
+  const ROUTE_STAGE = {
+    "#/careers": "explore", "#/skills": "skills", "#/goals": "goals",
+    "#/cw1": "cw1", "#/cw2": "cw2", "#/reflections": "reflect",
+    "#/resources": "explore", "#/profile": "understand"
+  };
+
+  const DRAW_MS = 900, NODE_GAP = 70;
+
+  let readout = null;        /* the HUD element — belongs to the current page only */
+  let lastFocus = -2;        /* -2 so the first observer pass always paints */
+  let nextTitle = "";
+
+  const pad2 = n => String(n).padStart(2, "0");
+  const stages = () => (window.PSE && PSE.roadmap) || [];
+
+  function focusIndex(world) {
+    const nodes = world.querySelectorAll(".cv-node");
+    for (let i = 0; i < nodes.length; i++) if (nodes[i].classList.contains("focus")) return i;
+    return -1;
+  }
+
+  /* Camera and caption are derived from the same index, so they cannot
+     disagree — which is the whole reason the caption is there. */
+  function paintReadout(i) {
+    if (!readout) return;
+    const list = stages(), t = readout.querySelector("b"), n = readout.querySelector("em");
+    t.textContent = (i >= 0 && list[i])
+      ? "Stage " + list[i].n + " of " + pad2(list.length) + " — " + list[i].title
+      : "Overview — " + pad2(list.length) + " stages";
+    n.textContent = nextTitle;
+  }
+
+  /* Where "my next step" really is: resolved here rather than letting
+     canvas.js swallow a route no stage claims. */
+  function trueNext() {
+    const step = (window.Store && Store.nextStep()) || { route: "", title: "" };
+    const id = ROUTE_STAGE[step.route];
+    let i = id ? stages().findIndex(r => r.id === id) : -1;
+    if (i < 0) i = window.Journey ? Journey.now() : 0;
+    return { i: i, title: step.title || "" };
+  }
+
+  function flyTrue() {
+    const t = trueNext();
+    nextTitle = t.title;
+    if (window.Journey && Journey.active()) Journey.stage(t.i, 2);
+    lastFocus = t.i;
+    paintReadout(t.i);
+  }
+
+  const fsNode = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+
+  function toggleFull(host) {
+    if (fsNode()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) { const r = exit.call(document); if (r && r.catch) r.catch(() => {}); }
+      return;
+    }
+    const req = host.requestFullscreen || host.webkitRequestFullscreen;
+    if (req) { const r = req.call(host); if (r && r.catch) r.catch(() => {}); }
+  }
+
+  /* The only DOM this module creates: a stage readout and a full screen
+     button, appended to the HUD canvas.js already drew. */
+  function buildHud(host, hud, world, api) {
+    const full = document.createElement("button");
+    full.className = "btn btn-sm";
+    full.type = "button";
+    full.setAttribute("data-fx-own", OWN);
+    const label = () => { full.textContent = fsNode() ? "Exit full screen" : "Full screen"; };
+    label();
+    /* No data-act attribute, so app.js's delegated handler never sees it. */
+    api.on(full, "click", () => toggleFull(host));
+    api.on(document, "fullscreenchange", label);
+    api.on(document, "webkitfullscreenchange", label);
+    api.on(document, "keydown", e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      /* The assistant overlay owns the keyboard while it is open. */
+      if (document.body.classList.contains("ask-open")) return;
+      const el = e.target, tag = (el.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable) return;
+      if (e.key === "f" || e.key === "F") { toggleFull(host); e.preventDefault(); }
+    });
+    hud.appendChild(full);
+
+    readout = document.createElement("div");
+    readout.className = "cv-stage";
+    readout.setAttribute("data-fx-own", OWN);
+    readout.innerHTML = '<b></b><span>Next step · <em></em></span>';
+    hud.appendChild(readout);
+    nextTitle = trueNext().title;
+    paintReadout(focusIndex(world));
+
+    /* canvas.js states the focused stage only as a class, so that class is the
+       one reliable source for a caption that can never lag the camera. */
+    const obs = new MutationObserver(() => {
+      const i = focusIndex(world);
+      if (i === lastFocus) return;
+      lastFocus = i;
+      paintReadout(i);
+    });
+    obs.observe(world, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    api.observe(obs);
+  }
+
+  return {
+    onRender(root, ctx, api) {
+      const host = root.querySelector(".journey");
+      const world = host && host.querySelector(".cv-world");
+      if (!world) { readout = null; return; }             /* not the canvas page */
+      const hud = host.querySelector(".cv-hud");
+
+      lastFocus = -2;
+      readout = null;
+
+      /* --- the progress line draws to where the student stands ------------ */
+      const line = host.querySelectorAll(".cv-path path")[1];
+      if (line) {
+        const prog = parseFloat(line.getAttribute("stroke-dasharray")) || 0;
+        if (prog > 0 && !api.reduced) {
+          line.setAttribute("stroke-dasharray", "0 1");
+          void line.getBoundingClientRect();
+          /* 900ms against canvas.js's 420ms hand-off and its 900ms camera
+             transition: the line finishes about as the camera settles. */
+          api.raf(t => {
+            const k = Math.min(1, t * 1000 / DRAW_MS);
+            line.setAttribute("stroke-dasharray", (prog * api.ease.out(k)).toFixed(4) + " 1");
+            if (k >= 1) { line.setAttribute("stroke-dasharray", prog + " 1"); return false; }
+          });
+          api.onTeardown(() => line.setAttribute("stroke-dasharray", prog + " 1"));
+        }
+      }
+
+      /* --- the stages arrive in chronological order ----------------------- */
+      const nodes = Array.prototype.slice.call(world.querySelectorAll(".cv-node"));
+      if (!api.reduced) {
+        nodes.forEach((node, i) => {
+          const ring = node.querySelector(".cv-ring"), delay = (i * NODE_GAP) + "ms";
+          node.style.animationDelay = delay;
+          node.classList.add("fx-node-in");
+          api.on(node, "animationend", e => {
+            if (e.target !== node) return;                /* the ring bubbles its own */
+            node.classList.remove("fx-node-in"); node.style.animationDelay = "";
+          });
+          if (ring) {
+            ring.style.animationDelay = delay;
+            ring.classList.add("fx-ring-in");
+            /* Removed on end so canvas.js's .focus scaling — and the pulse on
+               the stage the student is standing on — own the transform again. */
+            api.on(ring, "animationend", () => {
+              ring.classList.remove("fx-ring-in"); ring.style.animationDelay = "";
+            });
+          }
+        });
+        api.onTeardown(() => nodes.forEach(node => {
+          const ring = node.querySelector(".cv-ring");
+          node.classList.remove("fx-node-in"); node.style.animationDelay = "";
+          if (ring) { ring.classList.remove("fx-ring-in"); ring.style.animationDelay = ""; }
+        }));
+      }
+
+      /* --- stages 01 and 02 are attendance, not earned work ---------------- */
+      stages().forEach((r, i) => {
+        if (r.id !== "meet" && r.id !== "understand") return;
+        const live = nodes[i] && nodes[i].querySelector(".cv-live");
+        if (live && live.querySelector("[data-fx-own]")) return;   /* not ours to rewrite */
+        if (live && live.textContent.indexOf("assumed from attendance") < 0) {
+          live.textContent = live.textContent + " · assumed from attendance";
+        }
+      });
+
+      /* render() rebuilds #page wholesale, so the HUD is normally brand new. If
+         a pass ever finds our own elements still there, replace them rather than
+         skip: the observer and listeners behind them were torn down, and a
+         readout left in place would silently stop following the camera. */
+      if (hud) {
+        hud.querySelectorAll('[data-fx-own="' + OWN + '"]').forEach(el => el.remove());
+        buildHud(host, hud, world, api);
+      }
+
+      /* --- "Fly to my next step" must land where it says ------------------- */
+      api.on(document, "click", e => {
+        const btn = e.target.closest && e.target.closest('[data-act="jnext"]');
+        if (!btn) return;
+        e.stopPropagation(); e.preventDefault();          /* capture: app.js never sees it */
+        flyTrue();
+      }, true);
+
+      /* The dashboard's "Fly to my next step" reaches the same broken fallback
+         through a route change, where there is no click left to intercept.
+         canvas.js's own hand-off is the only thing that arrives at zoom level 2
+         (the host gains .z3), so a mismatch at that moment is the same defect:
+         correct it once, quietly, while the camera is still moving. */
+      let touched = false;
+      const touch = () => { touched = true; };
+      api.on(host, "pointerdown", touch);
+      api.on(host, "wheel", touch, { passive: true });
+      api.after(470, () => {
+        if (touched) return;                              /* the presenter is driving */
+        if (!host.classList.contains("z3")) return;
+        if (focusIndex(world) === trueNext().i) return;
+        flyTrue();
+      });
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   pageflow.js — navigation continuity.
+
+   app.css binds `.page { animation: zoomin .28s }` to #page, but render() only
+   swaps innerHTML, so that entrance has not played since boot: every one of the
+   hundreds of navigations in a two-hour demo is a hard content swap. This module
+   gives the swap a reading order — hero, then next step, then the stat row —
+   which is the spec's "where am I / what am I doing" answered in motion, and
+   gives the SMART wizard a direction so six steps read as one procedure rather
+   than six unrelated forms.
+
+   It also installs an error floor. A thrown view today leaves the previous page
+   sitting under a changed hash; a white screen mid-presentation costs more marks
+   than any feature gains.
+
+   Everything is driven from a single class on #page with nth-child rules. Nine
+   other engineers are writing inline styles onto children of #page in the same
+   pass, so this module never writes transform or opacity onto a child itself,
+   and it removes its class again the moment the animation is over.
+   ========================================================================== */
+
+PSEFX.pageflow = (function () {
+  "use strict";
+
+  const OWN = "pageflow";
+
+  /* Long enough to outlast the last child's delay (.294s) plus its .22s run. */
+  const ENTER_FALLBACK = 700;
+
+  /* A view that throws never reaches FX.run, so "onRender has not fired for this
+     hash yet" is the only reliable signal that a screen failed to build. 320ms is
+     comfortably past app.js's synchronous render and well short of a human's
+     "is it broken?" threshold. */
+  const RECOVER_AFTER = 900;
+
+  const RECOVERY =
+    '<div class="card fx-recover" data-fx-own="' + OWN + '">' +
+      '<div class="card-b">' +
+        '<h3>This screen hit an error</h3>' +
+        '<p>Your work is safe — it is stored in this browser, not in the page.</p>' +
+        '<button class="btn btn-primary" data-act="go" data-route="#/">Back to Dashboard</button>' +
+      '</div>' +
+    '</div>';
+
+  let lastRoute = null;
+  let lastWizStep = null;
+
+  /* Set by onRender, read by the error floor. Module scope, not api state, so it
+     survives the teardown that runs between renders. */
+  let lastRenderedHash = null;
+  let recoveredHash = null;
+  let recoverTimer = null;
+
+  const hash = () => location.hash || "#/";
+
+  /* Ownership: another module may have claimed a subtree of #page for itself. */
+  function foreign(el) {
+    const owner = el.closest("[data-fx-own]");
+    return !!owner && owner.getAttribute("data-fx-own") !== OWN;
+  }
+
+  /* --- A. route entrance ---------------------------------------------------- */
+
+  function enter(root, api) {
+    /* The canvas owns its own arrival — stages fly in on their own schedule and a
+       transform on the page would fight the camera. */
+    if (root.querySelector(".journey")) return false;
+
+    /* One card rising on its own reads as a glitch, not as an order of reading. */
+    if (root.children.length < 2) return false;
+
+    root.classList.remove("fx-enter");
+    void root.offsetWidth;
+    root.classList.add("fx-enter");
+
+    /* Teardown runs inside FX.run immediately after the next innerHTML swap and
+       before the browser paints, so this leaves the DOM clean for the next pass
+       without ever showing a half-faded child. */
+    api.onTeardown(() => root.classList.remove("fx-enter"));
+
+    const done = () => root.classList.remove("fx-enter");
+
+    /* animationend bubbles, so one listener covers children other modules append
+       during this same pass. */
+    api.on(root, "animationend", e => {
+      if (e.animationName === "fx-rise" && e.target === root.lastElementChild) done();
+    });
+
+    /* A child that is hidden or display:none never fires animationend at all. */
+    api.after(ENTER_FALLBACK, done);
+    return true;
+  }
+
+  /* --- C. wizard direction -------------------------------------------------- */
+
+  function wizard(root, api, entered) {
+    const steps = root.querySelector(".wiz-steps");
+    if (!steps) { lastWizStep = null; return; }
+
+    const pips = Array.prototype.slice.call(steps.children);
+    const idx = pips.findIndex(el => el.classList.contains("on"));
+    if (idx < 0) { lastWizStep = null; return; }
+
+    const prev = lastWizStep;
+    lastWizStep = idx;
+    if (entered || api.reduced) return;
+    if (typeof prev !== "number" || prev === idx) return;
+
+    const body = steps.parentElement && steps.parentElement.querySelector(".card-b");
+    if (body && !foreign(body)) {
+      const cls = idx > prev ? "fx-slide-next" : "fx-slide-back";
+      body.classList.remove("fx-slide-next", "fx-slide-back");
+      void body.offsetWidth;
+      body.classList.add(cls);
+      api.on(body, "animationend", e => {
+        if (e.target === body) body.classList.remove("fx-slide-next", "fx-slide-back");
+      });
+      api.onTeardown(() => body.classList.remove("fx-slide-next", "fx-slide-back"));
+    }
+
+    /* The step just left behind is the one that turned green — pop its pip so the
+       viewer sees the wizard bank the step rather than merely change form. */
+    const left = pips[prev];
+    if (left && left.classList.contains("ok") && !foreign(left)) {
+      const pip = left.querySelector("b");
+      if (pip) {
+        pip.classList.remove("fx-pop");
+        void pip.offsetWidth;
+        pip.classList.add("fx-pop");
+        api.on(pip, "animationend", () => pip.classList.remove("fx-pop"));
+      }
+    }
+  }
+
+  /* --- D. error floor ------------------------------------------------------- */
+
+  function recover(reason) {
+    const page = document.getElementById("page");
+    if (!page) return;
+    const h = hash();
+    if (recoveredHash === h) return;                       /* at most once per hash */
+
+    /* Only step in when the page is GENUINELY BLANK. The earlier guard also
+       required lastRenderedHash === h, which races: navigating at roughly the
+       recovery interval — which is exactly what a presenter stepping with the
+       arrow keys produces — let the timer fire between a hash change and its
+       render, and this wiped a page that was about to be fine. An empty #page
+       is the only unambiguous signal that a view failed; if anything at all is
+       on screen, replacing it is worse than leaving it. */
+    if (page.children.length) return;
+
+    recoveredHash = h;
+    console.warn("[fx] pageflow: " + h + " did not render (" + reason + ")");
+    page.classList.remove("fx-enter");
+    page.innerHTML = RECOVERY;
+  }
+
+  function installErrorFloor() {
+    window.addEventListener("hashchange", () => {
+      clearTimeout(recoverTimer);
+      /* Plain setTimeout on purpose: this has to outlive the FX teardown that a
+         successful render would trigger. */
+      recoverTimer = setTimeout(() => {
+        if (lastRenderedHash !== hash()) recover("view threw");
+      }, RECOVER_AFTER);
+    });
+
+    const prior = window.onerror;
+    window.onerror = function (msg) {
+      try { recover(String(msg)); } catch (e) {}
+      if (typeof prior === "function") return prior.apply(this, arguments);
+      return false;
+    };
+  }
+
+  return {
+    init(api) {
+      installErrorFloor();
+    },
+
+    onRender(root, ctx, api) {
+      lastRenderedHash = ctx.route;
+      recoveredHash = null;                                /* this screen is alive again */
+      clearTimeout(recoverTimer);
+
+      const changed = ctx.route !== lastRoute;
+      lastRoute = ctx.route;
+
+      /* A same-route re-render is a checkbox tick or a filter keystroke. Nothing
+         arrived, so nothing should enter — that rule is the whole difference
+         between continuity and a screensaver. */
+      const entered = changed && !api.reduced ? enter(root, api) : false;
+
+      wizard(root, api, entered);
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
    present.js — presenter mode: the room, not the page.
 
    A two-hour live demo is a navigation problem before it is a design problem.
@@ -2517,7 +4604,10 @@ PSEFX.present = (function () {
   const ARC = [
     { r: "#/", k: "1", beat: "Where this student stands today",
       say: "One number, seven parts. Every screen after this one is an input to it." },
-    { r: "#/", beat: "What the number is made of",
+    /* `replay` is the ONE beat that repaints a route it is already on. Every
+       other same-route step only moves the bar, because a re-render with no
+       state behind it is an animation that traces nothing. */
+    { r: "#/", beat: "What the number is made of", replay: true,
       say: "The ring redraws its seven segments in the order the module teaches them." },
 
     { r: "#/roadmap", k: "2", beat: "The eight stages, as one canvas",
@@ -2621,7 +4711,7 @@ PSEFX.present = (function () {
 
   let on = false, idx = 0, zoom = 1, pending = null;
   let bar = null, help = null, goBtn = null;
-  let persona = 0, backed = false, backup = null;
+  let persona = 0, backed = false, captured = false, backup = null;
   let startedAt = 0, clockId = 0;
   let runSeen = false, runSecs = 0, runIn = false;
 
@@ -2646,9 +4736,13 @@ PSEFX.present = (function () {
     idx = clamp(i);
     const b = ARC[idx];
     if (b.before) safely(b.before);
-    /* exact route: repaint in place. Different route: let the router run, then
-       re-arm the beat on hashchange, because app.js clears drafts on the way. */
-    if (b.r === hash()) repaint(b.r);
+    /* exact route: repaint in place — but only if this beat actually changed
+       something (a before() hook, or the one declared replay). A beat that
+       changes no state must not re-run the page's build animations for a room
+       that would learn nothing from them. Different route: let the router run,
+       then re-arm the beat on hashchange, because app.js clears drafts on the
+       way. */
+    if (b.r === hash()) { if (b.before || b.replay) repaint(b.r); }
     else { pending = b; location.hash = b.r; }
     paint();
   }
@@ -2684,7 +4778,18 @@ PSEFX.present = (function () {
     if (backed) return;
     backed = true;
     try {
+      /* A demo gets reloaded. If the page comes back with a sample already in
+         storage, the workspace sitting there is NOT the presenter's own work,
+         and copying it over the backup would destroy the real thing for good.
+         So never back up a sample: adopt the backup already on disk instead,
+         so "My workspace" still restores the right thing after a reload. */
+      if (Store.get().isSample) {
+        backup = localStorage.getItem(BACKUP);
+        captured = backup !== null;
+        return;
+      }
       backup = localStorage.getItem(KEY);
+      captured = true;
       if (backup === null) localStorage.removeItem(BACKUP);
       else localStorage.setItem(BACKUP, backup);
     } catch (e) { /* private mode: the session still works, it just cannot be restored */ }
@@ -2692,9 +4797,10 @@ PSEFX.present = (function () {
 
   function restoreMine() {
     let raw = backup;
-    try { if (raw === null) raw = localStorage.getItem(BACKUP); } catch (e) {}
+    try { if (raw == null) raw = localStorage.getItem(BACKUP); } catch (e) {}
     if (raw) { try { localStorage.setItem(KEY, raw); } catch (e) {} Store.load(); }
-    else Store.reset();                 /* there was nothing here before the demo */
+    else if (captured) Store.reset();   /* we saw an empty workspace before the demo */
+    /* otherwise nothing here was ever ours to replace — leave the disk alone */
   }
 
   function applyPersona() {
@@ -2859,15 +4965,17 @@ PSEFX.present = (function () {
     on = v;
     document.body.classList.toggle("presenting", on);
     if (on) {
-      if (!startedAt) {
-        startedAt = Date.now();
-        /* the bar outlives every page, so its clock must not be handed to the
-           render cycle's teardown */
-        clockId = setInterval(() => { if (on) paint(); }, 1000);
-      }
+      if (!startedAt) startedAt = Date.now();
+      /* The bar outlives every page, so its clock cannot be handed to the
+         render cycle's teardown — this module owns it and stops it itself the
+         moment the bar goes away, so nothing ticks outside presenter mode. */
+      if (!clockId) clockId = setInterval(paint, 1000);
       setZoom(zoom);
       syncFromRoute();
-    } else if (help) help.hidden = true;
+    } else {
+      if (clockId) { clearInterval(clockId); clockId = 0; }
+      if (help) help.hidden = true;
+    }
   }
 
   const stop = e => { e.preventDefault(); e.stopPropagation(); };
@@ -2922,8 +5030,13 @@ PSEFX.present = (function () {
         }
 
         if (k === "?" || (k === "/" && e.shiftKey)) {
-          if (help.hidden) paintHelp();
-          help.hidden = !help.hidden;
+          if (help.hidden) {
+            paintHelp();
+            help.hidden = false;
+            /* open the script where the presenter actually is, not at beat one */
+            const cur = help.querySelector(".pm-arc li.on");
+            if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: "center" });
+          } else help.hidden = true;
           stop(e); return;
         }
 
@@ -2958,6 +5071,1095 @@ PSEFX.present = (function () {
        where the presenter has ended up, including navigation by mouse. */
     onRender() { if (on) syncFromRoute(); }
   };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   radar.js — the skill gap as a shape.
+
+   Section 10 asks for a gap analysis; the page answers it with ten separate
+   rows, which is a table of differences rather than a picture of one. A radar
+   states the same numbers as a silhouette, so the dent is the finding.
+
+   It also repairs a half-live screen. app.js patches the two value readouts
+   and the gap bar on every slider move but nothing else, so the summary tiles
+   keep naming a gap the student has just closed — a UI where some derived
+   values follow the drag and others freeze reads as broken, and undermines the
+   claim that the score is computed. This module makes the whole consequence
+   chain move at once: shape, tiles, row pill.
+   ========================================================================== */
+
+PSEFX.radar = (function () {
+  const R = 110;          /* outer radius, in viewBox units                   */
+  const LAB = 128;        /* label ring, far enough out to clear the spokes   */
+  const LH = 12;          /* line height for a wrapped label                  */
+  const RINGS = [2, 4, 6, 8, 10];
+
+  /* The viewBox is wider than it is tall because the labels, not the chart,
+     decide the horizontal extent: "Time management" and "Adaptability" sit on
+     the near-horizontal axes and must never be clipped or truncated. */
+  const VB = "-196 -150 392 300";
+
+  let api = null;
+  let elCur = null, elTgt = null, dots = [], statGrid = null;
+  let dispC = [], dispT = [];     /* what is on screen right now, 0-10        */
+  let gen = 0;                    /* cancels a tween that a newer one replaced */
+
+  /* Module scope, so it survives the teardown between renders: it is the only
+     way to know whether a value actually changed since it was last drawn. */
+  let drawn = null;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  const ang = (i, n) => (-90 + i * (360 / n)) * Math.PI / 180;
+
+  /* Decorate only our own DOM: anything another module has claimed is theirs. */
+  function foreign(el) {
+    const o = el.closest("[data-fx-own]");
+    return !!o && o.getAttribute("data-fx-own") !== "radar";
+  }
+
+  /* Long names wrap at their space; they are never shortened, because a
+     truncated axis label would misreport the student's own skill list. */
+  function wrap(name) {
+    if (name.length <= 11) return [name];
+    const sp = name.indexOf(" ");
+    return sp > 0 ? [name.slice(0, sp), name.slice(sp + 1)] : [name];
+  }
+
+  function dotTitle(r) {
+    if (!r.current && !r.target) return r.name + " — not rated";
+    return r.name + " — " + r.current + " of 10, target " + (r.target ? r.target + " of 10" : "not set");
+  }
+
+  function points(vals, n) {
+    return vals.map((v, i) => {
+      const rr = (v / 10) * R, a = ang(i, n);
+      return (rr * Math.cos(a)).toFixed(2) + "," + (rr * Math.sin(a)).toFixed(2);
+    }).join(" ");
+  }
+
+  function markup(rows) {
+    const n = rows.length;
+    const rings = RINGS.map(v =>
+      `<circle class="fx-r-ring" cx="0" cy="0" r="${(v / 10 * R).toFixed(1)}"/>`).join("");
+
+    const spokes = rows.map((r, i) => {
+      const a = ang(i, n);
+      return `<line class="fx-r-spoke" x1="0" y1="0" x2="${(R * Math.cos(a)).toFixed(1)}" y2="${(R * Math.sin(a)).toFixed(1)}"/>`;
+    }).join("");
+
+    const labs = rows.map((r, i) => {
+      const a = ang(i, n), cs = Math.cos(a), sn = Math.sin(a);
+      const anchor = cs > 0.15 ? "start" : cs < -0.15 ? "end" : "middle";
+      const lines = wrap(r.name);
+      /* A label above the chart grows upward from its anchor, one below grows
+         downward, one at the side is centred on it — so no label ever sits on
+         top of the axis it names. */
+      const y = sn < -0.35 ? LAB * sn - (lines.length - 1) * LH
+              : sn > 0.35  ? LAB * sn + 9
+              : LAB * sn - (lines.length - 1) * LH / 2 + 4;
+      const x = (LAB * cs).toFixed(1);
+      return `<text class="fx-r-lab" x="${x}" y="${y.toFixed(1)}" text-anchor="${anchor}">` +
+        lines.map((t, j) => `<tspan x="${x}" dy="${j ? LH : 0}">${esc(t)}</tspan>`).join("") +
+        `</text>`;
+    }).join("");
+
+    const dotm = rows.map(r =>
+      `<circle class="fx-r-dot" r="3" cx="0" cy="0"><title>${esc(dotTitle(r))}</title></circle>`).join("");
+
+    return `<svg class="fx-r-svg" viewBox="${VB}" role="img" aria-label="Radar of your skill ratings: the solid shape is where you are now, the dashed outline is your target.">` +
+      `<g class="fx-r-grid">${rings}${spokes}</g>` +
+      `<g class="fx-r-labs">${labs}</g>` +
+      `<polygon class="fx-r-target" points=""/>` +
+      `<polygon class="fx-r-current" points=""/>` +
+      `<g class="fx-r-dots">${dotm}</g>` +
+      `</svg>` +
+      `<figcaption>Your ten skills: solid shape is where you are, dashed outline is where you need to be.</figcaption>`;
+  }
+
+  function paint() {
+    if (!elCur) return;
+    const n = dispC.length;
+    elCur.setAttribute("points", points(dispC, n));
+    elTgt.setAttribute("points", points(dispT, n));
+    for (let i = 0; i < n; i++) {
+      const rr = (dispC[i] / 10) * R, a = ang(i, n);
+      dots[i].setAttribute("cx", (rr * Math.cos(a)).toFixed(2));
+      dots[i].setAttribute("cy", (rr * Math.sin(a)).toFixed(2));
+    }
+  }
+
+  /* Every move starts from whatever is currently on screen, so a fast drag
+     re-aims the same vertex instead of stacking fighting animations. */
+  function tweenTo(nc, nt, ms) {
+    gen++;
+    if (!elCur) return;
+    if (api.reduced || !ms) { dispC = nc.slice(); dispT = nt.slice(); paint(); return; }
+    const g = gen, fc = dispC.slice(), ft = dispT.slice();
+    api.raf(elapsed => {
+      if (g !== gen || !elCur) return false;
+      const t = Math.min(1, elapsed * 1000 / ms), e = api.ease.out(t);
+      for (let i = 0; i < nc.length; i++) {
+        dispC[i] = fc[i] + (nc[i] - fc[i]) * e;
+        dispT[i] = ft[i] + (nt[i] - ft[i]) * e;
+      }
+      paint();
+      return t < 1;
+    });
+  }
+
+  function record(rows) {
+    drawn = {};
+    rows.forEach(r => { drawn[r.id] = [r.current, r.target]; });
+  }
+
+  function changed(rows) {
+    if (!drawn) return true;
+    return rows.some(r => {
+      const d = drawn[r.id];
+      return !d || d[0] !== r.current || d[1] !== r.target;
+    });
+  }
+
+  /* --- the three summary tiles, recomputed exactly as V.skills computes them */
+  function tile(key) {
+    if (!statGrid) return null;
+    const all = statGrid.querySelectorAll(".card.stat");
+    for (let i = 0; i < all.length; i++) {
+      const k = all[i].querySelector(".k");
+      if (k && k.textContent.trim() === key) return all[i];
+    }
+    return null;
+  }
+
+  function syncTiles(rows) {
+    const rated = rows.filter(r => r.current && r.target);
+    const top = rows.filter(r => r.gap > 0).sort((a, b) => b.gap - a.gap)[0];
+    const strengths = rows.filter(r => r.current >= 7).sort((a, b) => b.current - a.current).slice(0, 3);
+
+    const t1 = tile("Skills rated");
+    if (t1) {
+      /* The "/10" lives in a sibling <span>; only the leading text node is ours. */
+      const v = t1.querySelector(".v");
+      if (v && v.firstChild && v.firstChild.nodeType === 3) v.firstChild.nodeValue = String(rated.length);
+    }
+
+    const t2 = tile("Biggest opportunity");
+    if (t2) {
+      const v = t2.querySelector(".v"), d = t2.querySelector(".d");
+      if (v) v.textContent = top ? top.name : "—";
+      if (d) d.textContent = top
+        ? top.current + "/10 → " + top.target + "/10, a gap of " + top.gap
+        : "Rate your skills to see this";
+    }
+
+    const t3 = tile("Strengths");
+    if (t3) {
+      const v = t3.querySelector(".v");
+      if (v) v.textContent = strengths.length ? strengths.map(s => s.name).join(", ") : "—";
+    }
+  }
+
+  /* The row is rewritten by class and text only — its <input> must keep focus
+     through the whole drag, so innerHTML is never an option here. */
+  function syncPill(input, row) {
+    const host = input.closest(".skill-row");
+    if (!host || foreign(host)) return;
+    const pill = host.querySelector(".skill-top > .pill");
+    if (!pill) return;
+    if (row.gap > 0)      { pill.className = "pill warn"; pill.textContent = "Gap of " + row.gap; }
+    else if (row.current) { pill.className = "pill ok";   pill.textContent = "At target"; }
+    else                  { pill.className = "pill";      pill.textContent = "Not rated"; }
+  }
+
+  function onInput(e) {
+    const el = e.target;
+    if (!elCur || !el || !el.getAttribute) return;
+    const path = el.getAttribute("data-set");
+    if (!path) return;
+    const m = path.match(/^skills\.([^.]+)\.(current|target)$/);
+    if (!m) return;
+
+    /* This listener is registered after app.js's, so the store has already
+       taken the new value by the time we read it back. */
+    const rows = Store.skillRows();
+    const i = rows.findIndex(r => r.id === m[1]);
+    if (i < 0) return;
+
+    tweenTo(rows.map(r => r.current), rows.map(r => r.target), 180);
+    const ttl = dots[i] && dots[i].querySelector("title");
+    if (ttl) ttl.textContent = dotTitle(rows[i]);
+    syncTiles(rows);
+    syncPill(el, rows[i]);
+    record(rows);
+  }
+
+  return {
+    init(a) { api = a; },
+
+    onRender(root, ctx, a) {
+      api = a;
+      elCur = elTgt = statGrid = null; dots = [];
+      if (ctx.route !== "#/skills") return;
+
+      const first = root.querySelector(".skill-row");
+      if (!first || foreign(first)) return;
+      const card = first.closest(".card");
+      if (!card || !card.parentNode) return;
+
+      const rows = Store.skillRows();
+      if (rows.length < 3) return;
+
+      const fig = document.createElement("figure");
+      fig.className = "fx-radar";
+      fig.setAttribute("data-fx-own", "radar");
+      fig.innerHTML = markup(rows);
+      card.parentNode.insertBefore(fig, card);
+
+      elCur = fig.querySelector(".fx-r-current");
+      elTgt = fig.querySelector(".fx-r-target");
+      dots = Array.prototype.slice.call(fig.querySelectorAll(".fx-r-dot"));
+
+      /* Claim the summary row so the counters module leaves those numbers to
+         us — we are the ones that have to keep them true during a drag. */
+      const grid = root.querySelector(".grid.g3");
+      if (grid && !foreign(grid)) { grid.setAttribute("data-fx-own", "radar"); statGrid = grid; }
+
+      const nc = rows.map(r => r.current), nt = rows.map(r => r.target);
+      const moved = changed(rows);
+      if (!drawn) {
+        /* First sight of the page this session: the shape grows out of the
+           centre, which is the one moment the chart explains what it is. */
+        dispC = nc.map(() => 0); dispT = nt.map(() => 0);
+        paint(); tweenTo(nc, nt, 600);
+      } else if (moved) {
+        dispC = rows.map(r => (drawn[r.id] || [0, 0])[0]);
+        dispT = rows.map(r => (drawn[r.id] || [0, 0])[1]);
+        paint(); tweenTo(nc, nt, 420);
+      } else {
+        dispC = nc.slice(); dispT = nt.slice();
+        paint();
+      }
+      record(rows);
+
+      /* document, not #page: app.js writes the store from its own document
+         listener, and ours must run after that write, not before it. */
+      api.on(document, "input", onInput);
+      api.onTeardown(() => { elCur = elTgt = statGrid = null; dots = []; });
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   ring.js — the readiness ring, drawn as the seven parts it is actually made of.
+
+   Section 24 insists the score never feels arbitrary. The page does explain it,
+   but in a separate card of seven flat bars sitting a long way from the ring
+   that states the number — so the explanation and the claim never meet. Here
+   the ring itself carries the composition: one arc per readiness part, drawn in
+   PSE.readinessParts order, which is also the order the module teaches
+   (exploration, skills, goals, CW1, practice, LinkedIn, reflections — stage 03
+   through stage 08). The motion is the lesson: by the time the number stops
+   counting, the viewer has seen where it came from.
+
+   Nothing here loops. A segment moves only when its part's earned value moved.
+   ========================================================================== */
+
+PSEFX.ring = (function () {
+
+  /* One accent ramp, not seven hues. The ring states a single number; seven
+     competing colours would read as seven unrelated metrics and would collide
+     with the chart palette, which belongs to comparison charts only. */
+  const RAMP = {
+    explore:  "var(--accent-deep)",   /* #1B4296 — the token, not the literal */
+    skills:   "var(--accent)",        /* #2559C7 — likewise                   */
+    goals:    "#2F68DC",
+    cw1:      "#3E7BE8",
+    practice: "#5B90EE",
+    cw2:      "#7BA7F2",
+    reflect:  "#9CBDF6"
+  };
+
+  const STROKE   = 8;    /* matches the ring the view prints, so nothing shifts */
+  const GAP      = 2;    /* separator between segments, in path pixels          */
+  const SEG_MS   = 260;
+  const STAGGER  = 90;
+  const NUM_MS   = 420;  /* a number counting in 260ms reads as a flicker       */
+
+  const SVGNS = "http://www.w3.org/2000/svg";
+
+  /* What each route's ring last showed. Module scope rather than api state:
+     everything held through api is torn down before the next onRender, and
+     this record has to survive exactly that gap to know what changed. */
+  const seen = new Map();   /* route -> { total, parts: { id: earned } } */
+
+  /* The rows of "What builds your score", claimed once per render so a hovered
+     segment can light the row that explains it. */
+  let rows = null, lit = null;
+
+  const clamp01 = t => (t < 0 ? 0 : t > 1 ? 1 : t);
+
+  function svgEl(name, attrs) {
+    const n = document.createElementNS(SVGNS, name);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  /* Skip anything another engineer has claimed; claim nothing of theirs. */
+  function claimable(node) {
+    const owner = node.closest("[data-fx-own]");
+    return !owner || owner.getAttribute("data-fx-own") === "ring";
+  }
+
+  /* --- geometry -----------------------------------------------------------
+     Every part contributes earned/100 of the circumference, so the seven arcs
+     laid end to end are exactly the total the centre number claims. The svg
+     already carries transform: rotate(-90deg), so a running sum of arc lengths
+     lands the segments clockwise from twelve o'clock with no trigonometry. */
+  function geometry(parts, c) {
+    const out = [];
+    let run = 0;
+    PSE.readinessParts.forEach(p => {
+      const got = parts[p.id] || { earned: 0, max: p.max };
+      const span = (got.earned / 100) * c;
+      /* A part worth nothing gets no arc at all — an empty score should look
+         empty, not like seven hairlines. */
+      if (got.earned > 0) {
+        out.push({
+          id: p.id, label: p.label, earned: got.earned, max: got.max,
+          len: Math.max(0, span - GAP), off: run
+        });
+      }
+      run += span;
+    });
+    return out;
+  }
+
+  function setArc(node, len, off, c) {
+    const L = Math.max(0, len);
+    node.setAttribute("stroke-dasharray", L + " " + Math.max(0, c - L));
+    /* Negative offset walks the dash forward along the path, which is how a
+       segment starts where the previous one ended. */
+    node.setAttribute("stroke-dashoffset", String(-off));
+  }
+
+  /* --- the hover link between an arc and the row that explains it ---------- */
+  function claimRows(root) {
+    const cards = root.querySelectorAll(".card");
+    for (let i = 0; i < cards.length; i++) {
+      const h = cards[i].querySelector(".card-h h3");
+      if (!h || h.textContent.trim() !== "What builds your score") continue;
+      if (!claimable(cards[i])) return null;
+      const body = cards[i].querySelector(".card-b");
+      if (!body) return null;
+      let n = 0;
+      for (let c = body.firstElementChild; c; c = c.nextElementSibling) {
+        const p = PSE.readinessParts[n++];
+        /* Stamp only — another module animates the bars inside these rows and
+           rewriting their markup would destroy its work mid-tween. */
+        if (p) c.setAttribute("data-part", p.id);
+      }
+      return body;
+    }
+    return null;
+  }
+
+  function light(segs, id) {
+    segs.forEach(s => { s.style.opacity = s.getAttribute("data-arc") === id ? "1" : ".32"; });
+    if (lit) lit.classList.remove("fx-lit");
+    lit = rows ? rows.querySelector('[data-part="' + id + '"]') : null;
+    if (lit) lit.classList.add("fx-lit");
+  }
+
+  function unlight(segs) {
+    segs.forEach(s => { s.style.opacity = ""; });
+    if (lit) lit.classList.remove("fx-lit");
+    lit = null;
+  }
+
+  /* --- one ring ------------------------------------------------------------ */
+  function decorate(host, ctx, api) {
+    const size = parseFloat(host.style.width) || host.offsetWidth || 132;
+    const svg  = host.querySelector("svg");
+    const num  = host.querySelector(".mid b");
+    if (!svg) return;
+
+    const r = size / 2 - 7, c = 2 * Math.PI * r, mid = size / 2;
+    const R = Store.readiness();
+    const geo = geometry(R.parts, c);
+
+    /* The hero ring sits on --dark and My Career's sits on white; one hard
+       coded track colour would look broken on one of them. */
+    const track = host.closest(".panel-dark") ? "#1E2B45" : "var(--surface-3)";
+
+    const before = seen.get(ctx.route);
+    const prevGeo = before ? geometry(inflate(before.parts), c) : null;
+    const prevOf = id => {
+      if (!prevGeo) return null;
+      for (let i = 0; i < prevGeo.length; i++) if (prevGeo[i].id === id) return prevGeo[i];
+      return null;
+    };
+
+    /* render() hands us brand-new default markup every time, so the two
+       printed circles are replaced rather than edited. */
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    svg.appendChild(svgEl("circle", {
+      cx: mid, cy: mid, r: r, fill: "none", stroke: track, "stroke-width": STROKE
+    }));
+
+    const segs = geo.map(g => {
+      const node = svgEl("circle", {
+        cx: mid, cy: mid, r: r, fill: "none",
+        stroke: RAMP[g.id] || "var(--accent)",
+        "stroke-width": STROKE, "stroke-linecap": "butt",
+        "data-arc": g.id, tabindex: "0", role: "img"
+      });
+      const words = g.label + " — " + g.earned + " of " + g.max;
+      const t = svgEl("title", {});
+      t.textContent = words;
+      node.appendChild(t);
+      /* <title> gives the pointer a tooltip; aria-label is what a screen
+         reader reliably reads off a focused shape. */
+      node.setAttribute("aria-label", words);
+      svg.appendChild(node);
+      return node;
+    });
+
+    host.setAttribute("data-fx-own", "ring");
+
+    const setNum = v => { if (num) num.textContent = String(Math.round(v)); };
+    const final = () => { geo.forEach((g, i) => setArc(segs[i], g.len, g.off, c)); setNum(R.total); };
+
+    if (api.reduced) {
+      final();                                   /* every value still visible */
+    } else if (!before) {
+      /* First sight of this ring: it composes itself, part by part, and the
+         number finishes counting on the same frame the last arc lands. */
+      const span = geo.length ? (geo.length - 1) * STAGGER + SEG_MS : 0;
+      if (!span) { final(); }
+      else {
+        geo.forEach((g, i) => setArc(segs[i], 0, g.off, c));
+        setNum(0);
+        api.raf(t => {
+          const ms = t * 1000;
+          geo.forEach((g, i) => {
+            setArc(segs[i], g.len * api.ease.out(clamp01((ms - i * STAGGER) / SEG_MS)), g.off, c);
+          });
+          setNum(R.total * api.ease.out(clamp01(ms / span)));
+          if (ms < span) return true;
+          final();
+          return false;
+        });
+      }
+    } else {
+      /* A return visit. Only what the student actually changed may move — an
+         arc that redraws itself on every navigation is the screensaver the
+         brief forbids. An upstream part growing does shift everything after
+         it, so a segment tweens when its start moved as well as its length. */
+      const moved = [];
+      geo.forEach((g, i) => {
+        const was = prevOf(g.id);
+        const from = was ? was : { len: 0, off: g.off };
+        if (Math.abs(from.len - g.len) < 0.01 && Math.abs(from.off - g.off) < 0.01) {
+          setArc(segs[i], g.len, g.off, c);
+        } else {
+          setArc(segs[i], from.len, from.off, c);
+          moved.push({ node: segs[i], from: from, to: g });
+        }
+      });
+      const numMoved = before.total !== R.total;
+      if (!moved.length && !numMoved) { final(); }
+      else {
+        setNum(before.total);
+        const span = Math.max(moved.length ? SEG_MS : 0, numMoved ? NUM_MS : 0);
+        api.raf(t => {
+          const ms = t * 1000;
+          const ea = api.ease.out(clamp01(ms / SEG_MS));
+          moved.forEach(m => setArc(m.node,
+            m.from.len + (m.to.len - m.from.len) * ea,
+            m.from.off + (m.to.off - m.from.off) * ea, c));
+          setNum(before.total + (R.total - before.total) * api.ease.out(clamp01(ms / NUM_MS)));
+          if (ms < span) return true;
+          final();
+          return false;
+        });
+      }
+    }
+
+    /* Hovering an arc isolates it and, on the dashboard, lights the sentence
+       that earned it. This is information, not motion, so reduced motion keeps
+       it — and it is what makes the tab stop on each segment worth having even
+       on My Career, where there is no breakdown card to light. */
+    if (segs.length) {
+      segs.forEach(node => {
+        const id = node.getAttribute("data-arc");
+        api.on(node, "pointerenter", () => light(segs, id));
+        api.on(node, "focus", () => light(segs, id));
+        api.on(node, "pointerleave", () => unlight(segs));
+        api.on(node, "blur", () => unlight(segs));
+      });
+      api.onTeardown(() => { if (lit) lit.classList.remove("fx-lit"); lit = null; });
+    }
+
+    const record = {};
+    PSE.readinessParts.forEach(p => { record[p.id] = (R.parts[p.id] || {}).earned || 0; });
+    seen.set(ctx.route, { total: R.total, parts: record });
+  }
+
+  /* The record stores plain earned values; geometry() wants readiness shapes. */
+  function inflate(parts) {
+    const out = {};
+    PSE.readinessParts.forEach(p => { out[p.id] = { earned: parts[p.id] || 0, max: p.max }; });
+    return out;
+  }
+
+  return {
+    onRender(root, ctx, api) {
+      const hosts = root.querySelectorAll(".ring");
+      if (!hosts.length || !window.PSE || !window.Store) return;
+      rows = claimRows(root);
+      lit = null;
+      hosts.forEach(host => { if (claimable(host)) decorate(host, ctx, api); });
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   score.js — the live readiness ledger.
+
+   The platform's whole argument is that a seven-part weighted model reads the
+   student's own work and turns it into a number. render() replaces #page
+   wholesale, so every stat, bar and rail score is printed already at its final
+   value and no number has visibly moved since boot — the model computes, but
+   nobody in the room can see it compute.
+
+   This module makes the arithmetic legible. It records a career view (the
+   single most demoable action on the platform, and the one piece of state
+   nothing outside loadSample() ever wrote), then counts the rail score to its
+   new total and names the part that moved. Nothing here loops and nothing
+   animates a value that did not change: an unchanged number is left exactly as
+   the view printed it.
+   ========================================================================== */
+
+PSEFX.score = (function () {
+
+  const DUR_NUM = 520;          /* the count */
+  const DUR_BAR = 600;          /* the fill, a touch behind it */
+  const CHIP_LIFE = 1600;
+  const CHIP_STILL = 2400;      /* reduced motion: long enough to read, static */
+  const PULSE = 600;
+  const STAGGER = 40, STAGGER_MAX = 8;
+
+  /* Rings, the journey canvas, the LinkedIn preview and the skills gap bar are
+     other engineers' surfaces; their numbers are theirs to move. */
+  const SKIP = ".ring, .journey, .li-prev, .gapbar";
+
+  let boot = null;              /* the api handed to init() — outlives every page */
+  let prev = null;              /* the readiness the rail is currently showing */
+  let prevAch = {};
+  let shown = 0;                /* the rail number as a float, mid-count */
+
+  let chip = null, chipObs = null, chipT = 0, chipBorn = 0;
+  let pulseT = 0;
+  let railCancel = null;
+
+  /* Survives the teardown between renders on purpose: knowing what a number was
+     last time is the only way to tell a recalculation from a re-render. */
+  const seen = new Map();
+
+  /* data.js, store.js and fx.js declare PSE / Store / FX with `const` in a
+     classic script, so they are script-scope bindings and NOT properties of
+     window — reach them by bare name, never through window.<x>. */
+  const reduced = () => (typeof FX !== "undefined" ? FX.reduced() : !!(boot && boot.reduced));
+  const now = () => (typeof performance !== "undefined" && performance.now ? performance.now() : Date.now());
+  const easeOut = t => (boot && boot.ease ? boot.ease.out(t) : 1 - Math.pow(1 - t, 3));
+
+  /* --- A. record a career view -------------------------------------------
+     state.viewed is read in five places and was never written outside the
+     sample workspace, so a real student capped at 85/100 and roadmap stage 03
+     could never complete. Opening a career detail page is the evidence; this
+     is where it gets recorded. ------------------------------------------- */
+  function recordView(ctx) {
+    const r = (ctx && ctx.route) || "";
+    if (r.indexOf("#/career/") !== 0) return;
+    const id = r.slice(9);
+    if (!id || typeof PSE === "undefined" || !PSE.careers.some(c => c.id === id)) return;
+    const st = Store.get();
+    if (!st || !Array.isArray(st.viewed) || st.viewed.indexOf(id) >= 0) return;
+    /* Store.update only notifies renderRail and this module, never render(), so
+       there is no recursion back into onRender. */
+    Store.update(s => { s.viewed.push(id); });
+  }
+
+  /* --- B. the rail ---------------------------------------------------------
+     app.js reprints #railscore wholesale on every state change AND again at the
+     end of render(), so nodes are re-queried on every frame rather than held. */
+
+  function railHost() { return document.getElementById("railscore"); }
+
+  function paintRail(num, pct, last) {
+    const host = railHost();
+    if (!host) return;
+    const v = host.querySelector(".v");
+    if (v && v.firstChild && v.firstChild.nodeType === 3) {
+      v.firstChild.nodeValue = String(Math.round(num));   /* the <small>/100</small> sibling is untouched */
+    }
+    const fill = host.querySelector(".bar > i");
+    if (fill) {
+      /* app.css gives .bar > i a .5s width transition; driving it per frame and
+         easing it at the same time would produce two overlapping curves. */
+      fill.style.transition = last ? "" : "none";
+      fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+    }
+  }
+
+  function railTo(total) {
+    if (railCancel) railCancel();
+    if (reduced()) { shown = total; paintRail(total, total, true); return; }
+
+    const from = shown, to = total;
+    if (from === to) return;
+    let raf = 0, dead = false, t0 = null;
+    const step = ts => {
+      if (dead) return;
+      if (t0 === null) t0 = ts;
+      const ms = ts - t0;
+      const n = from + (to - from) * easeOut(Math.min(1, ms / DUR_NUM));
+      const b = from + (to - from) * easeOut(Math.min(1, ms / DUR_BAR));
+      shown = n;
+      const done = ms >= DUR_BAR;
+      paintRail(done ? to : n, done ? to : b, done);
+      if (done) { shown = to; railCancel = null; return; }
+      raf = requestAnimationFrame(step);
+    };
+    /* Not api.raf: this is started from a Store subscription that can fire at
+       any moment, and api.raf is torn down by the next navigation mid-count. */
+    raf = requestAnimationFrame(step);
+    railCancel = () => { dead = true; cancelAnimationFrame(raf); railCancel = null; };
+  }
+
+  function removeChip() {
+    clearTimeout(chipT);
+    if (chipObs) { chipObs.disconnect(); chipObs = null; }
+    if (chip && chip.parentNode) chip.parentNode.removeChild(chip);
+    chip = null;
+  }
+
+  function showChip(text, down) {
+    removeChip();
+    const host = railHost();
+    if (!host) return;
+    chip = document.createElement("span");
+    chip.className = "fx-delta" + (down ? " down" : "") + (reduced() ? " still" : "");
+    chip.setAttribute("data-fx-own", "score");
+    chip.textContent = text;
+    chipBorn = now();
+    host.appendChild(chip);
+
+    /* renderRail rewrites #railscore.innerHTML on every state change, and one
+       click can trigger two of them, so the chip re-seats itself rather than
+       being lost between the score changing and the page finishing its render. */
+    chipObs = new MutationObserver(() => {
+      if (chip && !chip.isConnected) {
+        const h = railHost();
+        if (h) {
+          /* Re-inserting a node restarts its CSS animation, but the removal
+             timer is absolute — navigate during the chip's life and it would
+             snap back to full opacity and then be cut off mid-fade. A negative
+             delay resumes the fade exactly where the reprint interrupted it. */
+          chip.style.animationDelay = -(now() - chipBorn) + "ms";
+          h.appendChild(chip);
+        }
+      }
+      /* The reprint carries the final total. Observer callbacks run before the
+         browser paints, so putting the count back where it actually is here is
+         what stops a one-frame jump to the answer halfway through the count. */
+      if (railCancel) paintRail(shown, shown, false);
+    });
+    chipObs.observe(host, { childList: true });
+    chipT = setTimeout(removeChip, reduced() ? CHIP_STILL : CHIP_LIFE);
+  }
+
+  function pulse() {
+    if (reduced()) return;
+    const host = railHost();
+    if (!host) return;
+    host.classList.remove("fx-pulse");
+    void host.offsetWidth;
+    host.classList.add("fx-pulse");
+    clearTimeout(pulseT);
+    pulseT = setTimeout(() => { const h = railHost(); if (h) h.classList.remove("fx-pulse"); }, PULSE + 40);
+  }
+
+  const snap = R => {
+    const parts = {};
+    Object.keys(R.parts).forEach(k => { parts[k] = R.parts[k].earned; });
+    return { total: R.total, parts: parts };
+  };
+
+  /* Which part of the model moved most — ties go to the first part in the
+     order PSE.readinessParts teaches, which is also the module's own order. */
+  function mover(before, after) {
+    let best = null, size = 0;
+    PSE.readinessParts.forEach(p => {
+      const d = Math.abs((after[p.id] || 0) - (before.parts[p.id] || 0));
+      if (d > size) { size = d; best = p; }
+    });
+    return best;
+  }
+
+  function onState() {
+    const R = Store.readiness();
+    if (!prev) { prev = snap(R); shown = R.total; return; }
+
+    const ach = Store.achievements();
+    let won = null;
+    ach.forEach(a => { if (a.earned && !prevAch[a.id] && !won) won = a; });
+
+    const d = R.total - prev.total;
+    const after = snap(R);
+
+    if (d !== 0) {
+      const p = mover(prev, after.parts);
+      showChip((d > 0 ? "+" : "−") + Math.abs(d) + (p ? " · " + p.label : ""), d < 0);
+      railTo(R.total);
+    } else if (won) {
+      /* A threshold crossed without the total moving is still news. */
+      showChip("Achievement · " + won.label, false);
+      pulse();
+    }
+
+    prev = after;
+    prevAch = {};
+    ach.forEach(a => { prevAch[a.id] = a.earned; });
+  }
+
+  /* --- C. the numbers on the page ----------------------------------------- */
+
+  function ownedByUs(el) {
+    if (el.closest(SKIP)) return false;
+    const own = el.closest("[data-fx-own]");
+    return !own || own.getAttribute("data-fx-own") === "score";
+  }
+
+  /* A chain of child indices from #page: stable across renders of the same
+     route, and unique enough to tell the third stat tile from the fourth. */
+  function pathOf(el, root) {
+    const out = [];
+    let n = el;
+    while (n && n !== root && n.parentNode) {
+      out.push(Array.prototype.indexOf.call(n.parentNode.children, n));
+      n = n.parentNode;
+    }
+    return out.reverse().join(".");
+  }
+
+  function readNumber(el) {
+    const t = el.firstChild;
+    if (!t || t.nodeType !== 3) return null;
+    const m = /^\s*([+-]?\d+(?:\.\d+)?)([\s\S]*)$/.exec(t.nodeValue);
+    if (!m) return null;
+    const dec = m[1].indexOf(".") >= 0;
+    const tail = m[2];                      /* "%" and the like stay put */
+    /* A tail that opens with a digit or a separator means the match cut a
+       grouped figure in half ("1,234"); counting it would print "0,234". */
+    if (/^[.,\d]/.test(tail)) return null;
+    return {
+      value: parseFloat(m[1]),
+      write: v => { t.nodeValue = (dec ? v.toFixed(1) : String(Math.round(v))) + tail; },
+      dur: DUR_NUM
+    };
+  }
+
+  function readBar(el) {
+    const m = /^\s*([\d.]+)%\s*$/.exec(el.style.width || "");
+    if (!m) return null;
+    return {
+      value: parseFloat(m[1]),
+      write: (v, last) => {
+        el.style.transition = last ? "" : "none";
+        el.style.width = Math.max(0, Math.min(100, v)) + "%";
+      },
+      dur: DUR_BAR
+    };
+  }
+
+  function tween(api, delay, job, from, to) {
+    if (api.reduced) { job.write(to, true); return; }
+    job.write(from, false);                 /* freeze at the start before the frame paints */
+    const go = () => api.raf(t => {
+      const p = Math.min(1, (t * 1000) / job.dur);
+      if (p >= 1) { job.write(to, true); return false; }
+      job.write(from + (to - from) * api.ease.out(p), false);
+    });
+    if (delay) api.after(delay, go); else go();
+  }
+
+  function sweep(root, ctx, api) {
+    const stamp = (ctx && ctx.route ? ctx.route : "") + "|";
+    let step = 0;
+    Array.prototype.forEach.call(root.querySelectorAll(".stat .v, .bar > i"), el => {
+      if (!ownedByUs(el)) return;
+      const job = el.tagName === "I" ? readBar(el) : readNumber(el);
+      if (!job) return;                     /* a name, a dash, an em rule — leave it as rendered */
+
+      const key = stamp + pathOf(el, root);
+      const known = seen.has(key);
+      const from = known ? seen.get(key) : 0;
+      seen.set(key, job.value);
+
+      /* The rule that keeps this from becoming a screensaver: a value that did
+         not change is not a recalculation, so it does not move. */
+      if (known && Math.abs(from - job.value) < 0.005) return;
+
+      tween(api, Math.min(step, STAGGER_MAX) * STAGGER, job, from, job.value);
+      step++;
+    });
+  }
+
+  return {
+    init(api) {
+      boot = api;
+      const R = Store.readiness();
+      prev = snap(R);
+      shown = R.total;
+      Store.achievements().forEach(a => { prevAch[a.id] = a.earned; });
+      /* Once, here — there is no unsubscribe, so a subscription per navigation
+         would leak one listener for every click of a two-hour demo. */
+      Store.subscribe(onState);
+    },
+
+    onRender(root, ctx, api) {
+      recordView(ctx);
+
+      /* Other modules stamp data-fx-own during this same synchronous sweep and
+         script order belongs to the integrator, not to us. A microtask is the
+         last moment that is after every module has had its turn and still
+         before the browser paints, so nothing is claimed twice and nothing
+         flashes at its final value first. */
+      const pass = { dead: false };
+      api.onTeardown(() => { pass.dead = true; });
+      Promise.resolve().then(() => {
+        if (pass.dead || !root.isConnected) return;
+        try { sweep(root, ctx, api); }
+        catch (e) { console.warn("[fx] score sweep:", e && e.message); }
+      });
+    }
+  };
+})();
+
+</script>
+<script>
+/* =============================================================================
+   timer.js — the 5–7 minute window, drawn.
+
+   Section 18 asks for a 5–7 minute individual speaking target. What the app
+   paints is a stopwatch whose target window exists only as a sentence in a
+   caption, so a presenter rehearsing to it has to do the arithmetic in their
+   head while they are talking. The dial states it instead: the green band IS
+   the window, and the hand crossing into it is a thing a whole room can see.
+
+   app.js owns the clock inside a closure — timerId, seconds, paintTimer. This
+   module never drives it. It reads #tface's text and #tbtn's label and draws a
+   pure reflection of them, using the same 300 / 420 second thresholds
+   paintTimer uses, so the arc and the digits can never disagree on screen.
+   ========================================================================== */
+
+PSEFX.timer = (function () {
+
+  /* An eight-minute face rather than a seven-minute one: the window has to sit
+     inside the sweep with room left over, or a student who overruns sees a full
+     ring and learns nothing about how far over they went. */
+  const SWEEP = 480, WIN_A = 300, WIN_B = 420;
+  const SIZE = 230, SW = 12, MID = SIZE / 2, R = (SIZE - SW) / 2 - 4;
+  const C = 2 * Math.PI * R;
+
+  let api = null;
+  let face = null, btn = null, prog = null, band = null;
+
+  /* Read from the DOM, never authored here. */
+  let secs = 0, running = false, markAt = 0;
+  let looping = false, hit300 = false, sent = { s: 0, r: false };
+
+  /* Survives teardown so a saved run can collapse on the page that replaces it. */
+  let lastCount = -1, collapseFrom = 0, collapsing = false;
+
+  const now = () => (window.performance ? performance.now() : Date.now());
+  const mmss = n => Math.floor(n / 60) + ":" + String(Math.round(n) % 60).padStart(2, "0");
+  const colour = s => s > WIN_B ? "var(--bad)" : s >= WIN_A ? "var(--ok)" : "var(--accent)";
+
+  /* 0 seconds at twelve o'clock, running clockwise. */
+  function pt(t, rad) {
+    const a = (t / SWEEP) * 2 * Math.PI - Math.PI / 2;
+    return [MID + rad * Math.cos(a), MID + rad * Math.sin(a)];
+  }
+
+  function dial() {
+    const start = (WIN_A / SWEEP) * C, len = ((WIN_B - WIN_A) / SWEEP) * C;
+    const cap = t => {
+      const a = pt(t, R - SW / 2 - 1), b = pt(t, R + SW / 2 + 1);
+      return '<line class="fx-cap" x1="' + a[0].toFixed(2) + '" y1="' + a[1].toFixed(2) +
+             '" x2="' + b[0].toFixed(2) + '" y2="' + b[1].toFixed(2) + '"/>';
+    };
+    /* The band is positioned with a leading zero-length dash so nothing depends
+       on the sign convention of stroke-dashoffset. */
+    return '<svg class="fx-dial" viewBox="0 0 ' + SIZE + ' ' + SIZE + '" aria-hidden="true" focusable="false">' +
+      '<g transform="rotate(-90 ' + MID + ' ' + MID + ')" fill="none" stroke-width="' + SW + '">' +
+        '<circle class="fx-track" cx="' + MID + '" cy="' + MID + '" r="' + R + '"/>' +
+        '<circle class="fx-band" cx="' + MID + '" cy="' + MID + '" r="' + R + '" opacity=".28"' +
+          ' stroke-dasharray="0 ' + start.toFixed(2) + ' ' + len.toFixed(2) + ' ' + C.toFixed(2) + '"/>' +
+        '<circle class="fx-prog" cx="' + MID + '" cy="' + MID + '" r="' + R + '"' +
+          ' stroke-dasharray="0 ' + C.toFixed(2) + '"/>' +
+      '</g>' + cap(WIN_A) + cap(WIN_B) + '</svg>';
+  }
+
+  function draw(v, fixed) {
+    if (!prog) return;
+    const f = Math.max(0, Math.min(1, v / SWEEP));          /* past 8:00 the arc holds full */
+    prog.setAttribute("stroke-dasharray", (f * C).toFixed(2) + " " + C.toFixed(2));
+    /* Inline style, not a presentation attribute: var() substitution inside a
+       presentation attribute is unreliable in WebKit, and this demo runs off a
+       USB stick on whatever laptop is in the room. */
+    prog.style.setProperty("stroke", fixed || colour(v));
+  }
+
+  const interp = () => secs + Math.min(1, Math.max(0, (now() - markAt) / 1000));
+
+  /* Presenter mode mirrors this in its bar. The field names are a contract. */
+  function emit() {
+    if (secs === sent.s && running === sent.r) return;
+    sent = { s: secs, r: running };
+    document.dispatchEvent(new CustomEvent("pse:timer", {
+      detail: { seconds: secs, running: running, inWindow: secs >= WIN_A && secs <= WIN_B }
+    }));
+  }
+
+  /* One brightening as the hand enters the window, and never again this run.
+     A loop here would be exactly the screensaver the brief warns against. */
+  function flash() {
+    if (!band || api.reduced) return;
+    band.classList.remove("fx-band-lit");
+    void band.getBoundingClientRect();
+    band.classList.add("fx-band-lit");
+    api.on(band, "animationend", () => band.classList.remove("fx-band-lit"), { once: true });
+  }
+
+  function kick() {
+    if (looping || !running || api.reduced) return;
+    looping = true;
+    api.raf(() => {
+      if (!running || collapsing) { looping = false; return false; }
+      draw(interp());
+    });
+  }
+
+  function sync() {
+    if (!face) return;
+    const m = /(\d+):(\d+)/.exec(face.textContent || "");
+    const s = m ? (+m[1]) * 60 + (+m[2]) : 0;
+    const run = !!btn && (btn.textContent || "").indexOf("Pause") >= 0;
+    const t = now();
+
+    if (s !== secs) { secs = s; markAt = t; if (s < WIN_A) hit300 = false; }
+    if (run !== running) { running = run; if (run) markAt = t; }
+
+    collapsing = false;                 /* a live clock outranks the filing animation */
+    if (secs >= WIN_A && !hit300) { hit300 = true; flash(); }
+    emit();
+    draw(running && !api.reduced ? interp() : secs);
+    kick();
+  }
+
+  /* Existing data that is written once at save time and then never shown again,
+     which is the half of reflective practice the module actually marks. */
+  function lastRun(host) {
+    const runs = (Store.get().cw1.practice || []);
+    if (!runs.length) return;
+    const r = runs[runs.length - 1], note = (r.improvement || "").trim();
+    const el = document.createElement("div");
+    el.className = "fx-lastrun";
+    el.setAttribute("data-fx-own", "timer");
+    el.textContent = note
+      ? "Last time you said: “" + note + "” · " + mmss(r.seconds) + (r.date ? " on " + r.date : "")
+      : "Last run: " + mmss(r.seconds) + ", average " + (r.avg || "—") + "/5";
+    host.parentNode.insertBefore(el, host);
+  }
+
+  function onRender(root, ctx, a) {
+    api = a;
+    face = root.querySelector("#tface");
+    /* Ten of us are decorating this app blind: if anyone else has claimed the
+       subtree the clock lives in, it is theirs and we leave it alone. */
+    const owner = face && face.closest("[data-fx-own]");
+    if (!face || (owner && owner.getAttribute("data-fx-own") !== "timer")) {
+      face = prog = band = btn = null; collapseFrom = 0; return;
+    }
+    btn = root.querySelector("#tbtn");
+
+    /* paintTimer re-queries $("#tface") by id on every tick, so moving the node
+       into a positioned wrapper costs app.js nothing. */
+    const host = document.createElement("div");
+    host.className = "fx-clock";
+    host.setAttribute("data-fx-own", "timer");
+    face.parentNode.insertBefore(host, face);
+    host.innerHTML = dial();
+    host.appendChild(face);
+    prog = host.querySelector(".fx-prog");
+    band = host.querySelector(".fx-band");
+
+    /* The window is now drawn, so the caption can stop describing it. */
+    const cap = root.querySelector(".timer-band");
+    if (cap) cap.textContent = "5:00 – 7:00 is your share of the group's time";
+
+    lastRun(host);
+
+    secs = 0; running = false; hit300 = false; looping = false; markAt = now();
+    sync();
+
+    const obs = new MutationObserver(sync);
+    api.observe(obs);
+    obs.observe(face, { childList: true, characterData: true, subtree: true });
+    if (btn) obs.observe(btn, { childList: true, characterData: true, subtree: true });
+
+    /* The run was filed one render ago: let the arc empty so the viewer sees the
+       clock become a record rather than simply find it back at zero. */
+    if (collapseFrom) {
+      const from = collapseFrom, hue = colour(from);
+      collapseFrom = 0;
+      if (api.reduced) draw(0);
+      else {
+        collapsing = true;
+        draw(from, hue);
+        api.raf(e => {
+          if (!collapsing) return false;
+          const k = Math.min(1, e / .4);
+          draw(from * (1 - api.ease.out(k)), hue);
+          if (k >= 1) { collapsing = false; return false; }
+        });
+      }
+    }
+  }
+
+  function init() {
+    lastCount = (Store.get().cw1.practice || []).length;
+    /* Subscribed exactly once: Store has no unsubscribe, so this must never
+       move into onRender. savepractice updates the Store before it re-renders,
+       so `secs` still holds the length of the run being filed. */
+    Store.subscribe(st => {
+      const n = (st.cw1.practice || []).length;
+      if (lastCount >= 0 && n > lastCount) collapseFrom = secs;
+      lastCount = n;
+    });
+  }
+
+  return { init: init, onRender: onRender };
 })();
 
 </script>
