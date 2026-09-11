@@ -119,8 +119,39 @@ h2 { font-size: 66px; line-height: 1.05; margin: 0; font-weight: 500; letter-spa
 .takeaways { margin: 0; padding: 0 0 0 40px; display: grid; gap: 14px; font-size: 25px; line-height: 1.4; color: var(--ink2); }
 .takeaways li::marker { color: var(--acc); font-family: var(--mono); } .takeaways b { color: var(--ink); font-weight: 600; }
 
-.refs { margin: 0; padding: 0 0 0 34px; display: grid; gap: 8px; font-size: 17px; line-height: 1.4; color: var(--ink2); font-family: var(--sans); }
-.refs li::marker { color: var(--acc); font-family: var(--mono); } .refs i { color: var(--ink); }
+/* ---------- frame 10: the reference dossier ---------- */
+.dossier { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: start; }
+.ref-col { display: grid; align-content: start; }
+.ref-col h5 {
+  font-size: 13px; font-weight: 500; letter-spacing: .16em; color: var(--acc);
+  margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+}
+.ref-col h5 + .refs { margin-bottom: 22px; }
+.ref-col h5 span { letter-spacing: 0; font-size: 12px; color: var(--ink3); text-transform: none; font-family: var(--serif); font-style: italic; }
+
+.refs { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.ref {
+  display: grid; grid-template-columns: 30px minmax(0,1fr) 62px; gap: 12px;
+  padding: 9px 10px 9px 12px; border-left: 2px solid var(--line2); border-radius: 0 8px 8px 0;
+  transition: background .15s, border-color .15s;
+}
+.ref:hover { background: rgba(243,239,230,.04); }
+.ref[data-src] { cursor: default; }
+.ref[data-src="wef"]       { border-left-color: var(--acc2); }
+.ref[data-src="linkedin"]  { border-left-color: var(--ok); }
+.ref[data-src="glassdoor"] { border-left-color: var(--acc); }
+.ref[data-src="indeed"]    { border-left-color: var(--blue); }
+.ref-n { font-size: 14px; color: var(--ink3); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.ref[data-src="wef"] .ref-n       { color: var(--acc2); }
+.ref[data-src="linkedin"] .ref-n  { color: var(--ok); }
+.ref[data-src="glassdoor"] .ref-n { color: var(--acc); }
+.ref[data-src="indeed"] .ref-n    { color: var(--blue); }
+.ref-b { font-size: 16px; line-height: 1.42; color: var(--ink2); font-family: var(--serif); min-width: 0; }
+.ref-b b { color: var(--ink); font-weight: 600; }
+.ref-b i { color: var(--ink); }
+.ref-u { display: block; font-size: 12px; color: var(--ink3); word-break: break-all; margin-top: 2px; }
+.ref-a { font-size: 11px; line-height: 1.3; color: var(--ink3); text-align: right; padding-top: 3px; }
 
 /* reveal on arrival */
 .r { opacity: 0; transform: translateY(18px); }
@@ -1135,6 +1166,21 @@ VIS.provenance = { mount(host, api) {
   rows.forEach((r, i) => hit(FX, CX - FX + 10, r.y, 34, () => light(t => t.claim === i)));
   srcRows.forEach(r => hit(SX - 10, W - SX + 10, r.y, 46, () => light(t => t.src === r.src)));
 
+  /* The reference list below this diagram drives it too: hovering a reference
+     lights the threads for its source, so "which number came from where" is
+     answerable by pointing rather than explaining. */
+  const frame = host.closest(".frame");
+  const refHandlers = [];
+  if (frame) {
+    frame.querySelectorAll(".ref[data-src]").forEach(li => {
+      const id = li.getAttribute("data-src");
+      const on = () => light(t => t.src.id === id);
+      li.addEventListener("pointerenter", on);
+      li.addEventListener("pointerleave", clear);
+      refHandlers.push([li, on]);
+    });
+  }
+
   /* a pointer that leaves the frame between two hit rects would otherwise
      strand the deck in a dimmed state on screen */
   host.addEventListener("pointerleave", clear);
@@ -1142,11 +1188,24 @@ VIS.provenance = { mount(host, api) {
      so any state class we put on it would still be there on the next landing.
      Leave the host exactly as we found it or the frame returns dimmed. */
   api.onTeardown(() => {
+    refHandlers.forEach(([li, on]) => {
+      li.removeEventListener("pointerenter", on);
+      li.removeEventListener("pointerleave", clear);
+    });
     host.removeEventListener("pointerleave", clear);
     host.classList.remove("pv-lit", "pv-arrive");
   });
 
-  if (api.reduced) return;
+  /* Reduced motion still needs the finished picture. Returning here without
+     settling left every thread dashed fully out — the diagram rendered as two
+     columns of dots with nothing joining them, which is the one thing it
+     exists to show. The overview's static mount lands here too. */
+  if (api.reduced) {
+    threads.forEach(th => { th.path.style.strokeDashoffset = 0; });
+    rows.forEach(r => { r.g.setAttribute("opacity", 1); r.g.removeAttribute("transform"); });
+    srcRows.forEach(r => r.g.setAttribute("opacity", 1));
+    return;
+  }
 
   /* --- arrival: claims, then sources, then the threads that join them --- */
   const C_STEP = .06, C_DUR = .20;
@@ -1958,19 +2017,35 @@ const DECK = {
     html: `
       <div class="kicker mono">10 · REFERENCES · WESTMINSTER HARVARD</div>
       ${R(1, `<div class="vis vis-provenance" data-vis="provenance"></div>`)}
-      ${R(2, `<ol class="refs">
-        <li>World Economic Forum (2025) <i>The Future of Jobs Report 2025</i>. Available at: https://www.weforum.org/publications/the-future-of-jobs-report-2025/ (Accessed: ${ACCESSED}).</li>
-        <li>LinkedIn Economic Graph (2025) <i>Jobs on the Rise 2025</i>. Available at: https://www.linkedin.com/pulse/linkedin-jobs-rise-2025 (Accessed: ${ACCESSED}).</li>
-        <li>Glassdoor (2026) <i>Prompt Engineer: average salary and pay trends</i>. Available at: https://www.glassdoor.com/Salaries/prompt-engineer-salary-SRCH_KO0,15.htm (Accessed: ${ACCESSED}).</li>
-        <li>Indeed (2026) <i>Prompt engineer salary in United States</i>. Available at: https://www.indeed.com/career/prompt-engineer/salaries (Accessed: ${ACCESSED}).</li>
-        <li>Anthropic (2026) <i>Prompt engineering overview</i>. Available at: https://docs.anthropic.com/ (Accessed: ${ACCESSED}).</li>
-        <li>OpenAI (2026) <i>Prompt engineering guide</i>. Available at: https://platform.openai.com/docs/guides/prompt-engineering (Accessed: ${ACCESSED}).</li>
-        <li>Boonstra, L. (2025) <i>Prompt Engineering</i>. Google. Available at: https://www.kaggle.com/whitepaper-prompt-engineering (Accessed: ${ACCESSED}).</li>
-        <li>White, J. (2023) <i>Prompt Engineering for ChatGPT</i> [online course]. Vanderbilt University / Coursera. Available at: https://www.coursera.org/learn/prompt-engineering (Accessed: ${ACCESSED}).</li>
-        <li>PromptLayer (2025) <i>AI prompt engineering jobs in 2025: skills, salaries and future outlook</i>. Available at: https://blog.promptlayer.com/ai-prompt-engineering-jobs-in-2025-skills-salaries-future-outlook/ (Accessed: ${ACCESSED}).</li>
-        <li>The AI Career Lab (2026) <i>What happened to the prompt engineer?</i> Available at: https://theaicareerlab.com/careers/what-happened-to-the-prompt-engineer (Accessed: ${ACCESSED}).</li>
-      </ol>`)}
-      ${R(3, `<div class="foot mono warn">Team: re-open every link and re-check every figure the week before submission. Aggregator salaries move monthly.</div>`)}` }
+      ${R(2, `<div class="dossier">
+        <div class="ref-col">
+          <h5 class="mono">LABOUR-MARKET DATA <span>the figures on screen</span></h5>
+          <ol class="refs">
+            <li class="ref" data-src="wef"><span class="ref-n mono">01</span><span class="ref-b"><b>World Economic Forum</b> (2025) <i>The Future of Jobs Report 2025</i>. <span class="ref-u mono">https://www.weforum.org/publications/the-future-of-jobs-report-2025/</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref" data-src="linkedin"><span class="ref-n mono">02</span><span class="ref-b"><b>LinkedIn Economic Graph</b> (2025) <i>Jobs on the Rise 2025</i>. <span class="ref-u mono">https://www.linkedin.com/pulse/linkedin-jobs-rise-2025</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref" data-src="glassdoor"><span class="ref-n mono">03</span><span class="ref-b"><b>Glassdoor</b> (2026) <i>Prompt Engineer: average salary and pay trends</i>. <span class="ref-u mono">https://www.glassdoor.com/Salaries/prompt-engineer-salary-SRCH_KO0,15.htm</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref" data-src="indeed"><span class="ref-n mono">04</span><span class="ref-b"><b>Indeed</b> (2026) <i>Prompt engineer salary in United States</i>. <span class="ref-u mono">https://www.indeed.com/career/prompt-engineer/salaries</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+          </ol>
+          <h5 class="mono">TRAINING <span>the credential route</span></h5>
+          <ol class="refs" start="5">
+            <li class="ref"><span class="ref-n mono">05</span><span class="ref-b"><b>White, J.</b> (2023) <i>Prompt Engineering for ChatGPT</i> [online course]. Vanderbilt University / Coursera. <span class="ref-u mono">https://www.coursera.org/learn/prompt-engineering</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+          </ol>
+        </div>
+        <div class="ref-col">
+          <h5 class="mono">VENDOR DOCUMENTATION <span>what the craft actually is</span></h5>
+          <ol class="refs" start="6">
+            <li class="ref"><span class="ref-n mono">06</span><span class="ref-b"><b>Anthropic</b> (2026) <i>Prompt engineering overview</i>. <span class="ref-u mono">https://docs.anthropic.com/</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref"><span class="ref-n mono">07</span><span class="ref-b"><b>OpenAI</b> (2026) <i>Prompt engineering guide</i>. <span class="ref-u mono">https://platform.openai.com/docs/guides/prompt-engineering</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref"><span class="ref-n mono">08</span><span class="ref-b"><b>Boonstra, L.</b> (2025) <i>Prompt Engineering</i>. Google. <span class="ref-u mono">https://www.kaggle.com/whitepaper-prompt-engineering</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+          </ol>
+          <h5 class="mono">INDUSTRY ANALYSIS <span>how the role changed</span></h5>
+          <ol class="refs" start="9">
+            <li class="ref" data-src="linkedin"><span class="ref-n mono">09</span><span class="ref-b"><b>PromptLayer</b> (2025) <i>AI prompt engineering jobs in 2025: skills, salaries and future outlook</i>. <span class="ref-u mono">https://blog.promptlayer.com/ai-prompt-engineering-jobs-in-2025-skills-salaries-future-outlook/</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+            <li class="ref" data-src="linkedin"><span class="ref-n mono">10</span><span class="ref-b"><b>The AI Career Lab</b> (2026) <i>What happened to the prompt engineer?</i>. <span class="ref-u mono">https://theaicareerlab.com/careers/what-happened-to-the-prompt-engineer</span></span><span class="ref-a mono">read<br>10 Sep 26</span></li>
+          </ol>
+        </div>
+      </div>`)}
+      ${R(3, `<div class="foot mono warn">Hover any reference to light its thread above. Team: re-open every link and re-check every figure the week before submission — aggregator salaries move monthly.</div>`)}` }
   ]
 };
 
